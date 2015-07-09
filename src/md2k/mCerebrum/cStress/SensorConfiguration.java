@@ -1,5 +1,7 @@
 package md2k.mCerebrum.cStress;
 
+import md2k.mCerebrum.cStress.Structs.Sensor;
+
 import java.util.HashMap;
 
 /**

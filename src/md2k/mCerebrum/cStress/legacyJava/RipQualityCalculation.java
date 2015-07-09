@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress;
+package md2k.mCerebrum.cStress.legacyJava;
 
 import md2k.mCerebrum.cStress.Autosense.AutosenseSample;
 

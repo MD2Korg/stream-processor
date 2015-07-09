@@ -1,5 +1,6 @@
-package md2k.mCerebrum.cStress;
+package md2k.mCerebrum.cStress.Features;
 
+import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.transform.DftNormalization;

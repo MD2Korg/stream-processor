@@ -2,7 +2,10 @@ package md2k.mCerebrum.cStress;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
-import md2k.mCerebrum.cStress.Autosense.AutosenseSample;
+import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
+import md2k.mCerebrum.cStress.Features.ECGFeatures;
+import md2k.mCerebrum.cStress.Features.RIPFeatures;
+import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import java.util.ArrayList;
 

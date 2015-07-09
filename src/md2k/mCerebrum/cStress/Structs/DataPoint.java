@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress;
+package md2k.mCerebrum.cStress.Structs;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -26,14 +26,7 @@ package md2k.mCerebrum.cStress;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class StressProbability {
-
-    AccelerometerFeatures accelFeatures;
-
-    ECGFeatures ecgFeatures;
-
-    RIPFeatures ripFeatures;
-
-
-
+public class DataPoint {
+    public double value;
+    public long timestamp;
 }
