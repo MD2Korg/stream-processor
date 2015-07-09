@@ -37,7 +37,7 @@ public class Main {
         TOSParser tp = new TOSParser();
         tp.importData(args[0]);
 
-        cStress stress = new cStress();
+        cStress stress = new cStress(60*1000); //60 second windows
 
         for(AUTOSENSE_PACKET ap: tp) {
             stress.add(ap);
