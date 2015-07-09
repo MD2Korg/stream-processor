@@ -1,6 +1,4 @@
-package md2k.mCerebrum.cStress;
-
-import java.util.HashMap;
+package md2k.mCerebrum.cStress.Autosense;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,28 +26,38 @@ import java.util.HashMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class SensorConfiguration {
+public class AUTOSENSE {
 
-    private HashMap<String,Sensor> sensors;
+    public static final int CHEST_ECG = 0;
+    public static final int CHEST_ACCEL_X = 1;
+    public static final int CHEST_ACCEL_Y = 2;
+    public static final int CHEST_ACCEL_Z = 3;
+    public static final int CHEST_GSR = 4;
 
-    public SensorConfiguration() {
-        this.sensors = new HashMap<>();
-    }
+    public static final int CHEST_RIP = 7;
+    public static final int CHEST_BATTERY_SKINTEMP_AMBIENTTEMP = 8;
 
-    public void add(String identifier, double frequency, int channel) {
-        this.sensors.put(identifier, new Sensor(identifier,frequency,channel));
-    }
+    public static final int WRIST_ACCEL_X_RIGHT = 19;
+    public static final int WRIST_ACCEL_Y_RIGHT = 20;
+    public static final int WRIST_ACCEL_Z_RIGHT = 21;
+    public static final int WRIST_GYRO_X_RIGHT = 22;
+    public static final int WRIST_GYRO_Y_RIGHT = 23;
+    public static final int WRIST_GYRO_Z_RIGHT = 24;
 
-    public double getFrequency(String identifier) {
-        if (this.sensors.containsKey(identifier))
-            return this.sensors.get(identifier).frequency;
-        return -1;
-    }
+    public static final int WRIST_ACCEL_X_LEFT = 26;
+    public static final int WRIST_ACCEL_Y_LEFT = 27;
+    public static final int WRIST_ACCEL_Z_LEFT = 28;
+    public static final int WRIST_GYRO_X_LEFT = 29;
+    public static final int WRIST_GYRO_Y_LEFT = 30;
+    public static final int WRIST_GYRO_Z_LEFT = 31;
 
-    public double getChannel(String identifier) {
-        if (this.sensors.containsKey(identifier))
-            return this.sensors.get(identifier).channel;
-        return -1;
-    }
+
+    public static final int G_QUALITY_GOOD = 0;
+    public static final int G_QUALITY_MISSING = 4;
+    public static final int G_QUALITY_NOISE = 1;
+    public static final int G_QUALITY_BAND_LOOSE = 2;
+    public static final int G_QUALITY_BAND_OFF = 3;
+    public static final int G_QUALITY_BAD = 2;
+
 
 }

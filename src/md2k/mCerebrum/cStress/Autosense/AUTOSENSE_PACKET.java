@@ -1,6 +1,4 @@
-package md2k.mCerebrum.cStress;
-
-import java.util.HashMap;
+package md2k.mCerebrum.cStress.Autosense;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,28 +26,19 @@ import java.util.HashMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class SensorConfiguration {
+public class AUTOSENSE_PACKET {
 
-    private HashMap<String,Sensor> sensors;
+    public long timestamp;
+    public int channelID;
+    public int[] data;
 
-    public SensorConfiguration() {
-        this.sensors = new HashMap<>();
+    public AUTOSENSE_PACKET(long timestamp, int channelID, int[] data) {
+        this.timestamp = timestamp;
+        this.channelID = channelID;
+        this.data = data;
     }
 
-    public void add(String identifier, double frequency, int channel) {
-        this.sensors.put(identifier, new Sensor(identifier,frequency,channel));
+    public String toString() {
+        return new StringBuilder().append(this.timestamp).append(" (").append(this.channelID).append(") ").toString();
     }
-
-    public double getFrequency(String identifier) {
-        if (this.sensors.containsKey(identifier))
-            return this.sensors.get(identifier).frequency;
-        return -1;
-    }
-
-    public double getChannel(String identifier) {
-        if (this.sensors.containsKey(identifier))
-            return this.sensors.get(identifier).channel;
-        return -1;
-    }
-
 }
