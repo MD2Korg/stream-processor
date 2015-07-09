@@ -15,11 +15,11 @@ import java.util.*;
  * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ * list of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -34,7 +34,7 @@ import java.util.*;
  */
 public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
 
-    private final TreeMap<Long,AUTOSENSE_PACKET> data;
+    private final TreeMap<Long, AUTOSENSE_PACKET> data;
 
 
     public TOSParser() {
@@ -46,25 +46,20 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
         AUTOSENSE_PACKET tempPacket;
 
         String[] tokens;
-        int[] data = new int[] {0,0,0,0,0};
+        int[] data = new int[]{0, 0, 0, 0, 0};
         long timestamp;
         int channelID;
 
         File file = new File(filename);
 
-        int count = 0;
-
-        Scanner scanner = null;
+        Scanner scanner;
         try {
             scanner = new Scanner(file);
-            while(scanner.hasNext()){
-                count++;
-                if (count > 100000)
-                    break;
+            while (scanner.hasNext()) {
                 tokens = scanner.nextLine().split(",");
                 channelID = Integer.parseInt(tokens[0]);
                 timestamp = Long.parseLong(tokens[6]);
-                for(int i=1;i<6;i++) {
+                for (int i = 1; i < 6; i++) {
                     data[i - 1] = Integer.parseInt(tokens[i]);
                 }
 
@@ -74,13 +69,6 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-//        for(Long index: this.data.navigableKeySet()) {
-//            System.out.println(this.data.get(index));
-//        }
-
-//        System.out.println(this.data.size());
-
     }
 
 
