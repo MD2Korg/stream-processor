@@ -37,26 +37,28 @@ public class cStress {
 
     long windowStartTime = -1;
 
-    long windowSize = 60*1000; //60 Seconds
+    long windowSize;
 
 
-    ArrayList<AutosenseSample> ECG;
-    ArrayList<AutosenseSample> RIP;
-    ArrayList<AutosenseSample> ACCELX;
-    ArrayList<AutosenseSample> ACCELY;
-    ArrayList<AutosenseSample> ACCELZ;
+    ArrayList<AUTOSENSE_PACKET> ECG;
+    ArrayList<AUTOSENSE_PACKET> RIP;
+    ArrayList<AUTOSENSE_PACKET> ACCELX;
+    ArrayList<AUTOSENSE_PACKET> ACCELY;
+    ArrayList<AUTOSENSE_PACKET> ACCELZ;
 
     SensorConfiguration sensorConfig;
 
-    public cStress () {
+    //Feature Computation Classes
+    AccelerometerFeatures accelFeatures;
+    ECGFeatures ecgFeatures;
+    RIPFeatures ripFeatures;
+
+
+    public cStress(long windowSize) {
+        this.windowSize = windowSize;
         config();
         resetBuffers();
 
-    }
-
-    public double evaluateStress() {
-
-        return 0.0;
     }
 
 
@@ -64,9 +66,9 @@ public class cStress {
         //Set cStress configurations here
 
         sensorConfig = new SensorConfiguration();
-        sensorConfig.add("RIP", 64.0/3.0, AUTOSENSE.CHEST_RIP);
+        sensorConfig.add("RIP", 64.0 / 3.0, AUTOSENSE.CHEST_RIP);
         sensorConfig.add("ECG", 64.0, AUTOSENSE.CHEST_ECG);
-        sensorConfig.add("ACCELX", 64.0/6.0, AUTOSENSE.CHEST_ACCEL_X);
+        sensorConfig.add("ACCELX", 64.0 / 6.0, AUTOSENSE.CHEST_ACCEL_X);
         sensorConfig.add("ACCELY", 64.0 / 6.0, AUTOSENSE.CHEST_ACCEL_Y);
         sensorConfig.add("ACCELZ", 64.0 / 6.0, AUTOSENSE.CHEST_ACCEL_Z);
 
@@ -1949,9 +1951,38 @@ public class cStress {
 
 
     public double process() {
-//        Object result = read_process_memphis_formatteddata(windowSize);
+
+        DataPoint[] accelerometerX = generateDataPointArray(ACCELX, sensorConfig.getFrequency("ACCELX"));
+        DataPoint[] accelerometerY = generateDataPointArray(ACCELY, sensorConfig.getFrequency("ACCELY"));
+        DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ, sensorConfig.getFrequency("ACCELZ"));
+        DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
+        DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
+
+        System.out.println(debugOutput());
+        if (accelerometerX.length >= 16 && accelerometerY.length >= 16 && accelerometerZ.length >= 16)
+            accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"));
+
+        if (ecg.length >= 16)
+            ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
+
 
         return 0.0;
+    }
+
+    private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data, double frequency) {
+        ArrayList<DataPoint> result = new ArrayList<>();
+
+        for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
+            for (int i = 0; i < 5; i++) {
+                DataPoint dp = new DataPoint();
+                dp.value = ap.data[i];
+                dp.timestamp = ap.timestamp - (long) Math.floor((4 - i) / frequency);
+                result.add(dp);
+            }
+        }
+        DataPoint[] dpArray = new DataPoint[result.size()];
+        result.toArray(dpArray);
+        return dpArray;
     }
 
     private String debugOutput() {
@@ -1964,39 +1995,31 @@ public class cStress {
         if (this.windowStartTime < 0)
             this.windowStartTime = ap.timestamp;
 
-        if ( (ap.timestamp - windowStartTime) >= this.windowSize ) {
+        if ((ap.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
             process();
             resetBuffers();
             this.windowStartTime = ap.timestamp;
         }
 
-        ArrayList<AutosenseSample> autosenseSamples = new ArrayList<>();
-
-        for(int i=0; i<5; i++) {
-            AutosenseSample s = new AutosenseSample(ap,i);
-            autosenseSamples.add(s);
-        }
-
-
         switch (ap.channelID) {
             case AUTOSENSE.CHEST_ECG:
-                this.ECG.addAll(autosenseSamples);
+                this.ECG.add(ap);
                 break;
 
             case AUTOSENSE.CHEST_RIP:
-                this.RIP.addAll(autosenseSamples);
+                this.RIP.add(ap);
                 break;
 
             case AUTOSENSE.CHEST_ACCEL_X:
-                this.ACCELX.addAll(autosenseSamples);
+                this.ACCELX.add(ap);
                 break;
 
             case AUTOSENSE.CHEST_ACCEL_Y:
-                this.ACCELY.addAll(autosenseSamples);
+                this.ACCELY.add(ap);
                 break;
 
             case AUTOSENSE.CHEST_ACCEL_Z:
-                this.ACCELZ.addAll(autosenseSamples);
+                this.ACCELZ.add(ap);
                 break;
 
             default:

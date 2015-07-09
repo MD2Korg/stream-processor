@@ -53,7 +53,7 @@ public class ECGFeatures{
 
         long[] Rpeak_index = detect_Rpeak(this.datapoints, this.frequency);
 
-
+        return (DataPoint[]) result.toArray();
     }
 
     private long[] detect_Rpeak(DataPoint[] datapoints, double frequency) {
@@ -61,7 +61,7 @@ public class ECGFeatures{
         double[] sample = new double[datapoints.length];
         double[] timestamps = new double[datapoints.length];
         for(int i=0; i<sample.length; i++) {
-            sample[i] = datapoints[i].data;
+            sample[i] = datapoints[i].value;
             timestamps[i] = datapoints[i].timestamp;
         }
 
@@ -119,6 +119,17 @@ public class ECGFeatures{
 
         //TODO: Complete this
 
+        return new long[10];
+    }
+
+    //TODO: Complete this
+    private double[] blackman(double window_l) {
+        return new double[2];
+    }
+
+    //TODO: Complete this
+    private double[] filrs(double fl, double[] f, double[] a, double[] w) {
+        return new double[2];
     }
 
     private double[] conv(double[] signal, double[] kernel, String type) {
@@ -140,7 +151,7 @@ public class ECGFeatures{
         DescriptiveStatistics stats = new DescriptiveStatistics();
 
         for (DataPoint aData : dp) {
-            stats.addValue(aData.data);
+            stats.addValue(aData.value);
         }
 
         variance = stats.getVariance();
@@ -152,11 +163,11 @@ public class ECGFeatures{
         rr_count = ( (double) dp.length ) / ( dp[dp.length-1].timestamp-dp[0].timestamp );
 
         Lomb HRLomb = lomb(dp);
-
-        heartrateFLHF = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-        heartratepower12 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-        heartratepower23 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-        heartratepower34 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+//
+//        heartrateFLHF = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+//        heartratepower12 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+//        heartratepower23 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+//        heartratepower34 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
 
     }
 
@@ -187,7 +198,7 @@ public class ECGFeatures{
         return result;
     }
 
-    private Lomb lomb(DataPoint[] dp) {
+    private Lomb lomb(DataPoint[] dp) { //TODO: This is a very large bottleneck for ECG
         //HeartRateLomb.m
 
 
@@ -203,29 +214,42 @@ public class ECGFeatures{
 
         DescriptiveStatistics stats = new DescriptiveStatistics();
         for (DataPoint aData : dp) {
-            stats.addValue(aData.data);
+            stats.addValue(aData.value);
         }
 
         double mx = stats.getMean();
         double vx = stats.getVariance();
 
         for (DataPoint aDp : dp) {
-            aDp.data -= mx;
+            aDp.value -= mx;
         }
 
         double[] P = new double[nf];
-        for(int i=0; i<nf; i++) {
-            double wt[] = new double[dp.length];
-            double swt[] = new double[dp.length];
-            double cwt[] = new double[dp.length];
+        double[] wt;
+        double[] swt;
+        double[] cwt;
+        double Ss2wt;
+        double Sc2wt;
+        double wtau;
+        double swtau;
+        double cwtau;
+        double[] swttau;
+        double[] cwttau;
+        double swttau2;
+        double cwttau2;
 
-            double Ss2wt = 0;
-            double Sc2wt = 0;
+        for(int i=0; i<nf; i++) {
+            wt = new double[dp.length];
+            swt = new double[dp.length];
+            cwt = new double[dp.length];
+
+            Ss2wt = 0;
+            Sc2wt = 0;
 
             for(int j=0; j<wt.length; j++) {
                 wt[j] = 2.0 * Math.PI * f[i] * dp[j].timestamp;
-                swt[j] = Math.sin(wt[i]);
-                cwt[j] = Math.cos(wt[i]);
+                swt[j] = Math.sin(wt[j]);
+                cwt[j] = Math.cos(wt[j]);
 
                 Ss2wt += cwt[j]*swt[j];
                 Sc2wt += (cwt[j]-swt[j])*(cwt[j]+swt[j]);
@@ -233,15 +257,15 @@ public class ECGFeatures{
             }
             Ss2wt *= 2;
 
-            double wtau = 0.5 * Math.atan2(Ss2wt, Sc2wt);
-            double swtau = Math.sin(wtau);
-            double cwtau = Math.cos(wtau);
+            wtau = 0.5 * Math.atan2(Ss2wt, Sc2wt);
+            swtau = Math.sin(wtau);
+            cwtau = Math.cos(wtau);
 
-            double swttau[] = new double[swt.length];
-            double cwttau[] = new double[swt.length];
+            swttau = new double[swt.length];
+            cwttau = new double[swt.length];
 
-            double swttau2 = 0;
-            double cwttau2 = 0;
+            swttau2 = 0;
+            cwttau2 = 0;
 
             for(int j = 0; j<swt.length; j++) {
                 swttau[j] = swt[j]*cwtau - cwt[j]*swtau;
@@ -255,8 +279,8 @@ public class ECGFeatures{
             double part1 = 0;
             double part2 = 0;
             for(int j = 0; j<cwttau.length; j++) {
-                part1 += (dp[j].data*cwttau[j])*(dp[j].data*cwttau[j]);
-                part2 += (dp[j].data*swttau[j])*(dp[j].data*swttau[j]);
+                part1 += (dp[j].value *cwttau[j])*(dp[j].value *cwttau[j]);
+                part2 += (dp[j].value *swttau[j])*(dp[j].value *swttau[j]);
             }
 
             P[i] = ((part1 / cwttau2) + (part2 / swttau2)) / (2 * vx);

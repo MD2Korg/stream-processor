@@ -27,6 +27,6 @@ package md2k.mCerebrum.cStress;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class DataPoint {
-    public double data;
-    public double timestamp;
+    public double value;
+    public long timestamp;
 }

@@ -42,11 +42,11 @@ public class RIPFeatures{
     public double RSA;
 
 
-    public RIPFeatures(DataPoint[] seg, DataPoint[] ecg) {
+    public RIPFeatures(DataPoint[] seg, ECGFeatures ecg) {
 
         DescriptiveStatistics statsSeg = new DescriptiveStatistics();
         for(DataPoint d: seg) {
-            statsSeg.addValue(d.data);
+            statsSeg.addValue(d.value);
         }
         double min = statsSeg.getMin();
         double max = statsSeg.getMax();
@@ -61,7 +61,7 @@ public class RIPFeatures{
         int peakindex = 0;
         double peakValue = -1e9;
         for(int i=0; i<seg.length; i++) {
-            if (seg[i].data > peakValue) {
+            if (seg[i].value > peakValue) {
                 peakindex = i;
             }
         }
