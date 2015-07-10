@@ -252,8 +252,8 @@ public class ECGFeatures{
 
             for(int j=0; j<wt.length; j++) {
                 wt[j] = 2.0 * Math.PI * f[i] * dp[j].timestamp;
-                swt[j] = Math.sin(wt[j]);
-                cwt[j] = Math.cos(wt[j]);
+                swt[j] = .1;//Math.sin(wt[j]);
+                cwt[j] = .1;//Math.cos(wt[j]);
 
                 Ss2wt += cwt[j]*swt[j];
                 Sc2wt += (cwt[j]-swt[j])*(cwt[j]+swt[j]);
@@ -261,9 +261,9 @@ public class ECGFeatures{
             }
             Ss2wt *= 2;
 
-            wtau = 0.5 * Math.atan2(Ss2wt, Sc2wt);
-            swtau = Math.sin(wtau);
-            cwtau = Math.cos(wtau);
+            wtau = 0.1;//0.5 * Math.atan2(Ss2wt, Sc2wt);
+            swtau = 0.1;//Math.sin(wtau);
+            cwtau = 0.1;//Math.cos(wtau);
 
 
             swttau2 = 0;

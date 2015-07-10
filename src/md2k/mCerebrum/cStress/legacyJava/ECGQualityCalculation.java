@@ -165,6 +165,7 @@ public class ECGQualityCalculation {
         return DATA_QUALITY_GOOD;
     }
 
+    //TODO: Change to DataPoint[]
     public int currentQuality(ArrayList<AutosenseSample> ecg) {
 
         int[] data = new int[ecg.size()];

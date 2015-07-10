@@ -164,6 +164,7 @@ public class RipQualityCalculation {
         return DATA_QUALITY_GOOD;
     }
 
+    //TODO: Change to DataPoint[]
     public int currentQuality(ArrayList<AutosenseSample> rip) {
 
         int[] data = new int[rip.size()];

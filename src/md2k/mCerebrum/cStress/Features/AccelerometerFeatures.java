@@ -234,7 +234,7 @@ public class AccelerometerFeatures {
         double minFD = Math.min(Math.min(fdX, fdY), fdZ);
         double meanFD = (fdX + fdY + fdZ) / 3.0;
 
-        //TWH: Are these used anywhere?
+        //TODO: Are these used anywhere?
 //        DiffRatio drXY = computeDiffRatio(segx, segy);
 //        DescriptiveStatistics statsDiffXY = new DescriptiveStatistics();
 //        DescriptiveStatistics statsRatioXY = new DescriptiveStatistics();
@@ -668,6 +668,7 @@ public class AccelerometerFeatures {
     }
 
 
+    //TODO: Not needed anymore?
 //    private DiffRatio computeDiffRatio(double[] X, double[] Y) {
 //        DiffRatio result = new DiffRatio();
 //        ArrayList<Double> ratio = new ArrayList<>();
@@ -705,6 +706,7 @@ public class AccelerometerFeatures {
         return result;
     }
 
+    //TODO: Not needed anymore?
 //    private class DiffRatio {
 //        double[] ratio;
 //        double[] diff;
