@@ -54,7 +54,9 @@ public class ECGFeatures{
 
         long[] Rpeak_index = detect_Rpeak(this.datapoints, this.frequency);
 
-        return (DataPoint[]) result.toArray();
+        DataPoint[] dpArray = new DataPoint[result.size()];
+        result.toArray(dpArray);
+        return dpArray;
     }
 
     private long[] detect_Rpeak(DataPoint[] datapoints, double frequency) {
@@ -66,7 +68,7 @@ public class ECGFeatures{
             timestamps[i] = datapoints[i].timestamp;
         }
 
-        double window_l = Math.ceil(frequency/5.0);
+        int window_l = (int) Math.ceil(frequency/5.0);
 
         double thr1 = 0.5;
         double f = 2.0/frequency;
@@ -77,9 +79,9 @@ public class ECGFeatures{
         double[] A = {0, 0, 1, 1, 0, 0};
         double[] w = {500.0/dels1, 1.0/delp, 500/dels2};
         double fl = 256;
-        double[] b = filrs(fl, F, A, w);
+        double[] b = filrs(fl, F, A, w); //TODO: This filter is a function of frequency.  Can it be hard-coded for this case?
 
-        double[] y2 = conv(sample, b, "same"); //TODO: Fixme
+        double[] y2 = conv(sample, b, "same"); //TODO: Fixme: Can this be done with FFT transformations?
         DescriptiveStatistics statsY2 = new DescriptiveStatistics();
         for(double d: y2) {
             statsY2.addValue(d);
@@ -89,7 +91,7 @@ public class ECGFeatures{
         }
         
         double[] h_D = {-1.0/8.0, -2.0/8.0, 0.0/8.0, 2.0/8.0, -1.0/8.0};
-        double[] y3 = conv(y2, h_D, "same"); //TODO: Fixme
+        double[] y3 = conv(y2, h_D, "same"); //TODO: Fixme: Can this be done with FFT transformations?
         DescriptiveStatistics statsY3 = new DescriptiveStatistics();
         for(double d: y3) {
             statsY3.addValue(d);
@@ -109,7 +111,7 @@ public class ECGFeatures{
         }
 
         double[] h_I = blackman(window_l);
-        double[] y5 = conv(y4, h_I, "same"); //TODO: Fixme
+        double[] y5 = conv(y4, h_I, "same"); //TODO: Fixme: Can this be done with FFT transformations?
         DescriptiveStatistics statsY5 = new DescriptiveStatistics();
         for(double d: y5) {
             statsY5.addValue(d);
@@ -123,9 +125,14 @@ public class ECGFeatures{
         return new long[10];
     }
 
-    //TODO: Complete this
-    private double[] blackman(double window_l) {
-        return new double[2];
+    private double[] blackman(int window_l) {
+        double[] result = new double[window_l];
+        int M = (int) Math.floor((window_l+1)/2);
+        for(int i=0; i<M; i++) {
+            result[i] = 0.42 - 0.5*Math.cos(2.0 * Math.PI * (double) i / (window_l-1)) + 0.08*Math.cos(4.0 * Math.PI * (double) i / (window_l-1));
+            result[window_l-i-1] = result[i];
+        }
+        return result;
     }
 
     //TODO: Complete this
