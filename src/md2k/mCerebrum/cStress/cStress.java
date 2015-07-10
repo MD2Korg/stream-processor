@@ -5,6 +5,7 @@ import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
 import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
+import md2k.mCerebrum.cStress.Features.RunningStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import java.util.ArrayList;
@@ -14,17 +15,17 @@ import java.util.ArrayList;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -48,6 +49,11 @@ public class cStress {
     ArrayList<AUTOSENSE_PACKET> ACCELX;
     ArrayList<AUTOSENSE_PACKET> ACCELY;
     ArrayList<AUTOSENSE_PACKET> ACCELZ;
+
+    // Keep track of mean and stdev.  This should be reset at the beginning of each day.
+    // An EWMA-based solution may need to be added to seed the new day with appropriate information
+    RunningStatistics ECGStats = new RunningStatistics();
+    RunningStatistics RIPStats = new RunningStatistics();
 
     SensorConfiguration sensorConfig;
 
@@ -1960,6 +1966,14 @@ public class cStress {
         DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ, sensorConfig.getFrequency("ACCELZ"));
         DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
+
+        for (DataPoint dp : ecg) {
+            ECGStats.add(dp.value);
+        }
+        for (DataPoint dp : rip) {
+            RIPStats.add(dp.value);
+        }
+
 
         System.out.println(debugOutput());
         if (accelerometerX.length >= 16 && accelerometerY.length >= 16 && accelerometerZ.length >= 16)
