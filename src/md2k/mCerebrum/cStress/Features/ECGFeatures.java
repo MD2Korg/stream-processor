@@ -164,11 +164,11 @@ public class ECGFeatures{
         rr_count = ( (double) dp.length ) / ( dp[dp.length-1].timestamp-dp[0].timestamp );
 
         Lomb HRLomb = lomb(dp);
-//
-//        heartrateFLHF = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-//        heartratepower12 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-//        heartratepower23 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-//        heartratepower34 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+
+        heartrateFLHF = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+        heartratepower12 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+        heartratepower23 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+        heartratepower34 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
 
     }
 
@@ -238,12 +238,15 @@ public class ECGFeatures{
         double[] cwttau;
         double swttau2;
         double cwttau2;
-
+        wt = new double[dp.length];
+        swt = new double[dp.length];
+        cwt = new double[dp.length];
+        swttau = new double[swt.length];
+        cwttau = new double[swt.length];
+        double part1;
+        double part2;
+        double count = 0;
         for(int i=0; i<nf; i++) {
-            wt = new double[dp.length];
-            swt = new double[dp.length];
-            cwt = new double[dp.length];
-
             Ss2wt = 0;
             Sc2wt = 0;
 
@@ -262,8 +265,6 @@ public class ECGFeatures{
             swtau = Math.sin(wtau);
             cwtau = Math.cos(wtau);
 
-            swttau = new double[swt.length];
-            cwttau = new double[swt.length];
 
             swttau2 = 0;
             cwttau2 = 0;
@@ -277,8 +278,8 @@ public class ECGFeatures{
             }
 
 
-            double part1 = 0;
-            double part2 = 0;
+            part1 = 0;
+            part2 = 0;
             for(int j = 0; j<cwttau.length; j++) {
                 part1 += (dp[j].value *cwttau[j])*(dp[j].value *cwttau[j]);
                 part2 += (dp[j].value *swttau[j])*(dp[j].value *swttau[j]);
