@@ -307,7 +307,7 @@ public class RIPFeatures {
             downInterceptIndex = (ArrayList<Integer>) downInterceptIndex.subList(0,minimumLength-1);
         }
 
-        //TODO: Needs work from Rumanna
+        //TODO: Needs work from Rummana
 
 
         return result;
