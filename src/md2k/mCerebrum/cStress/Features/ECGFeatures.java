@@ -79,7 +79,7 @@ public class ECGFeatures{
         double[] A = {0, 0, 1, 1, 0, 0};
         double[] w = {500.0/dels1, 1.0/delp, 500/dels2};
         double fl = 256;
-        double[] b = filrs(fl, F, A, w); //TODO: This filter is a function of frequency.  Can it be hard-coded for this case?
+        double[] b = firls(fl, F, A, w); //TODO: This filter is a function of frequency.  Can it be hard-coded for this case?
 
         double[] y2 = conv(sample, b, "same"); //TODO: Fixme: Can this be done with FFT transformations?
         DescriptiveStatistics statsY2 = new DescriptiveStatistics();
@@ -252,15 +252,15 @@ public class ECGFeatures{
         cwttau = new double[swt.length];
         double part1;
         double part2;
-        double count = 0;
+
         for(int i=0; i<nf; i++) {
             Ss2wt = 0;
             Sc2wt = 0;
 
             for(int j=0; j<wt.length; j++) {
                 wt[j] = 2.0 * Math.PI * f[i] * dp[j].timestamp;
-                swt[j] = .1;//Math.sin(wt[j]);
-                cwt[j] = .1;//Math.cos(wt[j]);
+                swt[j] = Math.sin(wt[j]);
+                cwt[j] = Math.cos(wt[j]);
 
                 Ss2wt += cwt[j]*swt[j];
                 Sc2wt += (cwt[j]-swt[j])*(cwt[j]+swt[j]);
@@ -268,9 +268,9 @@ public class ECGFeatures{
             }
             Ss2wt *= 2;
 
-            wtau = 0.1;//0.5 * Math.atan2(Ss2wt, Sc2wt);
-            swtau = 0.1;//Math.sin(wtau);
-            cwtau = 0.1;//Math.cos(wtau);
+            wtau = 0.5 * Math.atan2(Ss2wt, Sc2wt);
+            swtau = Math.sin(wtau);
+            cwtau = Math.cos(wtau);
 
 
             swttau2 = 0;

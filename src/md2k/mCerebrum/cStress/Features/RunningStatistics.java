@@ -31,7 +31,7 @@ public class RunningStatistics {
     private double stdev;
     private long count;
 
-    void RunningStatistics() {
+    public RunningStatistics() {
         this.mean = 0.0;
         this.stdev = 0.0;
         this.count = 0;
@@ -49,7 +49,7 @@ public class RunningStatistics {
     }
 
     public double getStdev() {
-        return Math.sqrt(stdev / (k-2));
+        return Math.sqrt(stdev / (count-2));
     }
 
 }

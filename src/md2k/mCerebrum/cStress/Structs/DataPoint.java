@@ -29,4 +29,9 @@ package md2k.mCerebrum.cStress.Structs;
 public class DataPoint {
     public double value;
     public long timestamp;
+
+    public DataPoint(double value, long timestamp) {
+        this.value = value;
+        this.timestamp = timestamp;
+    }
 }
