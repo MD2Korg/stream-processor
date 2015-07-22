@@ -1,5 +1,7 @@
 package md2k.mCerebrum.cStress.Features;
 
+import com.sun.tools.doclets.formats.html.resources.standard;
+import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -51,14 +53,133 @@ public class ECGFeatures{
     public double rr_20percentile;
     public double rr_count;
 
-    public DataPoint[] computeRR() {
-        ArrayList<DataPoint> result = new ArrayList<>();
+    private double[] rr_value;
+    private long[] rr_timestamp;
+    private long[] rr_index;
+    private int[] rr_outlier;
 
+    public void computeRR() {
         long[] Rpeak_index = detect_Rpeak(this.datapoints, this.frequency);
 
-        DataPoint[] dpArray = new DataPoint[result.size()];
-        result.toArray(dpArray);
-        return dpArray;
+        long[] pkT = new long[Rpeak_index.length];
+        for(int i=0; i<Rpeak_index.length; i++) {
+            pkT[i] = this.datapoints[(int)Rpeak_index[i]].timestamp;
+        }
+
+        rr_value = new double[pkT.length-1];
+        rr_timestamp = new long[pkT.length-1];
+
+        for(int i=1; i<pkT.length; i++) {
+            rr_value[i] = (double) (pkT[i]-pkT[i-1]) / 1000.0;
+            rr_timestamp[i] = pkT[i-1];
+
+        }
+
+        rr_index = new long[pkT.length];
+        System.arraycopy(pkT,0,rr_index,0,pkT.length);
+
+        rr_outlier = detect_outlier_v2(rr_value,rr_timestamp);
+
+        DescriptiveStatistics valueStats = new DescriptiveStatistics();
+        for(int i=0; i<rr_value.length; i++) {
+            if (rr_outlier[i] == 0) {
+                valueStats.addValue(rr_value[i]);
+            }
+        }
+
+        double mu = valueStats.getMean();
+        double sigma = valueStats.getStandardDeviation();
+
+        for(int i=0; i<rr_outlier.length; i++) {
+            if (rr_outlier[i] == 0) {
+                if ( Math.abs(rr_value[i] - mu) > (3.0*sigma) ) {
+                    rr_outlier[i] = 1;
+                } else {
+                    rr_outlier[i] = 0;
+                }
+            }
+        }
+    }
+
+    private int[] detect_outlier_v2(double[] sample, long[] timestamp) {
+        ArrayList<Integer> outlier = new ArrayList<>();
+
+        if (timestamp.length != 0) {
+            ArrayList<Double> valid_rrInterval = new ArrayList<>();
+            ArrayList<Long> valid_timestamp = new ArrayList<>();
+            DescriptiveStatistics valid_rrInterval_stats = new DescriptiveStatistics();
+            for(int i=0; i<sample.length; i++) {
+                if(sample[i] > 0.3 && sample[i] < 2.0) {
+                    valid_rrInterval.add(sample[i]);
+                    valid_rrInterval_stats.addValue(sample[i]);
+                    valid_timestamp.add(timestamp[i]);
+                }
+            }
+            DescriptiveStatistics diff_rrInterval = new DescriptiveStatistics();
+            for(int i=1; i<valid_rrInterval.size(); i++) {
+                diff_rrInterval.addValue(Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i - 1)));
+            }
+            double MED = 4.5 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
+            double MAD = (valid_rrInterval_stats.getPercentile(50) - 2.8 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
+            double CBD = (MED+MAD) / 2.0;
+            if (CBD<0.2) {
+                CBD = 0.2;
+            }
+
+            for (double aSample : sample) {
+                outlier.add(AUTOSENSE.G_QUALITY_BAD);
+            }
+            outlier.set(0,AUTOSENSE.G_QUALITY_GOOD);
+            double standard_rrInterval = valid_rrInterval.get(0);
+            boolean prev_beat_bad = false;
+
+            for(int i=1; i<valid_rrInterval.size()-1; i++) {
+                double ref = valid_rrInterval.get(i);
+                if (ref > 0.3 && ref < 2.0) {
+                    double beat_diff_prevGood = Math.abs(standard_rrInterval-valid_rrInterval.get(i));
+                    double beat_diff_pre = Math.abs(valid_rrInterval.get(i-1) - valid_rrInterval.get(i));
+                    double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i+1));
+
+                    if (prev_beat_bad && beat_diff_prevGood < CBD) {
+                        for(int j=0; j<timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j,AUTOSENSE.G_QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (prev_beat_bad && beat_diff_prevGood>CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD) {
+                        for(int j=0; j<timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j,AUTOSENSE.G_QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
+                        prev_beat_bad = true;
+                    } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
+                        for(int j=0; j<timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j,AUTOSENSE.G_QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (!prev_beat_bad && beat_diff_pre > CBD) {
+                        prev_beat_bad = true;
+                    }
+
+                }
+            }
+
+        }
+
+        int[] result = new int[outlier.size()];
+        for(int i=0; i<outlier.size(); i++) {
+            result[i] = outlier.get(i);
+        }
+        return result;
     }
 
     private long[] detect_Rpeak(DataPoint[] datapoints, double frequency) {
@@ -83,7 +204,7 @@ public class ECGFeatures{
         double fl = 256;
         double[] b = firls(fl, F, A, w);
 
-        double[] y2 = conv(sample, b, "same"); //TODO: Fixme: Can this be done with FFT transformations?
+        double[] y2 = conv(sample, b, "same");
         DescriptiveStatistics statsY2 = new DescriptiveStatistics();
         for(double d: y2) {
             statsY2.addValue(d);
@@ -93,7 +214,7 @@ public class ECGFeatures{
         }
         
         double[] h_D = {-1.0/8.0, -2.0/8.0, 0.0/8.0, 2.0/8.0, -1.0/8.0};
-        double[] y3 = conv(y2, h_D, "same"); //TODO: Fixme: Can this be done with FFT transformations?
+        double[] y3 = conv(y2, h_D, "same");
         DescriptiveStatistics statsY3 = new DescriptiveStatistics();
         for(double d: y3) {
             statsY3.addValue(d);
@@ -113,7 +234,7 @@ public class ECGFeatures{
         }
 
         double[] h_I = blackman(window_l);
-        double[] y5 = conv(y4, h_I, "same"); //TODO: Fixme: Can this be done with FFT transformations?
+        double[] y5 = conv(y4, h_I, "same");
         DescriptiveStatistics statsY5 = new DescriptiveStatistics();
         for(double d: y5) {
             statsY5.addValue(d);
