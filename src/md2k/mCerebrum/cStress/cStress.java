@@ -175,7 +175,7 @@ public class cStress {
 
 
 
-
+         return 0.0;
     }
     
 
@@ -203,7 +203,7 @@ public class cStress {
             ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
 
         if (rip.length >= 16)
-            ripFeatures = new RIPFeatures(rip, ecgFeatures);
+            ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
 
         return 0.0;
     }
@@ -213,9 +213,7 @@ public class cStress {
 
         for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
             for (int i = 0; i < 5; i++) {
-                DataPoint dp = new DataPoint();
-                dp.value = ap.data[i];
-                dp.timestamp = ap.timestamp - (long) Math.floor((4 - i) / frequency);
+                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency));
                 result.add(dp);
             }
         }

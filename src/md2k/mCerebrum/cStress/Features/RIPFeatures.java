@@ -3,6 +3,7 @@ package md2k.mCerebrum.cStress.Features;
 import md2k.mCerebrum.cStress.SensorConfiguration;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import java.util.ArrayList;
 
 /**
@@ -89,13 +90,9 @@ public class RIPFeatures {
             Stretch.addValue(max - min); //TODO: Verify what this is: BreathStretchCalculate.m
             //StretchUp.addValue(max - median);
             //StretchDown.addValue(median - min);
-            IERatio.addValue( (darray[peakindex].timestamp - darray[0].timestamp) / (darray[darray.length].timestamp - darray[peakindex].timestamp)   );
+            IERatio.addValue((darray[peakindex].timestamp - darray[0].timestamp) / (darray[darray.length].timestamp - darray[peakindex].timestamp));
 
             //RSA.addValue(rsaCalculateCycle(darray, ecg) );
-
-
-
-
 
 
         }
@@ -116,22 +113,22 @@ public class RIPFeatures {
 
         DataPoint[] sample = smooth(rip, 5);
 
-        int windowLength= (int) Math.round(8.0 * sensorConfig.getFrequency("RIP"));
+        int windowLength = (int) Math.round(8.0 * sensorConfig.getFrequency("RIP"));
 
         DataPoint[] MAC = smooth(sample, windowLength); //TODO: Verify the purpose the MATLAB's moving average and the difference between smooth
 
         ArrayList<Integer> upInterceptIndex = new ArrayList<>();
         ArrayList<Integer> downInterceptIndex = new ArrayList<>();
 
-        for(int i=1; i<MAC.length; i++) {
-            if (sample[i-1].value <= MAC[i-1].value && sample[i].value > MAC[i].value) {
-                upInterceptIndex.add(i-1);
-            } else if (sample[i-1].value >= MAC[i-1].value && sample[i].value < MAC[i].value) {
-                downInterceptIndex.add(i-1);
+        for (int i = 1; i < MAC.length; i++) {
+            if (sample[i - 1].value <= MAC[i - 1].value && sample[i].value > MAC[i].value) {
+                upInterceptIndex.add(i - 1);
+            } else if (sample[i - 1].value >= MAC[i - 1].value && sample[i].value < MAC[i].value) {
+                downInterceptIndex.add(i - 1);
             }
         }
 
-        Intercepts UIDI = InterceptOutlierDetectorRIPLamia(upInterceptIndex,downInterceptIndex,sample,windowLength);
+        Intercepts UIDI = InterceptOutlierDetectorRIPLamia(upInterceptIndex, downInterceptIndex, sample, windowLength);
 
         int[] UI = UIDI.UI;
         int[] DI = UIDI.DI;
@@ -139,19 +136,19 @@ public class RIPFeatures {
         ArrayList<Integer> peakIndex = new ArrayList<>();
         ArrayList<Integer> valleyIndex = new ArrayList<>();
 
-        for(int i=0; i<UI.length; i++) {
+        for (int i = 0; i < UI.length; i++) {
 
             int peakindex = 0;
             double peakValue = -1e9;
-            for (int j = UI[i]; j < DI[i+1]; j++) {
+            for (int j = UI[i]; j < DI[i + 1]; j++) {
                 if (sample[j].value > peakValue) {
                     peakindex = j;
                 }
             }
             peakIndex.add(peakindex);
 
-            DataPoint[] temp = new DataPoint[UI[i]-DI[i]];
-            System.arraycopy(sample,DI[i],temp,0,UI[i]-DI[i]);
+            DataPoint[] temp = new DataPoint[UI[i] - DI[i]];
+            System.arraycopy(sample, DI[i], temp, 0, UI[i] - DI[i]);
             MaxMin maxMinTab = localMaxMin(temp, 1);
 
             if (maxMinTab.mintab.length == 0) {
@@ -164,7 +161,7 @@ public class RIPFeatures {
                 }
                 valleyIndex.add(valleyindex);
             } else {
-                valleyIndex.add(DI[i]+(int)maxMinTab.mintab[maxMinTab.mintab.length-1].timestamp - 1); //timestamp is index in this case
+                valleyIndex.add(DI[i] + (int) maxMinTab.mintab[maxMinTab.mintab.length - 1].timestamp - 1); //timestamp is index in this case
             }
         }
 
@@ -174,21 +171,21 @@ public class RIPFeatures {
         double meanInspirationAmplitude = 0.0;
         double meanExpirationAmplitude = 0.0;
 
-        for(int i=0; i<valleyIndex.size()-1; i++) {
+        for (int i = 0; i < valleyIndex.size() - 1; i++) {
             inspirationAmplitude[i] = sample[peakIndex.get(i)].value - sample[valleyIndex.get(i)].value;
-            expirationAmplitude[i] = Math.abs(sample[valleyIndex.get(i+1)].value - sample[peakIndex.get(i)].value);
+            expirationAmplitude[i] = Math.abs(sample[valleyIndex.get(i + 1)].value - sample[peakIndex.get(i)].value);
 
             meanInspirationAmplitude += inspirationAmplitude[i];
             meanExpirationAmplitude += expirationAmplitude[i];
         }
-        meanInspirationAmplitude /= (valleyIndex.size()-1);
-        meanExpirationAmplitude /= (valleyIndex.size()-1);
+        meanInspirationAmplitude /= (valleyIndex.size() - 1);
+        meanExpirationAmplitude /= (valleyIndex.size() - 1);
 
         ArrayList<Integer> finalPeakIndex = new ArrayList<>();
         ArrayList<Integer> finalValleyIndex = new ArrayList<>();
 
-        for(int i=0; i<inspirationAmplitude.length; i++) {
-            if( inspirationAmplitude[i] > 0.15*meanInspirationAmplitude ) {
+        for (int i = 0; i < inspirationAmplitude.length; i++) {
+            if (inspirationAmplitude[i] > 0.15 * meanInspirationAmplitude) {
                 finalPeakIndex.add(peakIndex.get(i));
                 finalValleyIndex.add(valleyIndex.get(i));
             }
@@ -199,13 +196,13 @@ public class RIPFeatures {
 
         resultValleyIndex.add(finalValleyIndex.get(0));
 
-        for(int i=0; i<expirationAmplitude.length; i++) {
-            if( expirationAmplitude[i] > 0.15*meanExpirationAmplitude ) {
-                resultValleyIndex.add(finalValleyIndex.get(i+1));
+        for (int i = 0; i < expirationAmplitude.length; i++) {
+            if (expirationAmplitude[i] > 0.15 * meanExpirationAmplitude) {
+                resultValleyIndex.add(finalValleyIndex.get(i + 1));
                 resultPeakIndex.add(finalPeakIndex.get(i));
             }
         }
-        resultPeakIndex.add(finalPeakIndex.get(finalPeakIndex.size()-1));
+        resultPeakIndex.add(finalPeakIndex.get(finalPeakIndex.size() - 1));
 
         PeakValley result = new PeakValley();
         result.valleyIndex = resultValleyIndex;
@@ -257,7 +254,7 @@ public class RIPFeatures {
         int mxpos = -1;
         int mnpos = -1;
 
-        for(int x=0; x<temp.length; x++) {
+        for (int x = 0; x < temp.length; x++) {
             tempvalue = temp[x].value;
             if (tempvalue > mx) {
                 mx = tempvalue;
@@ -269,7 +266,7 @@ public class RIPFeatures {
             }
 
             if (lookformax) {
-                if ( tempvalue < mx-delta ) {
+                if (tempvalue < mx - delta) {
                     DataPoint d = new DataPoint(mx, mxpos);
                     maxtab.add(d);
                     mn = tempvalue;
@@ -277,7 +274,7 @@ public class RIPFeatures {
                     lookformax = false;
                 }
             } else {
-                if ( tempvalue > mn+delta ) {
+                if (tempvalue > mn + delta) {
                     DataPoint d = new DataPoint(mn, mnpos);
                     mintab.add(d);
                     mx = tempvalue;
@@ -300,11 +297,11 @@ public class RIPFeatures {
         Intercepts result = new Intercepts();
 
         int minimumLength = Math.min(upInterceptIndex.size(), downInterceptIndex.size());
-        if(upInterceptIndex.size() < minimumLength) {
-            upInterceptIndex = (ArrayList<Integer>) upInterceptIndex.subList(0,minimumLength-1);
+        if (upInterceptIndex.size() < minimumLength) {
+            upInterceptIndex = (ArrayList<Integer>) upInterceptIndex.subList(0, minimumLength - 1);
         }
-        if(downInterceptIndex.size() < minimumLength) {
-            downInterceptIndex = (ArrayList<Integer>) downInterceptIndex.subList(0,minimumLength-1);
+        if (downInterceptIndex.size() < minimumLength) {
+            downInterceptIndex = (ArrayList<Integer>) downInterceptIndex.subList(0, minimumLength - 1);
         }
 
         //TODO: Needs work from Rummana
@@ -320,15 +317,15 @@ public class RIPFeatures {
         double[] buffer = new double[n];
         double sum = 0.0;
 
-        for(int i=0; i < rip.length; i++) {
+        for (int i = 0; i < rip.length; i++) {
             sum -= buffer[i % n];
             buffer[i % n] = rip[i].value;
             sum += rip[i].value;
 
             if (i > n) {
-                output = new DataPoint(buffer[i%n]/(i+1), rip[i].timestamp);
+                output = new DataPoint(buffer[i % n] / (i + 1), rip[i].timestamp);
             } else {
-                output = new DataPoint(buffer[i%n]/n, rip[i].timestamp);
+                output = new DataPoint(buffer[i % n] / n, rip[i].timestamp);
             }
             result[i] = output;
         }
@@ -351,7 +348,6 @@ public class RIPFeatures {
         public int[] UI;
         public int[] DI;
     }
-
 
 
     private class PeakValley {
