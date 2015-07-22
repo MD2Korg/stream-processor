@@ -51,11 +51,14 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
         int channelID;
 
         File file = new File(filename);
-
+        int count = 100000;
         Scanner scanner;
         try {
             scanner = new Scanner(file);
             while (scanner.hasNext()) {
+                count -=1;
+                if(count <= 0)
+                    break;
                 tokens = scanner.nextLine().split(",");
                 channelID = Integer.parseInt(tokens[0]);
                 timestamp = Long.parseLong(tokens[6]);

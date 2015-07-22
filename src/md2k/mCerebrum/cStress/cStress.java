@@ -101,7 +101,19 @@ public class cStress {
          ECG - RR interval 20th percentile
          ECG - RR interval heart-rate
          */
-        
+
+        double ECG_RR_Interval_Variance = ecgFeatures.RRStats.getVariance();
+        double ECG_RR_Interval_Quartile_Deviation = (ecgFeatures.RRStats.getPercentile(75) - ecgFeatures.RRStats.getPercentile(25)) / 2.0;
+        double ECG_RR_Interval_Low_Frequency_Energy = ecgFeatures.LombLowFrequencyEnergy;
+        double ECG_RR_Interval_Medium_Frequency_Energy = ecgFeatures.LombMediumFrequencyEnergy;
+        double ECG_RR_Interval_High_Frequency_Energy = ecgFeatures.LombHighFrequencyEnergy;
+        double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = ecgFeatures.LombLowHighFrequencyEnergyRatio;
+        double ECG_RR_Interval_Mean = ecgFeatures.RRStats.getMean();
+        double ECG_RR_Interval_Median = ecgFeatures.RRStats.getPercentile(50);
+        double ECG_RR_Interval_80thPercentile = ecgFeatures.RRStats.getPercentile(80);
+        double ECG_RR_Interval_20thPercentile = ecgFeatures.RRStats.getPercentile(20);
+        double ECG_RR_Interval_Heart_Rate = ecgFeatures.HeartRate;
+
          /*
          RIP - Inspiration Duration - quartile deviation
          RIP - Inspiration Duration - mean
@@ -159,10 +171,10 @@ public class cStress {
          /*
          *RIP - Breath-rate
          */
-        double RIP_Breath_Rate = ripFeatures.InspDuration.getN();
+        //double RIP_Breath_Rate = ripFeatures.InspDuration.getN();
 
          /*
-         *RIP - Inspiration Minute Volume (Volume should be ventaliation? -TWH)
+         *RIP - Inspiration Minute Volume
          */
         //double RIP_Inspiration_Minute_Volume = ripFeature.
 

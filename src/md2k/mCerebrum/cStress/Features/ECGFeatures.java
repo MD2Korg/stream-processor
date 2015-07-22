@@ -41,24 +41,33 @@ public class ECGFeatures{
 
     //ecg_statistical_features.m
 
-    public double variance;
-    public double heartrateFLHF;
-    public double heartratepower12;
-    public double heartratepower23;
-    public double heartratepower34;
-    public double rr_mean;
-    public double rr_median;
-    public double rr_quartilerange;
-    public double rr_80percentile;
-    public double rr_20percentile;
-    public double rr_count;
+//    public double variance;
+//    public double heartrateFLHF;
+//    public double heartratepower12;
+//    public double heartratepower23;
+//    public double heartratepower34;
+//    public double rr_mean;
+//    public double rr_median;
+//    public double rr_quartilerange;
+//    public double rr_80percentile;
+//    public double rr_20percentile;
+//    public double rr_count;
 
-    private double[] rr_value;
-    private long[] rr_timestamp;
-    private long[] rr_index;
-    private int[] rr_outlier;
+    private double[] rr_value = new double[0];
+    private long[] rr_timestamp = new long[0];
+    private long[] rr_index = new long[0];
+    private int[] rr_outlier = new int[0];
 
-    public void computeRR() {
+
+    public DescriptiveStatistics RRStats;
+    public double HeartRate;
+    public double LombLowFrequencyEnergy;
+    public double LombMediumFrequencyEnergy;
+    public double LombHighFrequencyEnergy;
+    public double LombLowHighFrequencyEnergyRatio;
+
+
+    public boolean computeRR() {
         long[] Rpeak_index = detect_Rpeak(this.datapoints, this.frequency);
 
         long[] pkT = new long[Rpeak_index.length];
@@ -66,12 +75,18 @@ public class ECGFeatures{
             pkT[i] = this.datapoints[(int)Rpeak_index[i]].timestamp;
         }
 
+        if( pkT.length < 2) {
+            System.out.println("Not enough peaks, aborting computation");
+            return false;
+        }
+
         rr_value = new double[pkT.length-1];
         rr_timestamp = new long[pkT.length-1];
 
+
         for(int i=1; i<pkT.length; i++) {
-            rr_value[i] = (double) (pkT[i]-pkT[i-1]) / 1000.0;
-            rr_timestamp[i] = pkT[i-1];
+            rr_value[i-1] = (double) (pkT[i]-pkT[i-1]) / 1000.0;
+            rr_timestamp[i-1] = pkT[i-1];
 
         }
 
@@ -99,6 +114,8 @@ public class ECGFeatures{
                 }
             }
         }
+
+        return true;
     }
 
     private int[] detect_outlier_v2(double[] sample, long[] timestamp) {
@@ -268,12 +285,12 @@ public class ECGFeatures{
         ArrayList<Integer> Rpeak_temp1 = new ArrayList<>();
 
 
-        while(i <= pkt.size()) {
+        while(i < pkt.size()) {
             if (Rpeak_temp1.size() == 0) {
                 if (y5[pkt.get(i)] >= thr1 && y5[pkt.get(i)] < (3.0*sig_lev) ) {
-                    Rpeak_temp1.set(c1, pkt.get(i));
+                    Rpeak_temp1.add(pkt.get(i));
                     sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
-                    c2.add(c1,i);
+                    c2.add(i);
                     c1 += 1;
                 } else if ( y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2 ) {
                     noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
@@ -285,11 +302,11 @@ public class ECGFeatures{
 
                 rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
             } else {
-                if (( (pkt.get(i)-pkt.get(c2.get(c1-1))) > 1.66*rr_ave ) && (i-c2.get(c1-1)) > 1 ) {
+                if (( (pkt.get(i)-pkt.get(c2.get(c1-2))) > 1.66*rr_ave ) && (i-c2.get(c1-2)) > 1 ) { //TODO: This code block is broken.  Decipher how the pkt, c1, and c2 variables interact.  Indexing problems right now.
                     ArrayList<Double> searchback_array_inrange = new ArrayList<>();
                     ArrayList<Integer> searchback_array_inrange_index = new ArrayList<>();
 
-                    for(int j=c2.get(c1-1)+1; j<i-1; j++) {
+                    for(int j=c2.get(c1-2)+1; j<i-1; j++) {
                         if(valuepks.get(i) < 3.0 * sig_lev && valuepks.get(i) > thr2) {
                             searchback_array_inrange.add(valuepks.get(i));
                             searchback_array_inrange_index.add(j - c2.get(c1 - 1));
@@ -305,10 +322,10 @@ public class ECGFeatures{
                                 searchback_max_index = j;
                             }
                         }
-                        Rpeak_temp1.set(c1, pkt.get(c2.get(c1-1))+searchback_array_inrange_index.get(searchback_max_index));
-                        sig_lev = 0.125*y5[Rpeak_temp1.get(c1)] + 0.875*sig_lev;
+                        Rpeak_temp1.add(pkt.get(c2.get(c1-2))+searchback_array_inrange_index.get(searchback_max_index));
+                        sig_lev = 0.125*y5[Rpeak_temp1.get(c1-1)] + 0.875*sig_lev;
                         c2.set(c1, c2.get(c1-1)+searchback_array_inrange_index.get(searchback_max_index));
-                        i = c2.get(c1)+1;
+                        i = c2.get(c1-1)+1;
                         c1 += 1;
                         thr1 = noise_lev+0.25*(sig_lev-noise_lev);
                         thr2 = 0.5 * thr1;
@@ -316,9 +333,9 @@ public class ECGFeatures{
                         continue;
                     }
                 } else if (y5[pkt.get(i)] >= thr1 && y5[pkt.get(i)] < 3.0*sig_lev) {
-                    Rpeak_temp1.set(c1, pkt.get(i));
+                    Rpeak_temp1.add(pkt.get(i));
                     sig_lev = 0.125*y5[pkt.get(i)] + 0.875*sig_lev;
-                    c2.set(c1, i);
+                    c2.add(i);
                     c1 += 1;
                 } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
                     noise_lev = 0.125*y5[pkt.get(i)] + 0.875*noise_lev;
@@ -346,9 +363,9 @@ public class ECGFeatures{
             ArrayList<Double> comp2 = new ArrayList<>();
 
             for(int j=1; j<Rpeak_temp2.size(); j++) {
-                if( (Rpeak_temp2.get(i) - Rpeak_temp2.get(i-1)) < (0.5*frequency) )
-                comp_index1.add(Rpeak_temp2.get(i-1));
-                comp_index2.add(Rpeak_temp2.get(i));
+                if( (Rpeak_temp2.get(j) - Rpeak_temp2.get(j-1)) < (0.5*frequency) )
+                comp_index1.add(Rpeak_temp2.get(j-1));
+                comp_index2.add(Rpeak_temp2.get(j));
             }
             for(int j=0; j<comp_index1.size(); j++) {
                 comp1.add(sample[comp_index1.get(j)]);
@@ -364,9 +381,9 @@ public class ECGFeatures{
             }
 
             ArrayList<Integer> temp = new ArrayList<>();
-            for(int j=0; j<Rpeak_temp2.size(); j++) {
-                if ( (Rpeak_temp2.get(i) - Rpeak_temp2.get(i-1)) < (0.5*frequency) ) {
-                    Rpeak_temp2.set(j+eli_index.get(j),-9999999);
+            for(int j=1; j<Rpeak_temp2.size(); j++) {
+                if ( (Rpeak_temp2.get(j) - Rpeak_temp2.get(j-1)) < (0.5*frequency) ) {
+                    Rpeak_temp2.set(j+eli_index.get(j-1)-1,-9999999);
                 }
             }
             for (Integer aRpeak_temp2 : Rpeak_temp2) {
@@ -392,7 +409,7 @@ public class ECGFeatures{
                     index = j;
                 }
             }
-            Rpeak_temp3.add(Rpeak_temp2.get(i)-(int)Math.ceil(frequency/10.0)+index-1);
+            Rpeak_temp3.add(index-1);
         }
 
 
@@ -471,32 +488,32 @@ public class ECGFeatures{
         this.datapoints = dp;
         this.frequency = freq;
 
-        computeRR();
+        if (computeRR()) {
 
-        DescriptiveStatistics stats = new DescriptiveStatistics();
+            RRStats = new DescriptiveStatistics();
 
-        for (DataPoint aData : dp) {
-            stats.addValue(aData.value);
+            for (int i = 0; i < rr_value.length; i++) {
+                if (rr_outlier[i] == AUTOSENSE.G_QUALITY_GOOD) {
+                    RRStats.addValue(rr_value[i]);
+                }
+            }
+
+            HeartRate = ((double) RRStats.getN()) / (dp[dp.length - 1].timestamp - dp[0].timestamp);
+
+            DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];
+            for (int i = 0; i < rrDatapoints.length; i++) {
+                rrDatapoints[i] = new DataPoint(RRStats.getElement(i), i);
+            }
+
+
+            Lomb HRLomb = lomb(rrDatapoints);
+
+            LombLowHighFrequencyEnergyRatio = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+            LombLowFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+            LombMediumFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
+            LombHighFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
+
         }
-
-        variance = stats.getVariance();
-        rr_mean = stats.getMean();
-        rr_median = stats.getPercentile(50);
-        rr_quartilerange = (stats.getPercentile(75) - stats.getPercentile(25)) / 2.0;
-        rr_80percentile = stats.getPercentile(80);
-        rr_20percentile = stats.getPercentile(20);
-        rr_count = ( (double) dp.length ) / ( dp[dp.length-1].timestamp-dp[0].timestamp );
-
-//        Lomb HRLomb = lomb(dp);
-//
-//        heartrateFLHF = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-//        heartratepower12 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-//        heartratepower23 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-//        heartratepower34 = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-
-
-
-
     }
 
     private double heartRateLFHF(double[] P, double[] f, double lowRate, double highRate) {
