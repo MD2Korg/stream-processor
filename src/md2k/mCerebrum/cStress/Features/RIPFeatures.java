@@ -62,6 +62,8 @@ public class RIPFeatures {
 
         sensorConfig = sc;
 
+        //TODO: Reenable after Rummana has fixed the missing code
+        //PeakValley pvData = peakvalley_v2(rip);
 
         ArrayList<DataPoint[]> windowedData = window(rip);
 
