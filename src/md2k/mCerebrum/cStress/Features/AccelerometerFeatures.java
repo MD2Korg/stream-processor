@@ -234,44 +234,6 @@ public class AccelerometerFeatures {
         double minFD = Math.min(Math.min(fdX, fdY), fdZ);
         double meanFD = (fdX + fdY + fdZ) / 3.0;
 
-        //TODO: Are these used anywhere?
-//        DiffRatio drXY = computeDiffRatio(segx, segy);
-//        DescriptiveStatistics statsDiffXY = new DescriptiveStatistics();
-//        DescriptiveStatistics statsRatioXY = new DescriptiveStatistics();
-//        for( double d: drXY.diff) {
-//            statsDiffXY.addValue(d);
-//        }
-//        for( double d: drXY.ratio ) {
-//            statsRatioXY.addValue(d);
-//        }
-//        double avgDiffXY = statsDiffXY.getPercentile(50);
-//        double avgRatioXY = statsRatioXY.getPercentile(50);
-
-//        DiffRatio drYZ = computeDiffRatio(segx, segy);
-//        DescriptiveStatistics statsDiffYZ = new DescriptiveStatistics();
-//        DescriptiveStatistics statsRatioYZ = new DescriptiveStatistics();
-//        for( double d: drYZ.diff) {
-//            statsDiffYZ.addValue(d);
-//        }
-//        for( double d: drYZ.ratio ) {
-//            statsRatioYZ.addValue(d);
-//        }
-//        double avgDiffYZ = statsDiffYZ.getPercentile(50);
-//        double avgRatioYZ = statsRatioYZ.getPercentile(50);
-
-//        DiffRatio drZX = computeDiffRatio(segx, segy);
-//        DescriptiveStatistics statsDiffZX = new DescriptiveStatistics();
-//        DescriptiveStatistics statsRatioZX = new DescriptiveStatistics();
-//        for( double d: drZX.diff) {
-//            statsDiffZX.addValue(d);
-//        }
-//        for( double d: drZX.ratio ) {
-//            statsRatioZX.addValue(d);
-//        }
-//        double avgDiffZX = statsDiffZX.getPercentile(50);
-//        double avgRatioZX = statsRatioZX.getPercentile(50);
-
-
         double[] crossingX = crossing(segx, statsX.getMean());
         double[] crossingY = crossing(segy, statsY.getMean());
         double[] crossingZ = crossing(segz, statsZ.getMean());
@@ -618,7 +580,7 @@ public class AccelerometerFeatures {
 
     }
 
-    private double computeEnergy(double[] data, int inc) {
+    public static double computeEnergy(double[] data, int inc) {
         double result = 0;
 
         int NFFT = nextPower2(data.length);
@@ -635,7 +597,7 @@ public class AccelerometerFeatures {
         return result;
     }
 
-    private int nextPower2(int length) {
+    public static int nextPower2(int length) {
         int result = 1;
         while (result < length) {
             result *= 2;
@@ -643,7 +605,7 @@ public class AccelerometerFeatures {
         return result;
     }
 
-    private double[] magnitude(DataPoint[] x, DataPoint[] y, DataPoint[] z) {
+    public static double[] magnitude(DataPoint[] x, DataPoint[] y, DataPoint[] z) {
         double[] result = new double[Math.min(Math.min(x.length, y.length), z.length)];
         for (int i = 0; i < result.length; i++) {
             result[i] = Math.sqrt(Math.pow(x[i].value, 2) + Math.pow(y[i].value, 2) + Math.pow(z[i].value, 2));
@@ -652,7 +614,7 @@ public class AccelerometerFeatures {
     }
 
 
-    private double[] crossing(DataPoint[] x, double mean) {
+    public static double[] crossing(DataPoint[] x, double mean) {
         ArrayList<Double> crossings = new ArrayList<>();
 
         for (int i = 0; i < x.length - 1; i++) {
@@ -667,48 +629,18 @@ public class AccelerometerFeatures {
         return result;
     }
 
+    public static double[] diff(DataPoint[] dp) {
+        double[] result;
+        if (dp.length == 0) {
+            result = new double[0];
+        } else {
+            result = new double[dp.length - 1];
 
-    //TODO: Not needed anymore?
-//    private DiffRatio computeDiffRatio(double[] X, double[] Y) {
-//        DiffRatio result = new DiffRatio();
-//        ArrayList<Double> ratio = new ArrayList<>();
-//        ArrayList<Double> diff = new ArrayList<>();
-//
-//        double value;
-//        for(int i=0; i<Math.min(X.length, Y.length); i++) {
-//            value = Math.abs(X[i]-Y[i]);
-//            diff.add( value );
-//            if(Y[i] != 0) {
-//                ratio.add( value );
-//            }
-//        }
-//
-//        result.diff = new double[diff.size()];
-//        result.ratio = new double[ratio.size()];
-//        for(int i=0; i<diff.size(); i++) {
-//            result.diff[i] = diff.get(i);
-//        }
-//        for(int i=0; i<ratio.size(); i++) {
-//            result.ratio[i] = ratio.get(i);
-//        }
-//
-//        return result;
-//    }
-//
-
-    private double[] diff(DataPoint[] dp) {
-        double[] result = new double[dp.length - 1];
-
-        for (int i = 1; i < dp.length; i++) {
-            result[i - 1] = dp[i].value - dp[i - 1].value;
+            for (int i = 1; i < dp.length; i++) {
+                result[i - 1] = dp[i].value - dp[i - 1].value;
+            }
         }
-
         return result;
     }
 
-    //TODO: Not needed anymore?
-//    private class DiffRatio {
-//        double[] ratio;
-//        double[] diff;
-//    }
 }
