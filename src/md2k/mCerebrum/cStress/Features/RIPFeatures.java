@@ -48,6 +48,10 @@ public class RIPFeatures {
     //ripfeature_extraction_by_window
     private SensorConfiguration sensorConfig;
 
+    public RIPFeatures() {
+
+    }
+
     public RIPFeatures(DataPoint[] rip, ECGFeatures ecg, SensorConfiguration sc) {
 
         //Initialize statistics
@@ -102,7 +106,7 @@ public class RIPFeatures {
 
     }
 
-    private ArrayList<DataPoint[]> window(DataPoint[] rip) {
+    public  ArrayList<DataPoint[]> window(DataPoint[] rip) {
         ArrayList<DataPoint[]> result = new ArrayList<>();
 
         //TODO: Windowing code here
@@ -111,7 +115,7 @@ public class RIPFeatures {
         return result;
     }
 
-    private PeakValley peakvalley_v2(DataPoint[] rip) {
+    public  PeakValley peakvalley_v2(DataPoint[] rip) {
 
         DataPoint[] sample = smooth(rip, 5);
 
@@ -213,7 +217,7 @@ public class RIPFeatures {
         return result;
     }
 
-    private class MaxMin {
+    public class MaxMin {
         public DataPoint[] maxtab;
         public DataPoint[] mintab;
 
@@ -223,7 +227,7 @@ public class RIPFeatures {
         }
     }
 
-    private MaxMin localMaxMin(DataPoint[] temp, int delta) {
+    public  MaxMin localMaxMin(DataPoint[] temp, int delta) {
         /*
         %PEAKDET Detect peaks in a vector
         %        [MAXTAB, MINTAB] = PEAKDET(V, DELTA) finds the local
@@ -293,7 +297,7 @@ public class RIPFeatures {
         return result;
     }
 
-    private Intercepts InterceptOutlierDetectorRIPLamia(ArrayList<Integer> upInterceptIndex, ArrayList<Integer> downInterceptIndex, DataPoint[] sample, int windowLength) {
+    public  Intercepts InterceptOutlierDetectorRIPLamia(ArrayList<Integer> upInterceptIndex, ArrayList<Integer> downInterceptIndex, DataPoint[] sample, int windowLength) {
         //TODO: Intercept_outlier_detector_RIP_lamia.m
 
         Intercepts result = new Intercepts();
@@ -312,25 +316,38 @@ public class RIPFeatures {
         return result;
     }
 
-    private DataPoint[] smooth(DataPoint[] rip, int n) {
+    public  DataPoint[] smooth(DataPoint[] rip, int n) {
         DataPoint[] result = new DataPoint[rip.length];
 
         DataPoint output;
-        double[] buffer = new double[n];
-        double sum = 0.0;
 
-        for (int i = 0; i < rip.length; i++) {
-            sum -= buffer[i % n];
-            buffer[i % n] = rip[i].value;
-            sum += rip[i].value;
-
-            if (i > n) {
-                output = new DataPoint(buffer[i % n] / (i + 1), rip[i].timestamp);
+        int windowSize = 1;
+        double sum;
+        for(int i=0; i<rip.length; i++) {
+            sum = 0.0;
+            int startingPoint;
+            if( (rip.length-i+1) < n ) {
+                startingPoint = (int) rip.length-windowSize;
             } else {
-                output = new DataPoint(buffer[i % n] / n, rip[i].timestamp);
+                startingPoint = (int) Math.max(Math.floor(i - n / 2), 0);
             }
+            for(int j=startingPoint; j<startingPoint+windowSize; j++) {
+                sum += rip[j].value;
+            }
+            sum /= (double) windowSize;
+
+            output = new DataPoint(sum, rip[i].timestamp);
+
+
             result[i] = output;
+
+            if(windowSize < n && (rip.length-i) > n) { //Increase windowSize until n
+                windowSize += 2;
+            } else if ( (rip.length-i+1) < n) {
+                windowSize -= 2;
+            }
         }
+
 
         return result;
     }
@@ -346,13 +363,13 @@ public class RIPFeatures {
 //    }
 
 
-    private class Intercepts {
+    public class Intercepts {
         public int[] UI;
         public int[] DI;
     }
 
 
-    private class PeakValley {
+    public class PeakValley {
         public ArrayList<Integer> peakIndex;
         public ArrayList<Integer> valleyIndex;
     }
