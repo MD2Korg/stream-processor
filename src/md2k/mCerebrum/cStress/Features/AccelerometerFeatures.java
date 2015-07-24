@@ -114,6 +114,9 @@ public class AccelerometerFeatures {
 
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq) {
 
+        //TODO: Does this need to operate on 10 second or 60 second windows?
+
+
         DescriptiveStatistics statsX = new DescriptiveStatistics();
         DescriptiveStatistics statsY = new DescriptiveStatistics();
         DescriptiveStatistics statsZ = new DescriptiveStatistics();

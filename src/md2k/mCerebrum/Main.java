@@ -37,7 +37,7 @@ public class Main {
         TOSParser tp = new TOSParser();
         tp.importData(args[0]);
 
-        cStress stress = new cStress(60*1000); //60 second windows
+        cStress stress = new cStress(60*1000, "svm_model_FIXME"); //60 second windows //TODO: Find one of the SVM model files
 
         for(AUTOSENSE_PACKET ap: tp) {
             stress.add(ap);

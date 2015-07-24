@@ -8,6 +8,8 @@ import md2k.mCerebrum.cStress.Features.RIPFeatures;
 import md2k.mCerebrum.cStress.Features.RunningStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
+import libsvm.*;
+
 import java.util.ArrayList;
 
 
@@ -62,13 +64,20 @@ public class cStress {
     ECGFeatures ecgFeatures;
     RIPFeatures ripFeatures;
 
+    private svm_model Model;
 
-    public cStress(long windowSize) {
+    public cStress(long windowSize, String svmModelFile) {
         this.windowSize = windowSize;
         this.ECGStats = new RunningStatistics();
         this.RIPStats = new RunningStatistics();
         config();
         resetBuffers();
+
+        try {
+            Model = svm.svm_load_model(svmModelFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -120,7 +129,7 @@ public class cStress {
          RIP - Inspiration Duration - median
          RIP - Inspiration Duration - 80th percentile
          */
-        double RIP_Inspiration_Duration_Quartile_Deviation = (ripFeatures.InspDuration.getPercentile(75) - ripFeatures.InspDuration.getPercentile(25) ) / 2.0;
+        double RIP_Inspiration_Duration_Quartile_Deviation = (ripFeatures.InspDuration.getPercentile(75) - ripFeatures.InspDuration.getPercentile(25)) / 2.0;
         double RIP_Inspiration_Duration_Mean = ripFeatures.InspDuration.getMean();
         double RIP_Inspiration_Duration_Median = ripFeatures.InspDuration.getPercentile(50);
         double RIP_Inspiration_Duration_80thPercentile = ripFeatures.InspDuration.getPercentile(80);
@@ -131,7 +140,7 @@ public class cStress {
          RIP - Expiration Duration - median
          RIP - Expiration Duration - 80th percentile
          */
-        double RIP_Expiration_Duration_Quartile_Deviation = (ripFeatures.ExprDuration.getPercentile(75) - ripFeatures.ExprDuration.getPercentile(25) ) / 2.0;
+        double RIP_Expiration_Duration_Quartile_Deviation = (ripFeatures.ExprDuration.getPercentile(75) - ripFeatures.ExprDuration.getPercentile(25)) / 2.0;
         double RIP_Expiration_Duration_Mean = ripFeatures.ExprDuration.getMean();
         double RIP_Expiration_Duration_Median = ripFeatures.ExprDuration.getPercentile(50);
         double RIP_Expiration_Duration_80thPercentile = ripFeatures.ExprDuration.getPercentile(80);
@@ -142,7 +151,7 @@ public class cStress {
          RIP - Respiration Duration - median
          RIP - Respiration Duration - 80th percentile
          */
-        double RIP_Respiration_Duration_Quartile_Deviation = (ripFeatures.RespDuration.getPercentile(75) - ripFeatures.RespDuration.getPercentile(25) ) / 2.0;
+        double RIP_Respiration_Duration_Quartile_Deviation = (ripFeatures.RespDuration.getPercentile(75) - ripFeatures.RespDuration.getPercentile(25)) / 2.0;
         double RIP_Respiration_Duration_Mean = ripFeatures.RespDuration.getMean();
         double RIP_Respiration_Duration_Median = ripFeatures.RespDuration.getPercentile(50);
         double RIP_Respiration_Duration_80thPercentile = ripFeatures.RespDuration.getPercentile(80);
@@ -153,7 +162,7 @@ public class cStress {
          RIP - Inspiration-Expiration Duration Ratio - median
          RIP - Inspiration-Expiration Duration Ratio - 80th percentile
          */
-        double RIP_Inspiration_Expiration_Duration_Quartile_Deviation = (ripFeatures.IERatio.getPercentile(75) - ripFeatures.IERatio.getPercentile(25) ) / 2.0;
+        double RIP_Inspiration_Expiration_Duration_Quartile_Deviation = (ripFeatures.IERatio.getPercentile(75) - ripFeatures.IERatio.getPercentile(25)) / 2.0;
         double RIP_Inspiration_Expiration_Duration_Mean = ripFeatures.IERatio.getMean();
         double RIP_Inspiration_Expiration_Duration_Median = ripFeatures.IERatio.getPercentile(50);
         double RIP_Inspiration_Expiration_Duration_80thPercentile = ripFeatures.IERatio.getPercentile(80);
@@ -164,19 +173,19 @@ public class cStress {
          *RIP - Stretch - median
          RIP - Stretch - 80th percentile
          */
-        double RIP_Stretch_Duration_Quartile_Deviation = (ripFeatures.Stretch.getPercentile(75) - ripFeatures.Stretch.getPercentile(25) ) / 2.0;
+        double RIP_Stretch_Duration_Quartile_Deviation = (ripFeatures.Stretch.getPercentile(75) - ripFeatures.Stretch.getPercentile(25)) / 2.0;
         double RIP_Stretch_Duration_Mean = ripFeatures.Stretch.getMean();
         double RIP_Stretch_Duration_Median = ripFeatures.Stretch.getPercentile(50);
         double RIP_Stretch_Duration_80thPercentile = ripFeatures.Stretch.getPercentile(80);
          /*
          *RIP - Breath-rate
          */
-        //double RIP_Breath_Rate = ripFeatures.InspDuration.getN();
+        double RIP_Breath_Rate = 0.0;
 
          /*
          *RIP - Inspiration Minute Volume
          */
-        //double RIP_Inspiration_Minute_Volume = ripFeature.
+        double RIP_Inspiration_Minute_Volume = 0.0;
 
          /*
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
@@ -184,12 +193,83 @@ public class cStress {
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
          */
+        double RSA_Quartile_Deviation = 0.0;
+        double RSA_Mean = 0.0;
+        double RSA_Median = 0.0;
+        double RSA_80thPercentile = 0.0;
 
 
+        double[] featureVector = {
+                ECG_RR_Interval_Variance,
+                ECG_RR_Interval_Quartile_Deviation,
+                ECG_RR_Interval_Low_Frequency_Energy,
+                ECG_RR_Interval_Medium_Frequency_Energy,
+                ECG_RR_Interval_High_Frequency_Energy,
+                ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,
+                ECG_RR_Interval_Mean,
+                ECG_RR_Interval_Median,
+                ECG_RR_Interval_80thPercentile,
+                ECG_RR_Interval_20thPercentile,
+                ECG_RR_Interval_Heart_Rate,
 
-         return 0.0;
+                RIP_Inspiration_Duration_Quartile_Deviation,
+                RIP_Inspiration_Duration_Mean,
+                RIP_Inspiration_Duration_Median,
+                RIP_Inspiration_Duration_80thPercentile,
+
+                RIP_Expiration_Duration_Quartile_Deviation,
+                RIP_Expiration_Duration_Mean,
+                RIP_Expiration_Duration_Median,
+                RIP_Expiration_Duration_80thPercentile,
+
+                RIP_Respiration_Duration_Quartile_Deviation,
+                RIP_Respiration_Duration_Mean,
+                RIP_Respiration_Duration_Median,
+                RIP_Respiration_Duration_80thPercentile,
+
+                RIP_Inspiration_Expiration_Duration_Quartile_Deviation,
+                RIP_Inspiration_Expiration_Duration_Mean,
+                RIP_Inspiration_Expiration_Duration_Median,
+                RIP_Inspiration_Expiration_Duration_80thPercentile,
+
+                RIP_Stretch_Duration_Quartile_Deviation,
+                RIP_Stretch_Duration_Mean,
+                RIP_Stretch_Duration_Median,
+                RIP_Stretch_Duration_80thPercentile,
+
+                RIP_Breath_Rate,
+                RIP_Inspiration_Minute_Volume,
+
+                RSA_Quartile_Deviation,
+                RSA_Mean,
+                RSA_Median,
+                RSA_80thPercentile
+        };
+
+
+        double result = -1;
+        if (!activityCheck(accelFeatures)) {
+            //SVM evaluation
+            svm_node[] data = new svm_node[]
+            for (int i = 0; i < featureVector.length; i++) {
+                data[i] = new svm_node();
+                data[i].index = i;
+                data[i].value = featureVector[i];
+            }
+
+            int numberOfClasses = 2;
+            double[] prob_estimates = new double[numberOfClasses];
+            result = svm.svm_predict_probability(Model, data, prob_estimates);
+        }
+
+        return result;
     }
-    
+
+    private boolean activityCheck(AccelerometerFeatures accelFeatures) {
+        //TODO: Something about Accel Feature filtering of this event window for rejecting activity influenced readings.
+        return false;
+    }
+
 
     public double process() {
 
@@ -217,8 +297,13 @@ public class cStress {
         if (rip.length >= 16)
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
 
-        return 0.0;
+
+        double probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures);
+
+
+        return probabilityOfStress;
     }
+
 
     private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data, double frequency) {
         ArrayList<DataPoint> result = new ArrayList<>();
