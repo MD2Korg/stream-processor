@@ -115,7 +115,7 @@ public class AccelerometerFeatures {
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq) {
 
         //TODO: Does this need to operate on 10 second or 60 second windows?
-
+        //TODO: Can this be handled without 10 second windowing and by using a filter on 60 seconds of data?  analyze_activity.m
 
         DescriptiveStatistics statsX = new DescriptiveStatistics();
         DescriptiveStatistics statsY = new DescriptiveStatistics();

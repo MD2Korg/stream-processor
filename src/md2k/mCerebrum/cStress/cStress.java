@@ -74,7 +74,7 @@ public class cStress {
         resetBuffers();
 
         try {
-            Model = svm.svm_load_model(svmModelFile);
+            Model = svm.svm_load_model(svmModelFile); //TODO: Bias is not supported.  Needs investigation
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -201,16 +201,19 @@ public class cStress {
 
         double[] featureVector = {
                 ECG_RR_Interval_Variance,
-                ECG_RR_Interval_Quartile_Deviation,
-                ECG_RR_Interval_Low_Frequency_Energy,
-                ECG_RR_Interval_Medium_Frequency_Energy,
-                ECG_RR_Interval_High_Frequency_Energy,
                 ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,
+                ECG_RR_Interval_High_Frequency_Energy,
+                ECG_RR_Interval_Medium_Frequency_Energy,
+                ECG_RR_Interval_Low_Frequency_Energy,
                 ECG_RR_Interval_Mean,
                 ECG_RR_Interval_Median,
+                ECG_RR_Interval_Quartile_Deviation,
                 ECG_RR_Interval_80thPercentile,
                 ECG_RR_Interval_20thPercentile,
                 ECG_RR_Interval_Heart_Rate,
+
+                RIP_Breath_Rate,
+                RIP_Inspiration_Minute_Volume, //Ventalation
 
                 RIP_Inspiration_Duration_Quartile_Deviation,
                 RIP_Inspiration_Duration_Mean,
@@ -237,9 +240,6 @@ public class cStress {
                 RIP_Stretch_Duration_Median,
                 RIP_Stretch_Duration_80thPercentile,
 
-                RIP_Breath_Rate,
-                RIP_Inspiration_Minute_Volume,
-
                 RSA_Quartile_Deviation,
                 RSA_Mean,
                 RSA_Median,
@@ -250,7 +250,7 @@ public class cStress {
         double result = -1;
         if (!activityCheck(accelFeatures)) {
             //SVM evaluation
-            svm_node[] data = new svm_node[]
+            svm_node[] data = new svm_node[featureVector.length];
             for (int i = 0; i < featureVector.length; i++) {
                 data[i] = new svm_node();
                 data[i].index = i;
