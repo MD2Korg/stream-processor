@@ -38,7 +38,7 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AccelerometerFeatures {
-    private boolean Activity;
+    public boolean Activity;
 
     //accelerometerfeature_extraction.m
 

@@ -268,8 +268,7 @@ public class cStress {
     }
 
     private boolean activityCheck(AccelerometerFeatures accelFeatures) {
-        //TODO: Something about Accel Feature filtering of this event window for rejecting activity influenced readings.
-        return false;
+        return accelFeatures.Activity;
     }
 
 
