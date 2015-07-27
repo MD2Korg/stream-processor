@@ -246,6 +246,8 @@ public class cStress {
                 RSA_80thPercentile
         };
 
+        //normalize FV trainset_60_ecgrip_pilot_accel.dat_meansstdevs
+
 
         double result = -1;
         if (!activityCheck(accelFeatures)) {
@@ -259,7 +261,7 @@ public class cStress {
 
             int numberOfClasses = 2;
             double[] prob_estimates = new double[numberOfClasses];
-            result = svm.svm_predict_probability(Model, data, prob_estimates);
+            result = svm.svm_predict(Model, data);
         }
 
         return result;
