@@ -37,7 +37,7 @@ public class Main {
         TOSParser tp = new TOSParser();
         tp.importData(args[0]);
 
-        cStress stress = new cStress(60*1000, "/Users/hnat/Downloads/cStress_Framework_code/Common/model/libsvm/libsvm/DataFiles/trainset_60_ecgrip_pilot_accel.dat.model"); //60 second windows //TODO: Find one of proper model files
+        cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
 
         for(AUTOSENSE_PACKET ap: tp) {
             stress.add(ap);

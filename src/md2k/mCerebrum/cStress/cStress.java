@@ -10,6 +10,9 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -65,8 +68,10 @@ public class cStress {
     RIPFeatures ripFeatures;
 
     private svm_model Model;
+    private double[] featureVectorMean;
+    private double[] featureVectorStd;
 
-    public cStress(long windowSize, String svmModelFile) {
+    public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile) {
         this.windowSize = windowSize;
         this.ECGStats = new RunningStatistics();
         this.RIPStats = new RunningStatistics();
@@ -79,6 +84,38 @@ public class cStress {
             e.printStackTrace();
         }
 
+        this.featureVectorMean = new double[37];
+        this.featureVectorStd = new double[37];
+        loadFVParameters(featureVectorParameterFile);
+
+    }
+
+    private void loadFVParameters(String featureVectorParameterFile) {
+
+        BufferedReader br = null;
+        String line = "";
+        String csvSplitBy = ",";
+        int count;
+        try {
+            br = new BufferedReader(new FileReader(featureVectorParameterFile));
+            count = 0;
+            while ( (line = br.readLine()) != null ) {
+                String[] meanstd = line.split(csvSplitBy);
+                this.featureVectorMean[count] = Double.parseDouble(meanstd[0]);
+                this.featureVectorStd[count] = Double.parseDouble(meanstd[1]);
+                count++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 
@@ -246,7 +283,8 @@ public class cStress {
                 RSA_80thPercentile
         };
 
-        //normalize FV trainset_60_ecgrip_pilot_accel.dat_meansstdevs
+
+        featureVector = normalizeFV(featureVector);
 
 
         double result = -1;
@@ -264,6 +302,15 @@ public class cStress {
             result = svm.svm_predict(Model, data);
         }
 
+        return result;
+    }
+
+    private double[] normalizeFV(double[] featureVector) {
+        double[] result = new double[featureVector.length];
+
+        for(int i=0; i<featureVector.length; i++) {
+            result[i] = (featureVector[i] - this.featureVectorMean[i]) / this.featureVectorStd[i];
+        }
         return result;
     }
 

@@ -617,15 +617,26 @@ public class AccelerometerFeatures {
 
         long startTime = data[0].timestamp;
         ArrayList<DataPoint> tempArray = new ArrayList<>();
+        DataPoint[] temp;
         for(DataPoint dp: data) {
             if(dp.timestamp < startTime+size) {
                 tempArray.add(dp);
             } else {
-                result.add((DataPoint[]) tempArray.toArray());
+                temp = new DataPoint[tempArray.size()];
+                for(int i=0; i<temp.length; i++) {
+                    temp[i] = tempArray.get(i);
+                }
+                result.add(temp);
                 tempArray = new ArrayList<>();
                 startTime += size;
             }
         }
+        temp = new DataPoint[tempArray.size()];
+        for(int i=0; i<temp.length; i++) {
+            temp[i] = tempArray.get(i);
+        }
+        result.add(temp);
+
 
         return result;
     }
