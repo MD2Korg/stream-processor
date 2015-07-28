@@ -297,16 +297,12 @@ public class cStress {
                 data[i].value = featureVector[i];
             }
 
-            //int numberOfClasses = 2;
-            //double[] prob_estimates = new double[numberOfClasses];
             stressResult.probability = svm.svm_predict(Model, data);
             if (stressResult.probability < bias) {
-                stressResult.label = 0;
+                stressResult.label = 0; //Not-stressed label
             } else {
                 stressResult.label = 1; //Stressed label
             }
-
-
         }
 
         return stressResult;
@@ -367,7 +363,7 @@ public class cStress {
 
         for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
             for (int i = 0; i < 5; i++) {
-                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency));
+                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency)); //TODO: Fix this to be something more realistic
                 result.add(dp);
             }
         }
