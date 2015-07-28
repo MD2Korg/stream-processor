@@ -3,6 +3,7 @@ package md2k.mCerebrum.cStress.Features;
 import com.sun.tools.doclets.formats.html.resources.standard;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Structs.Lomb;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.lang.reflect.Array;
@@ -484,10 +485,7 @@ public class ECGFeatures {
         return shortresult;
     }
 
-    public class Lomb {
-        public double[] P;
-        public double[] f;
-    }
+
 
     public ECGFeatures(DataPoint[] dp, double freq) {
 

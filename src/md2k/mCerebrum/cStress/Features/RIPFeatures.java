@@ -2,6 +2,9 @@ package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.SensorConfiguration;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Structs.Intercepts;
+import md2k.mCerebrum.cStress.Structs.MaxMin;
+import md2k.mCerebrum.cStress.Structs.PeakValley;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -121,7 +124,7 @@ public class RIPFeatures {
 
         int windowLength = (int) Math.round(8.0 * sensorConfig.getFrequency("RIP"));
 
-        DataPoint[] MAC = smooth(sample, windowLength); //TODO: Verify the purpose the MATLAB's moving average and the difference between smooth
+        DataPoint[] MAC = smooth(sample, windowLength);
 
         ArrayList<Integer> upInterceptIndex = new ArrayList<>();
         ArrayList<Integer> downInterceptIndex = new ArrayList<>();
@@ -217,17 +220,9 @@ public class RIPFeatures {
         return result;
     }
 
-    public class MaxMin {
-        public DataPoint[] maxtab;
-        public DataPoint[] mintab;
 
-        public MaxMin() {
-            maxtab = new DataPoint[0];
-            mintab = new DataPoint[0];
-        }
-    }
 
-    public  MaxMin localMaxMin(DataPoint[] temp, int delta) {
+    public MaxMin localMaxMin(DataPoint[] temp, int delta) {
         /*
         %PEAKDET Detect peaks in a vector
         %        [MAXTAB, MINTAB] = PEAKDET(V, DELTA) finds the local
@@ -317,9 +312,8 @@ public class RIPFeatures {
     }
 
     public  DataPoint[] smooth(DataPoint[] rip, int n) {
+        //Reimplementation of Matlab's smooth function
         DataPoint[] result = new DataPoint[rip.length];
-
-        DataPoint output;
 
         int windowSize = 1;
         double sum;
@@ -327,7 +321,7 @@ public class RIPFeatures {
             sum = 0.0;
             int startingPoint;
             if( (rip.length-i+1) < n ) {
-                startingPoint = (int) rip.length-windowSize;
+                startingPoint = rip.length-windowSize;
             } else {
                 startingPoint = (int) Math.max(Math.floor(i - n / 2), 0);
             }
@@ -336,10 +330,7 @@ public class RIPFeatures {
             }
             sum /= (double) windowSize;
 
-            output = new DataPoint(sum, rip[i].timestamp);
-
-
-            result[i] = output;
+            result[i] = new DataPoint(sum, rip[i].timestamp);
 
             if(windowSize < n && (rip.length-i) > n) { //Increase windowSize until n
                 windowSize += 2;
@@ -362,15 +353,4 @@ public class RIPFeatures {
 //        return 0;
 //    }
 
-
-    public class Intercepts {
-        public int[] UI;
-        public int[] DI;
-    }
-
-
-    public class PeakValley {
-        public ArrayList<Integer> peakIndex;
-        public ArrayList<Integer> valleyIndex;
-    }
 }
