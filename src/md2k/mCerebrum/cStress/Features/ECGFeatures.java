@@ -37,43 +37,69 @@ import java.util.stream.Collectors;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ECGFeatures {
+
+    public DescriptiveStatistics RRStats;
+
+    //Data inputs
     private final DataPoint[] datapoints;
     private final double frequency;
 
-    //ecg_statistical_features.m
-
-//    public double variance;
-//    public double heartrateFLHF;
-//    public double heartratepower12;
-//    public double heartratepower23;
-//    public double heartratepower34;
-//    public double rr_mean;
-//    public double rr_median;
-//    public double rr_quartilerange;
-//    public double rr_80percentile;
-//    public double rr_20percentile;
-//    public double rr_count;
-
+    //Feature storage
     private double[] rr_value = new double[0];
     private long[] rr_timestamp = new long[0];
     private long[] rr_index = new long[0];
     private int[] rr_outlier = new int[0];
 
+    private double HeartRate;
+    private double LombLowFrequencyEnergy;
+    private double LombMediumFrequencyEnergy;
+    private double LombHighFrequencyEnergy;
+    private double LombLowHighFrequencyEnergyRatio;
 
-    public DescriptiveStatistics RRStats;
-    public double HeartRate;
-    public double LombLowFrequencyEnergy;
-    public double LombMediumFrequencyEnergy;
-    public double LombHighFrequencyEnergy;
-    public double LombLowHighFrequencyEnergyRatio;
+    public ECGFeatures(DataPoint[] dp, double freq) {
+
+        datapoints = dp;
+        frequency = freq;
+
+        if (computeRR()) {
+
+            RRStats = new DescriptiveStatistics();
+
+            for (int i = 0; i < rr_value.length; i++) {
+                if (rr_outlier[i] == AUTOSENSE.G_QUALITY_GOOD) {
+                    RRStats.addValue(rr_value[i]);
+                }
+            }
+
+            HeartRate = ((double) RRStats.getN()) / (dp[dp.length - 1].timestamp - dp[0].timestamp);
+
+            DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];
+            for (int i = 0; i < rrDatapoints.length; i++) {
+                rrDatapoints[i] = new DataPoint(RRStats.getElement(i), i);
+            }
 
 
-    public boolean computeRR() {
-        long[] Rpeak_index = detect_Rpeak(this.datapoints, this.frequency);
+            Lomb HRLomb = lomb(rrDatapoints); //TODO: I don't think this is supposed to be on RR intervals.  Please confirm/deny
+
+            LombLowHighFrequencyEnergyRatio = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+            LombLowFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+            LombMediumFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
+            LombHighFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
+
+        }
+    }
+
+
+    /**
+     * Compute RR intervals
+     * @return True if successful, False if there is not enough data
+     */
+    private boolean computeRR() {
+        long[] Rpeak_index = detect_Rpeak(datapoints, frequency);
 
         long[] pkT = new long[Rpeak_index.length];
         for (int i = 0; i < Rpeak_index.length; i++) {
-            pkT[i] = this.datapoints[(int) Rpeak_index[i]].timestamp;
+            pkT[i] = datapoints[(int) Rpeak_index[i]].timestamp;
         }
 
         if (pkT.length < 2) {
@@ -119,9 +145,16 @@ public class ECGFeatures {
         return true;
     }
 
+    /**
+     * Outlier detection for RR-interval data
+     * Reference: detect_outlier_v2.m
+     * @param sample RR-interval values
+     * @param timestamp RR-interval timestamps
+     * @return Outlier array
+     */
     public static int[] detect_outlier_v2(double[] sample, long[] timestamp) {
         ArrayList<Integer> outlier = new ArrayList<>();
-
+        //TODO: Errors to be resolved
         try {
             if (timestamp.length != 0) {
                 ArrayList<Double> valid_rrInterval = new ArrayList<>();
@@ -203,7 +236,14 @@ public class ECGFeatures {
         return result;
     }
 
+    /**
+     * R-peak detector
+     * @param datapoints Raw ECG datapoints
+     * @param frequency ECG sampling frequency
+     * @return Indexes of R-peaks
+     */
     public static long[] detect_Rpeak(DataPoint[] datapoints, double frequency) {
+        //TODO: Errors to be resolved
 
         double[] sample = new double[datapoints.length];
         double[] timestamps = new double[datapoints.length];
@@ -429,7 +469,13 @@ public class ECGFeatures {
         return result;
     }
 
-    public static double rr_ave_update(ArrayList<Integer> rpeak_temp1, double rr_ave) {
+    /**
+     *
+     * @param rpeak_temp1
+     * @param rr_ave
+     * @return
+     */
+    public static double rr_ave_update(ArrayList<Integer> rpeak_temp1, double rr_ave) { //TODO: Is this supposed to be rr_avg_udpate?
         ArrayList<Integer> peak_interval = new ArrayList<>();
 
         peak_interval.add(rpeak_temp1.get(0));
@@ -449,16 +495,32 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Standard implementation of the blackman filter
+     * @param window_l Window length of the blackman filter
+     * @return blackman filter
+     */
     public static double[] blackman(int window_l) {
         double[] result = new double[window_l];
         int M = (int) Math.floor((window_l + 1) / 2);
+
         for (int i = 0; i < M; i++) {
             result[i] = 0.42 - 0.5 * Math.cos(2.0 * Math.PI * (double) i / (window_l - 1)) + 0.08 * Math.cos(4.0 * Math.PI * (double) i / (window_l - 1));
             result[window_l - i - 1] = result[i];
         }
+
         return result;
     }
 
+    /**
+     * Finite Impulse Response Least-Squares filter
+     * This filter is hard-coded from a Matlab output based on the frequency of the ECG sensor
+     * @param fl Not used currently
+     * @param f Not used currently
+     * @param a Not used currently
+     * @param w Not used currently
+     * @return Implemented filter
+     */
     public static double[] firls(double fl, double[] f, double[] a, double[] w) {
         //Hardcoded to the specifications of the Autosense ECG sensor right now
 
@@ -467,6 +529,12 @@ public class ECGFeatures {
         return result;
     }
 
+    /**
+     * Standard convolution implementation for producing the "same" size filter
+     * @param signal Input signal
+     * @param kernel Kernel to apply to the signal
+     * @return Convoluted signal
+     */
     public static double[] conv(double[] signal, double[] kernel) {
         double[] result = new double[Math.max(Math.max(signal.length + kernel.length, signal.length), kernel.length)];
 
@@ -481,45 +549,19 @@ public class ECGFeatures {
         }
 
         double[] shortresult = new double[signal.length];
-        System.arraycopy(result, 0, shortresult, 0, signal.length);
+        System.arraycopy(result, 0, shortresult, 0, signal.length); //Remove excess array size
         return shortresult;
     }
 
 
-
-    public ECGFeatures(DataPoint[] dp, double freq) {
-
-        this.datapoints = dp;
-        this.frequency = freq;
-
-        if (computeRR()) {
-
-            RRStats = new DescriptiveStatistics();
-
-            for (int i = 0; i < rr_value.length; i++) {
-                if (rr_outlier[i] == AUTOSENSE.G_QUALITY_GOOD) {
-                    RRStats.addValue(rr_value[i]);
-                }
-            }
-
-            HeartRate = ((double) RRStats.getN()) / (dp[dp.length - 1].timestamp - dp[0].timestamp);
-
-            DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];
-            for (int i = 0; i < rrDatapoints.length; i++) {
-                rrDatapoints[i] = new DataPoint(RRStats.getElement(i), i);
-            }
-
-
-            Lomb HRLomb = lomb(rrDatapoints); //TODO: I don't think this is supposed to be RR intervals.  Please confirm/deny
-
-            LombLowHighFrequencyEnergyRatio = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-            LombLowFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-            LombMediumFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
-            LombHighFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
-
-        }
-    }
-
+    /**
+     * Heartrate Low Frequency - High Frequency ratio
+     * @param P
+     * @param f
+     * @param lowRate Low frequency cutoff
+     * @param highRate High frequency cutoff
+     * @return LF/HF ratio
+     */
     public static double heartRateLFHF(double[] P, double[] f, double lowRate, double highRate) {
         double result1 = 0;
         for (int i = 0; i < P.length; i++) {
@@ -529,13 +571,21 @@ public class ECGFeatures {
         }
         double result2 = 0;
         for (int i = 0; i < P.length; i++) {
-            if (f[i] >= lowRate && f[i] <= highRate) { //Should this be >= lowRate instead of what is in the code?
+            if (f[i] >= lowRate && f[i] <= highRate) {
                 result2 += P[i];
             }
         }
         return result1 / result2;
     }
 
+    /**
+     * Heartrate Power
+     * @param P
+     * @param f
+     * @param lowFrequency Low frequency cutoff
+     * @param highFrequency High frequency cutoff
+     * @return
+     */
     public static double heartRatePower(double[] P, double[] f, double lowFrequency, double highFrequency) {
         double result = 0;
         for (int i = 0; i < P.length; i++) {
@@ -547,10 +597,13 @@ public class ECGFeatures {
         return result;
     }
 
+    /**
+     * Lomb–Scargle periodogram implementation
+     * Reference: HeartRateLomb.m
+     * @param dp DataPoint array
+     * @return Lomb structure with P and f defined
+     */
     public Lomb lomb(DataPoint[] dp) {
-        //HeartRateLomb.m
-
-
         double T = dp[dp.length - 1].timestamp - dp[0].timestamp;
         int nf = (int) Math.round(0.5 * 4.0 * 1.0 * dp.length);
         double[] f = new double[nf];
@@ -645,4 +698,23 @@ public class ECGFeatures {
     }
 
 
+    public double getHeartRate() {
+        return HeartRate;
+    }
+
+    public double getLombLowFrequencyEnergy() {
+        return LombLowFrequencyEnergy;
+    }
+
+    public double getLombMediumFrequencyEnergy() {
+        return LombMediumFrequencyEnergy;
+    }
+
+    public double getLombHighFrequencyEnergy() {
+        return LombHighFrequencyEnergy;
+    }
+
+    public double getLombLowHighFrequencyEnergyRatio() {
+        return LombLowHighFrequencyEnergyRatio;
+    }
 }
