@@ -32,10 +32,9 @@ import md2k.mCerebrum.cStress.cStress;
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
 
         TOSParser tp = new TOSParser();
-        tp.importData(args[0]);
+        tp.importData(args[0]); //A TOS file is the input argument
 
         cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
 

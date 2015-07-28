@@ -332,10 +332,10 @@ public class cStress {
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
         for (DataPoint dp : ecg) {
-            ECGStats.add(dp.value);
+            ECGStats.add( (dp.value-ECGStats.getMean())/ECGStats.getStdev() ); //Normalize data values based on running statistics
         }
         for (DataPoint dp : rip) {
-            RIPStats.add(dp.value);
+            RIPStats.add( (dp.value-RIPStats.getMean())/RIPStats.getStdev() ); //Normalize data values based on running statistics
         }
 
 
@@ -351,7 +351,7 @@ public class cStress {
 
 
         StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, 0.339329059788);
-
+        System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
         //TODO: Do something with this output
 
 
