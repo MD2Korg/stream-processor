@@ -1,7 +1,5 @@
 package md2k.mCerebrum.cStress.Autosense;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>

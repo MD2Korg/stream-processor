@@ -1,14 +1,11 @@
 package md2k.mCerebrum.cStress.Features;
 
-import com.sun.tools.doclets.formats.html.resources.standard;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
