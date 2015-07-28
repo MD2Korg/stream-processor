@@ -79,7 +79,7 @@ public class cStress {
         resetBuffers();
 
         try {
-            Model = svm.svm_load_model(svmModelFile); //TODO: Bias is not supported.  Needs investigation
+            Model = svm.svm_load_model(svmModelFile);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -131,8 +131,10 @@ public class cStress {
 
     }
 
-    private double evaluteStressModel(AccelerometerFeatures accelFeatures, ECGFeatures ecgFeatures, RIPFeatures ripFeatures) {
-        
+    private StressProbability evaluteStressModel(AccelerometerFeatures accelFeatures, ECGFeatures ecgFeatures, RIPFeatures ripFeatures, double bias) {
+
+        StressProbability stressResult = new StressProbability(-1,0.0);
+
         /* Ordered list of features for SVM model
         
          ECG - RR interval variance
@@ -286,8 +288,6 @@ public class cStress {
 
         featureVector = normalizeFV(featureVector);
 
-
-        double result = -1;
         if (!activityCheck(accelFeatures)) {
             //SVM evaluation
             svm_node[] data = new svm_node[featureVector.length];
@@ -297,12 +297,19 @@ public class cStress {
                 data[i].value = featureVector[i];
             }
 
-            int numberOfClasses = 2;
-            double[] prob_estimates = new double[numberOfClasses];
-            result = svm.svm_predict(Model, data);
+            //int numberOfClasses = 2;
+            //double[] prob_estimates = new double[numberOfClasses];
+            stressResult.probability = svm.svm_predict(Model, data);
+            if (stressResult.probability < bias) {
+                stressResult.label = 0;
+            } else {
+                stressResult.label = 1; //Stressed label
+            }
+
+
         }
 
-        return result;
+        return stressResult;
     }
 
     private double[] normalizeFV(double[] featureVector) {
@@ -346,10 +353,12 @@ public class cStress {
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
 
 
-        double probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures);
+        StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, 0.339329059788);
+
+        //TODO: Do something with this output
 
 
-        return probabilityOfStress;
+        return 0.0;
     }
 
 
