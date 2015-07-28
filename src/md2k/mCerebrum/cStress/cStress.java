@@ -9,6 +9,7 @@ import md2k.mCerebrum.cStress.Features.RunningStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
+import md2k.mCerebrum.cStress.Structs.StressProbability;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
