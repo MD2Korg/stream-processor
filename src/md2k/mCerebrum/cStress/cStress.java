@@ -343,8 +343,8 @@ public class cStress {
         if (accelerometerX.length >= 16 && accelerometerY.length >= 16 && accelerometerZ.length >= 16)
             accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"));
 
-        if (ecg.length >= 16)
-            ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
+        //if (ecg.length >= 16)
+        //    ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
 
         if (rip.length >= 16)
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);

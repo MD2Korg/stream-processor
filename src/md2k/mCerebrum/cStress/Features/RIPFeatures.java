@@ -55,6 +55,12 @@ public class RIPFeatures {
 
     }
 
+    /**
+     * Core Respiration Features
+     * @param rip
+     * @param ecg
+     * @param sc
+     */
     public RIPFeatures(DataPoint[] rip, ECGFeatures ecg, SensorConfiguration sc) {
 
         //Initialize statistics
@@ -62,17 +68,15 @@ public class RIPFeatures {
         ExprDuration = new DescriptiveStatistics();
         RespDuration = new DescriptiveStatistics();
         Stretch = new DescriptiveStatistics();
-        //StretchUp = new DescriptiveStatistics();
-        //StretchDown = new DescriptiveStatistics();
         IERatio = new DescriptiveStatistics();
         RSA = new DescriptiveStatistics();
 
         sensorConfig = sc;
 
-        //TODO: Reenable after Rummana has fixed the missing code
-        //PeakValley pvData = peakvalley_v2(rip);
 
-        ArrayList<DataPoint[]> windowedData = window(rip);
+        PeakValley pvData = peakvalley_v2(rip);
+
+        ArrayList<DataPoint[]> windowedData = window(rip, pvData);
 
         for (DataPoint[] darray : windowedData) {
             DescriptiveStatistics statsSeg = new DescriptiveStatistics();
@@ -97,8 +101,6 @@ public class RIPFeatures {
             ExprDuration.addValue(darray[darray.length].timestamp - darray[peakindex].timestamp);
             RespDuration.addValue(darray[darray.length].timestamp - darray[0].timestamp);
             Stretch.addValue(max - min); //TODO: Verify what this is: BreathStretchCalculate.m
-            //StretchUp.addValue(max - median);
-            //StretchDown.addValue(median - min);
             IERatio.addValue((darray[peakindex].timestamp - darray[0].timestamp) / (darray[darray.length].timestamp - darray[peakindex].timestamp));
 
             //RSA.addValue(rsaCalculateCycle(darray, ecg) );
@@ -109,7 +111,7 @@ public class RIPFeatures {
 
     }
 
-    public  ArrayList<DataPoint[]> window(DataPoint[] rip) {
+    public  ArrayList<DataPoint[]> window(DataPoint[] rip, PeakValley peakvalley) {
         ArrayList<DataPoint[]> result = new ArrayList<>();
 
         //TODO: Windowing code here
@@ -124,7 +126,7 @@ public class RIPFeatures {
 
         int windowLength = (int) Math.round(8.0 * sensorConfig.getFrequency("RIP"));
 
-        DataPoint[] MAC = smooth(sample, windowLength);
+        DataPoint[] MAC = mac(sample, windowLength);
 
         ArrayList<Integer> upInterceptIndex = new ArrayList<>();
         ArrayList<Integer> downInterceptIndex = new ArrayList<>();
@@ -152,13 +154,14 @@ public class RIPFeatures {
             for (int j = UI[i]; j < DI[i + 1]; j++) {
                 if (sample[j].value > peakValue) {
                     peakindex = j;
+                    peakValue = sample[j].value;
                 }
             }
             peakIndex.add(peakindex);
 
             DataPoint[] temp = new DataPoint[UI[i] - DI[i]];
             System.arraycopy(sample, DI[i], temp, 0, UI[i] - DI[i]);
-            MaxMin maxMinTab = localMaxMin(temp, 1);
+                MaxMin maxMinTab = localMaxMin(temp, 1);
 
             if (maxMinTab.mintab.length == 0) {
                 int valleyindex = 0;
@@ -166,6 +169,7 @@ public class RIPFeatures {
                 for (int j = DI[i]; j < UI[i]; j++) {
                     if (sample[j].value < valleyValue) {
                         valleyindex = j;
+                        valleyValue = sample[j].value;
                     }
                 }
                 valleyIndex.add(valleyindex);
@@ -220,6 +224,27 @@ public class RIPFeatures {
         return result;
     }
 
+    /**
+     * Moving Average Curve
+     * @param sample
+     * @param windowLength
+     * @return
+     */
+    private DataPoint[] mac(DataPoint[] sample, int windowLength) {
+
+        DataPoint[] result = new DataPoint[sample.length-2*windowLength];
+
+        for(int i=windowLength;i < sample.length-windowLength; i++) {
+            result[i-windowLength] = new DataPoint(0.0,0);
+            for(int j=-windowLength; j<windowLength; j++) {
+                result[i-windowLength].value += sample[i+j].value;
+            }
+            result[i-windowLength].value /= (2.0*windowLength); //Compute mean
+            result[i-windowLength].timestamp = sample[i+windowLength].timestamp;
+
+        }
+        return result;
+    }
 
 
     public MaxMin localMaxMin(DataPoint[] temp, int delta) {
@@ -292,21 +317,165 @@ public class RIPFeatures {
         return result;
     }
 
+    /**
+     * Intercept Outlier Detector
+     * Reference: Intercept_outlier_detector_RIP_lamia.m
+     * @param upInterceptIndex
+     * @param downInterceptIndex
+     * @param sample
+     * @param windowLength
+     * @return
+     */
     public  Intercepts InterceptOutlierDetectorRIPLamia(ArrayList<Integer> upInterceptIndex, ArrayList<Integer> downInterceptIndex, DataPoint[] sample, int windowLength) {
-        //TODO: Intercept_outlier_detector_RIP_lamia.m
-
         Intercepts result = new Intercepts();
 
         int minimumLength = Math.min(upInterceptIndex.size(), downInterceptIndex.size());
-        if (upInterceptIndex.size() < minimumLength) {
-            upInterceptIndex = (ArrayList<Integer>) upInterceptIndex.subList(0, minimumLength - 1);
-        }
-        if (downInterceptIndex.size() < minimumLength) {
-            downInterceptIndex = (ArrayList<Integer>) downInterceptIndex.subList(0, minimumLength - 1);
+
+        ArrayList<Integer> D = new ArrayList<>();
+        ArrayList<Integer> U = new ArrayList<>();
+        for(int i=0; i<minimumLength; i++) {
+            U.add(upInterceptIndex.get(i));
+            D.add(downInterceptIndex.get(i));
         }
 
-        //TODO: Needs work from Rummana
+        ArrayList<Integer> UI = new ArrayList<>();
+        ArrayList<Integer> DI = new ArrayList<>();
 
+        int i = 0;
+        int j = 0;
+        while(i < U.size()-2) {
+            if (j > (D.size()-1)) {
+                break;
+            }
+
+            while(j < D.size()-1) {
+               if(U.get(0) < D.get(0)) {
+                   if (i == U.size() || j == D.size()) {
+                       break;
+                   }
+
+                   if (U.get(i) < D.get(j) && D.get(j) < U.get(i+1)) {
+                       UI.add(U.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aD : D) {
+                           if ((aD > D.get(j)) && (aD < U.get(i+1))) {
+                               ind.add(aD);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           DI.add(D.get(j));
+                           j++;
+                       } else {
+                           DI.add(ind.get(ind.size()-1));
+                           j = ind.get(ind.size()-1)+1;
+                       }
+                       i++;
+                   } else if (U.get(i) < D.get(j) && D.get(j) > U.get(i+1)) {
+                       DI.add(D.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aU : U) {
+                           if ((aU > U.get(i)) && (aU < D.get(j))) {
+                               ind.add(aU);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           UI.add(U.get(i));
+                           i++;
+                       } else {
+                           UI.add(ind.get(ind.size()-1));
+                           i = ind.get(ind.size()-1)+1;
+                       }
+                       j++;
+                   }
+               } else if (D.get(0) < U.get(0)) {
+                   if (i == D.size() || j == U.size()) {
+                       break;
+                   }
+
+                   if (D.get(i) < U.get(j) && U.get(j) < D.get(i+1)) {
+                       DI.add(D.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aU : U) {
+                           if ((aU > U.get(j)) && (aU < D.get(i+1))) {
+                               ind.add(aU);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           UI.add(U.get(j));
+                           j++;
+                       } else {
+                           UI.add(ind.get(ind.size()-1));
+                           j = ind.get(ind.size()-1)+1;
+                       }
+                       i++;
+                   } else if (D.get(i) < U.get(j) && U.get(j) > D.get(i+1)) {
+                       UI.add(U.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aD : D) {
+                           if ((aD > D.get(i)) && (aD < U.get(j))) {
+                               ind.add(aD);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           DI.add(D.get(i));
+                           i++;
+                       } else {
+                           DI.add(ind.get(ind.size()-1));
+                           i = ind.get(ind.size()-1)+1;
+                       }
+                       j++;
+                   }
+               }
+            }
+        }
+
+        if (UI.size() ==0 && DI.size() == 0) {
+            return result;
+        }
+        if (UI.get(0) < DI.get(0)) {
+            UI.remove(0);
+        }
+
+        minimumLength = Math.min(UI.size(),DI.size());
+        while(UI.size() > minimumLength) {
+            UI.remove(UI.size()-1);
+        }
+        while(DI.size() > minimumLength) {
+            DI.remove(DI.size()-1);
+        }
+
+
+        ArrayList<Integer> DownIntercept = new ArrayList<>();
+        ArrayList<Integer> UpIntercept = new ArrayList<>();
+        double fr;
+        for(int ii=0; ii<DI.size()-1; ii++) {
+            fr = 60000.0 / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
+            if (fr >= 8.0 && fr <= 65) {
+                DownIntercept.add(DI.get(ii));
+                UpIntercept.add(UI.get(ii));
+            }
+        }
+
+
+        ArrayList<Integer> DownIntercept2 = new ArrayList<>();
+        ArrayList<Integer> UpIntercept2 = new ArrayList<>();
+        double equivalentSamplePoints = 8.0/20.0 * sensorConfig.getFrequency("RIP");
+        double upToDownDistance;
+        for(int ii=0; ii<DownIntercept.size()-1; ii++) {
+            upToDownDistance = DownIntercept.get(ii+1)-UpIntercept.get(ii)+1;
+            if(upToDownDistance > equivalentSamplePoints) {
+                UpIntercept2.add(UpIntercept.get(ii));
+                DownIntercept2.add(DownIntercept.get(ii));
+            }
+        }
+
+
+        result.UI = new int[UpIntercept2.size()];
+        result.DI = new int[UpIntercept2.size()];
+        for(int ii=0; ii<UpIntercept2.size(); ii++) {
+            result.UI[ii] = UpIntercept2.get(ii);
+            result.DI[ii] = DownIntercept2.get(ii);
+        }
 
         return result;
     }

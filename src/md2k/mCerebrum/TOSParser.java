@@ -46,7 +46,7 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
         AUTOSENSE_PACKET tempPacket;
 
         String[] tokens;
-        int[] data = new int[]{0, 0, 0, 0, 0};
+        int[] data;
         long timestamp;
         int channelID;
 
@@ -58,6 +58,7 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
                 tokens = scanner.nextLine().split(",");
                 channelID = Integer.parseInt(tokens[0]);
                 timestamp = Long.parseLong(tokens[6]);
+                data = new int[]{0, 0, 0, 0, 0};
                 for (int i = 1; i < 6; i++) {
                     data[i - 1] = Integer.parseInt(tokens[i]);
                 }
