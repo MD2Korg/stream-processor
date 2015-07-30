@@ -79,7 +79,7 @@ public class ECGFeatures {
             }
 
 
-            Lomb HRLomb = lomb(rrDatapoints); //TODO: I don't think this is supposed to be on RR intervals.  Please confirm/deny
+            Lomb HRLomb = lomb(rrDatapoints); //TODO: I don't think this is supposed to be on RR intervals.  Please confirm/deny, or at least on 60 second windows of them.
 
             LombLowHighFrequencyEnergyRatio = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
             LombLowFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
@@ -192,15 +192,7 @@ public class ECGFeatures {
                         double beat_diff_pre = Math.abs(valid_rrInterval.get(i - 1) - valid_rrInterval.get(i));
                         double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i + 1));
 
-                        if (prev_beat_bad && beat_diff_prevGood < CBD) {
-                            for (int j = 0; j < timestamp.length; j++) {
-                                if (timestamp[j] == valid_timestamp.get(i)) {
-                                    outlier.set(j, AUTOSENSE.G_QUALITY_GOOD);
-                                }
-                            }
-                            prev_beat_bad = false;
-                            standard_rrInterval = valid_rrInterval.get(i);
-                        } else if (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD) {
+                        if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
                             for (int j = 0; j < timestamp.length; j++) {
                                 if (timestamp[j] == valid_timestamp.get(i)) {
                                     outlier.set(j, AUTOSENSE.G_QUALITY_GOOD);
@@ -267,7 +259,7 @@ public class ECGFeatures {
         ArrayList<Integer> pkt = new ArrayList<>();
         ArrayList<Double> valuepks = new ArrayList<>();
         for (int i = 2; i < y5.length - 2; i++) {
-            if (y5[i - 2] < y5[i - 1] && y5[i - 1] < y5[i] && y5[i] < y5[i + 1] && y5[i + 1] < y5[i + 2]) {
+            if (y5[i - 2] < y5[i - 1] && y5[i - 1] < y5[i] && y5[i] >= y5[i + 1] && y5[i + 1] > y5[i + 2]) {
                 pkt.add(i);
                 valuepks.add(y5[i]);
             }
@@ -292,9 +284,15 @@ public class ECGFeatures {
         while (i < pkt.size()) {
             if (Rpeak_temp1.size() == 0) {
                 if (y5[pkt.get(i)] >= thr1 && y5[pkt.get(i)] < (3.0 * sig_lev)) {
-                    Rpeak_temp1.add(pkt.get(i));
+                    if(Rpeak_temp1.size() <= c1) {
+                        Rpeak_temp1.add(0);
+                    }
+                    Rpeak_temp1.set(c1,pkt.get(i));
                     sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
-                    c2.add(i);
+                    if(c2.size() <= c1) {
+                        c2.add(0);
+                    }
+                    c2.set(c1,i);
                     c1 += 1;
                 } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
                     noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
@@ -306,11 +304,11 @@ public class ECGFeatures {
 
                 rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
             } else {
-                if (((pkt.get(i) - pkt.get(c2.get(c1 - 2))) > 1.66 * rr_ave) && (i - c2.get(c1 - 2)) > 1) { //TODO: This code block is broken.  Decipher how the pkt, c1, and c2 variables interact.  Indexing problems right now.
+                if (((pkt.get(i) - pkt.get(c2.get(c1 - 1))) > 1.66 * rr_ave) && (i - c2.get(c1 - 1)) > 1) {
                     ArrayList<Double> searchback_array_inrange = new ArrayList<>();
                     ArrayList<Integer> searchback_array_inrange_index = new ArrayList<>();
 
-                    for (int j = c2.get(c1 - 2) + 1; j < i - 1; j++) {
+                    for (int j = c2.get(c1 - 1) + 1; j < i - 1; j++) {
                         if (valuepks.get(i) < 3.0 * sig_lev && valuepks.get(i) > thr2) {
                             searchback_array_inrange.add(valuepks.get(i));
                             searchback_array_inrange_index.add(j - c2.get(c1 - 1));
@@ -318,16 +316,22 @@ public class ECGFeatures {
                     }
 
                     if (searchback_array_inrange.size() > 0) {
-                        double searchback_max = -1e9;
-                        int searchback_max_index = -999999;
+                        double searchback_max = searchback_array_inrange.get(0);
+                        int searchback_max_index = 0;
                         for (int j = 0; j < searchback_array_inrange.size(); j++) {
                             if (searchback_array_inrange.get(j) > searchback_max) {
                                 searchback_max = searchback_array_inrange.get(i);
                                 searchback_max_index = j;
                             }
                         }
-                        Rpeak_temp1.add(pkt.get(c2.get(c1 - 2)) + searchback_array_inrange_index.get(searchback_max_index));
+                        if(Rpeak_temp1.size() >= c1) {
+                            Rpeak_temp1.add(0);
+                        }
+                        Rpeak_temp1.set(c1,pkt.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
                         sig_lev = 0.125 * y5[Rpeak_temp1.get(c1 - 1)] + 0.875 * sig_lev;
+                        if(c1 >= c2.size()) {
+                            c2.add(0);
+                        }
                         c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
                         i = c2.get(c1 - 1) + 1;
                         c1 += 1;
@@ -337,9 +341,15 @@ public class ECGFeatures {
                         continue;
                     }
                 } else if (y5[pkt.get(i)] >= thr1 && y5[pkt.get(i)] < 3.0 * sig_lev) {
-                    Rpeak_temp1.add(pkt.get(i));
+                    if(Rpeak_temp1.size() >= c1) {
+                        Rpeak_temp1.add(0);
+                    }
+                    Rpeak_temp1.set(c1,pkt.get(i));
                     sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
-                    c2.add(i);
+                    if(c2.size() <= c1) {
+                        c2.add(0);
+                    }
+                    c2.set(c1,i);
                     c1 += 1;
                 } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
                     noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
@@ -388,7 +398,7 @@ public class ECGFeatures {
             try {
                 for (int j = 1; j < Rpeak_temp2.size(); j++) {
                     if ((Rpeak_temp2.get(j) - Rpeak_temp2.get(j - 1)) < (0.5 * frequency)) {
-                        Rpeak_temp2.set(j + eli_index.get(j - 1) - 1, -9999999); //TODO: Broken indexing.  What is the desired behavior here and in the Matlab code?  This is a hack to workaround the Matlab implementation.
+                        Rpeak_temp2.set(j + eli_index.get(j - 1) - 1, -9999999);
                     }
                 }
             } catch (Exception e) {
@@ -429,6 +439,12 @@ public class ECGFeatures {
         return result;
     }
 
+    /**
+     * @param sample
+     * @param filter
+     * @param normalizePercentile
+     * @return
+     */
     private static double[] applyFilterNormalize(double[] sample, double[] filter, int normalizePercentile) {
         double[] result = conv(sample, filter);
         DescriptiveStatistics statsY2 = new DescriptiveStatistics();
@@ -442,10 +458,15 @@ public class ECGFeatures {
         return result;
     }
 
+    /**
+     * @param sample
+     * @param normalizePercentile
+     * @return
+     */
     private static double[] applySquareFilterNormalize(double[] sample, int normalizePercentile) {
         double[] result = new double[sample.length];
         DescriptiveStatistics statsY2 = new DescriptiveStatistics();
-        for (double d : result) {
+        for (double d : sample) {
             statsY2.addValue(d*d);
         }
         for (int i = 0; i < result.length; i++) {
