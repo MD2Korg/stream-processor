@@ -5,6 +5,7 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Intercepts;
 import md2k.mCerebrum.cStress.Structs.MaxMin;
 import md2k.mCerebrum.cStress.Structs.PeakValley;
+import org.apache.commons.math3.analysis.function.Exp;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -74,51 +75,45 @@ public class RIPFeatures {
         sensorConfig = sc;
 
 
-        PeakValley pvData = peakvalley_v2(rip);
-
-        ArrayList<DataPoint[]> windowedData = window(rip, pvData);
-
-        for (DataPoint[] darray : windowedData) {
-            DescriptiveStatistics statsSeg = new DescriptiveStatistics();
-            for (DataPoint d : darray) {
-                statsSeg.addValue(d.value);
-            }
-            double min = statsSeg.getMin();
-            double max = statsSeg.getMax();
-
-            //double median = ripMedian; //TODO: Is this the correct way to get median?  Currently it is using mean from a daily stats tracker.
-
-            //TODO: This doesn't appear to be correct.  See peakvalley_v2.m
-            int peakindex = 0;
-            double peakValue = -1e9;
-            for (int i = 0; i < darray.length; i++) {
-                if (darray[i].value > peakValue) {
-                    peakindex = i;
-                }
-            }
-
-            InspDuration.addValue(darray[peakindex].timestamp - darray[0].timestamp);
-            ExprDuration.addValue(darray[darray.length].timestamp - darray[peakindex].timestamp);
-            RespDuration.addValue(darray[darray.length].timestamp - darray[0].timestamp);
-            Stretch.addValue(max - min); //TODO: Verify what this is: BreathStretchCalculate.m
-            IERatio.addValue((darray[peakindex].timestamp - darray[0].timestamp) / (darray[darray.length].timestamp - darray[peakindex].timestamp));
-
-            //RSA.addValue(rsaCalculateCycle(darray, ecg) );
+        PeakValley pvData = peakvalley_v2(rip); //There is no trailing valley in this output.
 
 
+        for(int i=0; i<pvData.valleyIndex.size()-1; i++) {
+
+            InspDuration.addValue(rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp);
+            ExprDuration.addValue(rip[pvData.valleyIndex.get(i+1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp);
+            RespDuration.addValue(rip[pvData.valleyIndex.get(i+1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp);
+            Stretch.addValue(rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value);
+            IERatio.addValue(InspDuration.getElement((int)InspDuration.getN()-1)-ExprDuration.getElement((int)ExprDuration.getN()-1));
+            RSA.addValue(rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i+1)].timestamp, ecg) );
         }
 
 
     }
 
-    public  ArrayList<DataPoint[]> window(DataPoint[] rip, PeakValley peakvalley) {
-        ArrayList<DataPoint[]> result = new ArrayList<>();
+    private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {
+        ArrayList<Integer> cInd = new ArrayList<>();
+        for(int i=0; i<ecg.RRStatsTimestamps.size(); i++) {
+            if (ecg.RRStatsTimestamps.get(i)>=starttime && ecg.RRStatsTimestamps.get(i)<endtime) {
+                cInd.add(i);
+            }
+        }
 
-        //TODO: Windowing code here
+        double max = ecg.RRStats.getElement(cInd.get(0));
+        double min = ecg.RRStats.getElement(cInd.get(0));
 
+        for(int i=0; i<cInd.size(); i++) {
+            if (ecg.RRStats.getElement(i) > max) {
+                max = ecg.RRStats.getElement(i);
+            }
+            if (ecg.RRStats.getElement(i) < min) {
+                min = ecg.RRStats.getElement(i);
+            }
+        }
 
-        return result;
+        return max-min;
     }
+
 
     public  PeakValley peakvalley_v2(DataPoint[] rip) {
 
@@ -147,7 +142,7 @@ public class RIPFeatures {
         ArrayList<Integer> peakIndex = new ArrayList<>();
         ArrayList<Integer> valleyIndex = new ArrayList<>();
 
-        for (int i = 0; i < UI.length; i++) {
+        for (int i = 0; i < DI.length-1; i++) {
 
             int peakindex = 0;
             double peakValue = -1e9;
@@ -179,20 +174,17 @@ public class RIPFeatures {
         }
 
         double[] inspirationAmplitude = new double[valleyIndex.size()];
-        double[] expirationAmplitude = new double[valleyIndex.size()];
+        double[] expirationAmplitude;
 
         double meanInspirationAmplitude = 0.0;
-        double meanExpirationAmplitude = 0.0;
+        double meanExpirationAmplitude;
 
         for (int i = 0; i < valleyIndex.size() - 1; i++) {
             inspirationAmplitude[i] = sample[peakIndex.get(i)].value - sample[valleyIndex.get(i)].value;
-            expirationAmplitude[i] = Math.abs(sample[valleyIndex.get(i + 1)].value - sample[peakIndex.get(i)].value);
 
             meanInspirationAmplitude += inspirationAmplitude[i];
-            meanExpirationAmplitude += expirationAmplitude[i];
         }
         meanInspirationAmplitude /= (valleyIndex.size() - 1);
-        meanExpirationAmplitude /= (valleyIndex.size() - 1);
 
         ArrayList<Integer> finalPeakIndex = new ArrayList<>();
         ArrayList<Integer> finalValleyIndex = new ArrayList<>();
@@ -203,6 +195,17 @@ public class RIPFeatures {
                 finalValleyIndex.add(valleyIndex.get(i));
             }
         }
+
+
+        expirationAmplitude = new double[finalValleyIndex.size()-1];
+        meanExpirationAmplitude = 0.0;
+        for(int i=0; i<finalValleyIndex.size()-1; i++) {
+            expirationAmplitude[i] = Math.abs(sample[finalValleyIndex.get(i+1)].value-sample[finalPeakIndex.get(i)].value);
+            meanExpirationAmplitude += expirationAmplitude[i];
+        }
+        meanExpirationAmplitude /= (finalValleyIndex.size()-1);
+
+
 
         ArrayList<Integer> resultPeakIndex = new ArrayList<>();
         ArrayList<Integer> resultValleyIndex = new ArrayList<>();
@@ -511,15 +514,5 @@ public class RIPFeatures {
 
         return result;
     }
-
-
-//    private double rsaCalculateCycle(DataPoint[] seg, ECGFeatures ecgFeatures) {
-//        //TODO: Fix me
-//
-//        DataPoint[] ecg_rr = ecgFeatures.computeRR();
-//
-//
-//        return 0;
-//    }
 
 }

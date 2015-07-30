@@ -36,6 +36,7 @@ import java.util.ArrayList;
 public class ECGFeatures {
 
     public DescriptiveStatistics RRStats;
+    public ArrayList<Long> RRStatsTimestamps;
 
     //Data inputs
     private final DataPoint[] datapoints;
@@ -61,10 +62,12 @@ public class ECGFeatures {
         if (computeRR()) {
 
             RRStats = new DescriptiveStatistics();
+            RRStatsTimestamps = new ArrayList<>();
 
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.G_QUALITY_GOOD) {
                     RRStats.addValue(rr_value[i]);
+                    RRStatsTimestamps.add(rr_timestamp[i]);
                 }
             }
 
@@ -132,9 +135,9 @@ public class ECGFeatures {
         for (int i = 0; i < rr_outlier.length; i++) {
             if (rr_outlier[i] == 0) {
                 if (Math.abs(rr_value[i] - mu) > (3.0 * sigma)) {
-                    rr_outlier[i] = 1;
+                    rr_outlier[i] = AUTOSENSE.G_QUALITY_NOISE;
                 } else {
-                    rr_outlier[i] = 0;
+                    rr_outlier[i] = AUTOSENSE.G_QUALITY_GOOD;
                 }
             }
         }
@@ -240,8 +243,6 @@ public class ECGFeatures {
      * @return Indexes of R-peaks
      */
     public static long[] detect_Rpeak(DataPoint[] datapoints, double frequency) {
-        //TODO: Errors to be resolved
-
         double[] sample = new double[datapoints.length];
         double[] timestamps = new double[datapoints.length];
         for (int i = 0; i < sample.length; i++) {
@@ -253,53 +254,15 @@ public class ECGFeatures {
 
         double thr1 = 0.5;
         double f = 2.0 / frequency;
-        double delp = 0.02;
-        double dels1 = 0.02;
-        double dels2 = 0.02;
         double[] F = {0.0, 4.5 * f, 5.0 * f, 20.0 * f, 20.5 * f, 1};
         double[] A = {0, 0, 1, 1, 0, 0};
-        double[] w = {500.0 / dels1, 1.0 / delp, 500 / dels2};
+        double[] w = {500.0 / 0.02, 1.0 / 0.02, 500 / 0.02};
         double fl = 256;
-        double[] b = firls(fl, F, A, w);
 
-        double[] y2 = conv(sample, b);
-        DescriptiveStatistics statsY2 = new DescriptiveStatistics();
-        for (double d : y2) {
-            statsY2.addValue(d);
-        }
-        for (int i = 0; i < y2.length; i++) {
-            y2[i] /= statsY2.getPercentile(90);
-        }
-
-        double[] h_D = {-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0};
-        double[] y3 = conv(y2, h_D);
-        DescriptiveStatistics statsY3 = new DescriptiveStatistics();
-        for (double d : y3) {
-            statsY3.addValue(d);
-        }
-        for (int i = 0; i < y3.length; i++) {
-            y3[i] /= statsY3.getPercentile(90);
-        }
-
-        double[] y4 = new double[y3.length];
-        DescriptiveStatistics statsY4 = new DescriptiveStatistics();
-        for (int i = 0; i < y3.length; i++) {
-            y4[i] = y3[i] * y3[i];
-            statsY4.addValue(y4[i]);
-        }
-        for (int i = 0; i < y4.length; i++) {
-            y4[i] /= statsY4.getPercentile(90);
-        }
-
-        double[] h_I = blackman(window_l);
-        double[] y5 = conv(y4, h_I);
-        DescriptiveStatistics statsY5 = new DescriptiveStatistics();
-        for (double d : y5) {
-            statsY5.addValue(d);
-        }
-        for (int i = 0; i < y5.length; i++) {
-            y5[i] /= statsY5.getPercentile(90);
-        }
+        double[] y2 = applyFilterNormalize(sample, firls(fl, F, A, w), 90);
+        double[] y3 = applyFilterNormalize(y2, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
+        double[] y4 = applySquareFilterNormalize(y3, 90);
+        double[] y5 = applyFilterNormalize(y4, blackman(window_l), 90);
 
         ArrayList<Integer> pkt = new ArrayList<>();
         ArrayList<Double> valuepks = new ArrayList<>();
@@ -320,9 +283,9 @@ public class ECGFeatures {
         double sig_lev = 4.0 * thr1;
         double noise_lev = 0.1 * sig_lev;
 
-        int c1 = 1;
+        int c1 = 0;
         ArrayList<Integer> c2 = new ArrayList<>();
-        int i = 1;
+        int i = 0;
         ArrayList<Integer> Rpeak_temp1 = new ArrayList<>();
 
 
@@ -383,7 +346,7 @@ public class ECGFeatures {
                 }
                 thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
                 thr2 = 0.5 * thr1;
-                i += 1;
+                i++;
                 rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
             }
         }
@@ -466,6 +429,33 @@ public class ECGFeatures {
         return result;
     }
 
+    private static double[] applyFilterNormalize(double[] sample, double[] filter, int normalizePercentile) {
+        double[] result = conv(sample, filter);
+        DescriptiveStatistics statsY2 = new DescriptiveStatistics();
+        for (double d : result) {
+            statsY2.addValue(d);
+        }
+        for (int i = 0; i < result.length; i++) {
+            result[i] /= statsY2.getPercentile(normalizePercentile);
+        }
+
+        return result;
+    }
+
+    private static double[] applySquareFilterNormalize(double[] sample, int normalizePercentile) {
+        double[] result = new double[sample.length];
+        DescriptiveStatistics statsY2 = new DescriptiveStatistics();
+        for (double d : result) {
+            statsY2.addValue(d*d);
+        }
+        for (int i = 0; i < result.length; i++) {
+            result[i] = statsY2.getElement(i) / statsY2.getPercentile(normalizePercentile);
+        }
+
+        return result;
+    }
+
+
     /**
      *
      * @param rpeak_temp1
@@ -474,6 +464,10 @@ public class ECGFeatures {
      */
     public static double rr_ave_update(ArrayList<Integer> rpeak_temp1, double rr_ave) { //TODO: Is this supposed to be rr_avg_udpate?
         ArrayList<Integer> peak_interval = new ArrayList<>();
+
+        if (rpeak_temp1.size() == 0) {
+            return rr_ave;
+        }
 
         peak_interval.add(rpeak_temp1.get(0));
         for (int i = 1; i < rpeak_temp1.size(); i++) {
