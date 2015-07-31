@@ -1,1 +1,1 @@
-# cStress_Android
+# cStress - Java implementation for Android
