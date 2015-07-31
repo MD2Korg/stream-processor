@@ -338,22 +338,19 @@ public class cStress {
             RIPStats.add( (dp.value-RIPStats.getMean())/RIPStats.getStdev() ); //Normalize data values based on running statistics
         }
 
-
-        System.out.println(debugOutput());
-        if (accelerometerX.length >= 16 && accelerometerY.length >= 16 && accelerometerZ.length >= 16)
+        try {
+            System.out.println(debugOutput());
             accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"));
-
-        if (ecg.length >= 16)
             ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
-
-        if (rip.length >= 16)
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
 
+            StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, 0.339329059788);
+            System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
 
-        StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, 0.339329059788);
-        System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
-        //TODO: Do something with this output
-
+            //TODO: Do something with this output
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return 0.0;
     }
