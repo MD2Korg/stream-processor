@@ -154,73 +154,70 @@ public class ECGFeatures {
      */
     public static int[] detect_outlier_v2(double[] sample, long[] timestamp) {
         ArrayList<Integer> outlier = new ArrayList<>();
-        //TODO: Errors to be resolved
-        try {
-            if (timestamp.length != 0) {
-                ArrayList<Double> valid_rrInterval = new ArrayList<>();
-                ArrayList<Long> valid_timestamp = new ArrayList<>();
-                DescriptiveStatistics valid_rrInterval_stats = new DescriptiveStatistics();
-                for (int i = 0; i < sample.length; i++) {
-                    if (sample[i] > 0.3 && sample[i] < 2.0) {
-                        valid_rrInterval.add(sample[i]);
-                        valid_rrInterval_stats.addValue(sample[i]);
-                        valid_timestamp.add(timestamp[i]);
-                    }
-                }
-                DescriptiveStatistics diff_rrInterval = new DescriptiveStatistics();
-                for (int i = 1; i < valid_rrInterval.size(); i++) {
-                    diff_rrInterval.addValue(Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i - 1)));
-                }
-                double MED = 4.5 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
-                double MAD = (valid_rrInterval_stats.getPercentile(50) - 2.8 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
-                double CBD = (MED + MAD) / 2.0;
-                if (CBD < 0.2) {
-                    CBD = 0.2;
-                }
 
-                for (double aSample : sample) {
-                    outlier.add(AUTOSENSE.G_QUALITY_BAD);
+        if (timestamp.length != 0) {
+            ArrayList<Double> valid_rrInterval = new ArrayList<>();
+            ArrayList<Long> valid_timestamp = new ArrayList<>();
+            DescriptiveStatistics valid_rrInterval_stats = new DescriptiveStatistics();
+            for (int i = 0; i < sample.length; i++) {
+                if (sample[i] > 0.3 && sample[i] < 2.0) {
+                    valid_rrInterval.add(sample[i]);
+                    valid_rrInterval_stats.addValue(sample[i]);
+                    valid_timestamp.add(timestamp[i]);
                 }
-                outlier.set(0, AUTOSENSE.G_QUALITY_GOOD);
-                double standard_rrInterval = valid_rrInterval.get(0); //TODO: What to do on error case?
-                boolean prev_beat_bad = false;
-
-                for (int i = 1; i < valid_rrInterval.size() - 1; i++) {
-                    double ref = valid_rrInterval.get(i);
-                    if (ref > 0.3 && ref < 2.0) {
-                        double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rrInterval.get(i));
-                        double beat_diff_pre = Math.abs(valid_rrInterval.get(i - 1) - valid_rrInterval.get(i));
-                        double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i + 1));
-
-                        if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
-                            for (int j = 0; j < timestamp.length; j++) {
-                                if (timestamp[j] == valid_timestamp.get(i)) {
-                                    outlier.set(j, AUTOSENSE.G_QUALITY_GOOD);
-                                }
-                            }
-                            prev_beat_bad = false;
-                            standard_rrInterval = valid_rrInterval.get(i);
-                        } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
-                            prev_beat_bad = true;
-                        } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
-                            for (int j = 0; j < timestamp.length; j++) {
-                                if (timestamp[j] == valid_timestamp.get(i)) {
-                                    outlier.set(j, AUTOSENSE.G_QUALITY_GOOD);
-                                }
-                            }
-                            prev_beat_bad = false;
-                            standard_rrInterval = valid_rrInterval.get(i);
-                        } else if (!prev_beat_bad && beat_diff_pre > CBD) {
-                            prev_beat_bad = true;
-                        }
-
-                    }
-                }
-
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+            DescriptiveStatistics diff_rrInterval = new DescriptiveStatistics();
+            for (int i = 1; i < valid_rrInterval.size(); i++) {
+                diff_rrInterval.addValue(Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i - 1)));
+            }
+            double MED = 4.5 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
+            double MAD = (valid_rrInterval_stats.getPercentile(50) - 2.8 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
+            double CBD = (MED + MAD) / 2.0;
+            if (CBD < 0.2) {
+                CBD = 0.2;
+            }
+
+            for (double aSample : sample) {
+                outlier.add(AUTOSENSE.G_QUALITY_BAD);
+            }
+            outlier.set(0, AUTOSENSE.G_QUALITY_GOOD);
+            double standard_rrInterval = valid_rrInterval.get(0);
+            boolean prev_beat_bad = false;
+
+            for (int i = 1; i < valid_rrInterval.size() - 1; i++) {
+                double ref = valid_rrInterval.get(i);
+                if (ref > 0.3 && ref < 2.0) {
+                    double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rrInterval.get(i));
+                    double beat_diff_pre = Math.abs(valid_rrInterval.get(i - 1) - valid_rrInterval.get(i));
+                    double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i + 1));
+
+                    if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
+                        for (int j = 0; j < timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j, AUTOSENSE.G_QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
+                        prev_beat_bad = true;
+                    } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
+                        for (int j = 0; j < timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j, AUTOSENSE.G_QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (!prev_beat_bad && beat_diff_pre > CBD) {
+                        prev_beat_bad = true;
+                    }
+
+                }
+            }
+
         }
+
         int[] result = new int[outlier.size()];
         for (int i = 0; i < outlier.size(); i++) {
             result[i] = outlier.get(i);
@@ -376,16 +373,12 @@ public class ECGFeatures {
                 diffRpeak.add(Rpeak_temp2.get(j)-Rpeak_temp2.get(j-1));
             }
 
-            ArrayList<Integer> comp_index1 = new ArrayList<>();
-            ArrayList<Integer> comp_index2 = new ArrayList<>();
             ArrayList<Double> comp1 = new ArrayList<>();
             ArrayList<Double> comp2 = new ArrayList<>();
             ArrayList<Integer> eli_index = new ArrayList<>();
 
             for(int j=0; j<diffRpeak.size(); j++) {
                 if (diffRpeak.get(j) < (0.5*frequency)) {
-                    comp_index1.add(Rpeak_temp2.get(j));
-                    comp_index2.add(Rpeak_temp2.get(j+1));
                     comp1.add(sample[Rpeak_temp2.get(j)]);
                     comp2.add(sample[Rpeak_temp2.get(j + 1)]);
                     if (comp1.get(comp1.size()-1) < comp2.get(comp2.size()-1)) {
@@ -483,22 +476,22 @@ public class ECGFeatures {
 
         if (rpeak_temp1.size() == 0) {
             return rr_ave;
-        }
-
-        peak_interval.add(rpeak_temp1.get(0));
-        for (int i = 1; i < rpeak_temp1.size(); i++) {
-            peak_interval.add(rpeak_temp1.get(i) - rpeak_temp1.get(i - 1));
-        }
-
-        if (peak_interval.size() < 8) {
-            return rr_ave;
         } else {
-            double result = 0.0;
-            for (int i = peak_interval.size() - 8; i < peak_interval.size(); i++) {
-                result += peak_interval.get(i);
+            peak_interval.add(rpeak_temp1.get(0));
+            for (int i = 1; i < rpeak_temp1.size(); i++) {
+                peak_interval.add(rpeak_temp1.get(i) - rpeak_temp1.get(i - 1));
             }
-            result /= 8.0;
-            return result;
+
+            if (peak_interval.size() < 8) {
+                return rr_ave;
+            } else {
+                double result = 0.0;
+                for (int i = peak_interval.size() - 8; i < peak_interval.size(); i++) {
+                    result += peak_interval.get(i);
+                }
+                result /= 8.0;
+                return result;
+            }
         }
     }
 

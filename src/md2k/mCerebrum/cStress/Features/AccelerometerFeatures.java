@@ -116,9 +116,6 @@ public class AccelerometerFeatures {
 //    public double EndTimestamp;
 
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq) {
-
-        //TODO: 10 second.
-
         int windowSize = 10*1000;
 
         ArrayList<DataPoint[]> segxWindowed = window(segx,windowSize);
