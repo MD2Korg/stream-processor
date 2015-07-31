@@ -37,6 +37,8 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class RIPFeatures {
+    public double MinuteVolume;
+    public double BreathRate;
 
     //ripfeature_extraction.m
 
@@ -88,7 +90,13 @@ public class RIPFeatures {
             RSA.addValue(rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i+1)].timestamp, ecg) );
         }
 
+        BreathRate = pvData.valleyIndex.size();
 
+        MinuteVolume = 0.0;
+        for(int i=0; i<pvData.valleyIndex.size(); i++) {
+            MinuteVolume += (rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) / 1000.0 * (rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value) / 2.0;
+        }
+        MinuteVolume *= pvData.valleyIndex.size();
     }
 
     private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {

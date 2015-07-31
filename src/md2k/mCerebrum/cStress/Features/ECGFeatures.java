@@ -79,7 +79,7 @@ public class ECGFeatures {
             }
 
 
-            Lomb HRLomb = lomb(rrDatapoints); //TODO: I don't think this is supposed to be on RR intervals.  Please confirm/deny, or at least on 60 second windows of them.
+            Lomb HRLomb = lomb(rrDatapoints);
 
             LombLowHighFrequencyEnergyRatio = heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
             LombLowFrequencyEnergy = heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);

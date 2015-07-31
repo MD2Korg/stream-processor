@@ -220,12 +220,12 @@ public class cStress {
          /*
          *RIP - Breath-rate
          */
-        double RIP_Breath_Rate = 0.0;
+        double RIP_Breath_Rate = ripFeatures.BreathRate;
 
          /*
          *RIP - Inspiration Minute Volume
          */
-        double RIP_Inspiration_Minute_Volume = 0.0;
+        double RIP_Inspiration_Minute_Volume = ripFeatures.MinuteVolume;
 
          /*
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
@@ -233,10 +233,10 @@ public class cStress {
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
          */
-        double RSA_Quartile_Deviation = 0.0;
-        double RSA_Mean = 0.0;
-        double RSA_Median = 0.0;
-        double RSA_80thPercentile = 0.0;
+        double RSA_Quartile_Deviation = (ecgFeatures.RRStats.getPercentile(75) - ecgFeatures.RRStats.getPercentile(25) ) / 2.0;
+        double RSA_Mean = ecgFeatures.RRStats.getMean();
+        double RSA_Median = ecgFeatures.RRStats.getPercentile(50);
+        double RSA_80thPercentile = ecgFeatures.RRStats.getPercentile(80);
 
 
         double[] featureVector = {
@@ -287,7 +287,7 @@ public class cStress {
         };
 
 
-        featureVector = normalizeFV(featureVector);
+        featureVector = normalizeFV(featureVector); //TODO: Is this using winsorization?
 
         if (!activityCheck(accelFeatures)) {
             //SVM evaluation
@@ -339,7 +339,7 @@ public class cStress {
         }
 
         try {
-            System.out.println(debugOutput());
+            System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
             accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"));
             ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
@@ -369,11 +369,6 @@ public class cStress {
         result.toArray(dpArray);
         return dpArray;
     }
-
-    private String debugOutput() {
-        return "SIZES: " + this.ECG.size() + ", " + this.RIP.size() + ", " + this.ACCELX.size() + ", " + this.ACCELY.size() + ", " + this.ACCELZ.size();
-    }
-
 
     public void add(AUTOSENSE_PACKET ap) {
 
