@@ -76,6 +76,10 @@ public class RIPFeatures {
 
         sensorConfig = sc;
 
+        //TS correction here...
+        //Data Quality here...
+        //Interpolation...
+        //TODO: winsorization using activity input? Insp, Expr, Stretch, MinuteVentilation(Volume)
 
         PeakValley pvData = peakvalley_v2(rip); //There is no trailing valley in this output.
 

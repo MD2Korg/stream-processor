@@ -59,6 +59,12 @@ public class ECGFeatures {
         datapoints = dp;
         frequency = freq;
 
+
+        //TS correction here...
+        //Data Quality here...
+        //Interpolation...
+        //TODO: winsorization using activity input? RR-interval
+
         if (computeRR()) {
 
             RRStats = new DescriptiveStatistics();

@@ -639,7 +639,6 @@ public class AccelerometerFeatures {
     }
 
     public boolean activityAnalysis(double cutoff) {
-        //cutoff = 0.21348
 
         double[] accelFeature = this.StdevMagnitude;
 

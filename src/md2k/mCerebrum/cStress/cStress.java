@@ -287,7 +287,7 @@ public class cStress {
         };
 
 
-        featureVector = normalizeFV(featureVector); //TODO: Is this using winsorization?
+        featureVector = normalizeFV(featureVector);
 
         if (!activityCheck(accelFeatures)) {
             //SVM evaluation
