@@ -349,7 +349,7 @@ public class ECGFeatures {
                     if(c2.size() <= c1) {
                         c2.add(0);
                     }
-                    c2.set(c1,i);
+                    c2.set(c1, i);
                     c1 += 1;
                 } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
                     noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
@@ -371,45 +371,40 @@ public class ECGFeatures {
 
         while (!difference) {
             int length_Rpeak_temp2 = Rpeak_temp2.size();
+            ArrayList<Integer> diffRpeak = new ArrayList<>();
+            for(int j=1; j<Rpeak_temp2.size(); j++) {
+                diffRpeak.add(Rpeak_temp2.get(j)-Rpeak_temp2.get(j-1));
+            }
+
             ArrayList<Integer> comp_index1 = new ArrayList<>();
             ArrayList<Integer> comp_index2 = new ArrayList<>();
             ArrayList<Double> comp1 = new ArrayList<>();
             ArrayList<Double> comp2 = new ArrayList<>();
-
-            for (int j = 1; j < Rpeak_temp2.size(); j++) {
-                if ((Rpeak_temp2.get(j) - Rpeak_temp2.get(j - 1)) < (0.5 * frequency))
-                    comp_index1.add(Rpeak_temp2.get(j - 1));
-                comp_index2.add(Rpeak_temp2.get(j));
-            }
-            for (int j = 0; j < comp_index1.size(); j++) {
-                comp1.add(sample[comp_index1.get(j)]);
-                comp2.add(sample[comp_index2.get(j)]);
-            }
             ArrayList<Integer> eli_index = new ArrayList<>();
-            for (int j = 0; j < comp1.size(); j++) {
-                if (comp1.get(j) < comp2.get(j)) {
-                    eli_index.add(0);
+
+            for(int j=0; j<diffRpeak.size(); j++) {
+                if (diffRpeak.get(j) < (0.5*frequency)) {
+                    comp_index1.add(Rpeak_temp2.get(j));
+                    comp_index2.add(Rpeak_temp2.get(j+1));
+                    comp1.add(sample[Rpeak_temp2.get(j)]);
+                    comp2.add(sample[Rpeak_temp2.get(j + 1)]);
+                    if (comp1.get(comp1.size()-1) < comp2.get(comp2.size()-1)) {
+                        eli_index.add(0);
+                    } else {
+                        eli_index.add(1);
+                    }
                 } else {
-                    eli_index.add(1);
+                    eli_index.add(-999999);
                 }
             }
 
-            ArrayList<Integer> temp = new ArrayList<>();
-            try {
-                for (int j = 1; j < Rpeak_temp2.size(); j++) {
-                    if ((Rpeak_temp2.get(j) - Rpeak_temp2.get(j - 1)) < (0.5 * frequency)) {
-                        Rpeak_temp2.set(j + eli_index.get(j - 1) - 1, -9999999);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            for (Integer aRpeak_temp2 : Rpeak_temp2) {
-                if (aRpeak_temp2 != -9999999) {
-                    temp.add(aRpeak_temp2);
+            for(int j=0; j<diffRpeak.size(); j++) {
+                if (diffRpeak.get(j) < (0.5*frequency)) {
+                    Rpeak_temp2.set(j+eli_index.get(j), -999999);
                 }
             }
-            Rpeak_temp2 = temp;
+
+            Rpeak_temp2.removeIf(s -> s == -999999);
 
             difference = length_Rpeak_temp2 == Rpeak_temp2.size();
 
