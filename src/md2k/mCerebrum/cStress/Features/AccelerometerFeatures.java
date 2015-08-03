@@ -115,7 +115,7 @@ public class AccelerometerFeatures {
      * @param segz
      * @param samplingFreq
      */
-    public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq) {
+    public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq, RunningStatistics MagnitudeStats) {
         int windowSize = 10*1000;
 
         ArrayList<DataPoint[]> segxWindowed = window(segx,windowSize);
@@ -272,6 +272,7 @@ public class AccelerometerFeatures {
             DescriptiveStatistics statsMagnitude = new DescriptiveStatistics();
             for (double d : magnitude) {
                 statsMagnitude.addValue(d);
+                MagnitudeStats.add(d);
             }
 //        double avgMagnitude = statsMagnitude.getPercentile(50);
             stdMagnitudeArray.add(statsMagnitude.getStandardDeviation());
@@ -281,7 +282,7 @@ public class AccelerometerFeatures {
             StdevMagnitude[i] = stdMagnitudeArray.get(i);
         }
 
-        this.Activity = activityAnalysis(0.21348); //From Autosense Matlab code
+        this.Activity = activityAnalysis(this.StdevMagnitude, MagnitudeStats); //From Autosense Matlab code
 
 
 //        int NFFT = nextPower2(magnitude.length);
@@ -638,23 +639,15 @@ public class AccelerometerFeatures {
         return result;
     }
 
-    public boolean activityAnalysis(double cutoff) {
+    public boolean activityAnalysis(double[] accelFeature, RunningStatistics magnitudeStats) {
 
-        double[] accelFeature = this.StdevMagnitude;
-
-        double cutoff1 = 0.0; //1st percentile of accelFeature //TODO: Running stats?
-        double cutoff2 = 100.0; //99th percentile of accelFeature //TODO: Running stats?
-
-        DescriptiveStatistics afStats = new DescriptiveStatistics();
-        for(double d: accelFeature) {
-            afStats.addValue(d);
-        }
-
+        double lowlimit = magnitudeStats.getMean() - 3.0 * magnitudeStats.getStdev(); //Using this instead of percentile01
+        double highlimit = magnitudeStats.getMean() + 3.0 * magnitudeStats.getStdev(); //Using this instead of percentile99
+        double range = highlimit-lowlimit;
 
         boolean[] activityOrNot = new boolean[accelFeature.length];
         for(int i=0; i<accelFeature.length; i++) {
-            accelFeature[i] = (accelFeature[i]-cutoff2) / (afStats.getMax()-cutoff1);
-            activityOrNot[i] = accelFeature[i] > cutoff;
+            activityOrNot[i] = accelFeature[i] > (lowlimit + 0.35 * range);
         }
 
         int minActive = 0;
