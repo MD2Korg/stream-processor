@@ -61,6 +61,10 @@ public class cStress {
     // An EWMA-based solution may need to be added to seed the new day with appropriate information
     RunningStatistics ECGStats;
     RunningStatistics RIPStats;
+    RunningStatistics AccelXStats;
+    RunningStatistics AccelYStats;
+    RunningStatistics AccelZStats;
+    RunningStatistics MagnitudeStats;
 
     SensorConfiguration sensorConfig;
 
@@ -77,6 +81,11 @@ public class cStress {
         this.windowSize = windowSize;
         this.ECGStats = new RunningStatistics();
         this.RIPStats = new RunningStatistics();
+        this.AccelXStats = new RunningStatistics();
+        this.AccelYStats = new RunningStatistics();
+        this.AccelZStats = new RunningStatistics();
+        this.MagnitudeStats = new RunningStatistics();
+
         config();
         resetBuffers();
 
@@ -333,15 +342,44 @@ public class cStress {
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
         for (DataPoint dp : ecg) {
-            ECGStats.add( (dp.value-ECGStats.getMean())/ECGStats.getStdev() ); //Normalize data values based on running statistics
+            ECGStats.add(dp.value);
         }
         for (DataPoint dp : rip) {
-            RIPStats.add( (dp.value-RIPStats.getMean())/RIPStats.getStdev() ); //Normalize data values based on running statistics
+            RIPStats.add(dp.value);
         }
+        for (DataPoint dp : accelerometerX) {
+            AccelXStats.add(dp.value);
+        }
+        for (DataPoint dp : accelerometerY) {
+            AccelYStats.add(dp.value);
+        }
+        for (DataPoint dp : accelerometerZ) {
+            AccelZStats.add(dp.value);
+        }
+
+        //Normalize
+        for (int i=0; i<ecg.length; i++) {
+            ecg[i].value = (ecg[i].value-ECGStats.getMean()) / (ECGStats.getStdev());
+        }
+        for (int i=0; i<rip.length; i++) {
+            rip[i].value = (rip[i].value-RIPStats.getMean()) / (RIPStats.getStdev());
+        }
+        for (int i=0; i<accelerometerX.length; i++) {
+            accelerometerX[i].value = (accelerometerX[i].value-AccelXStats.getMean()) / (AccelXStats.getStdev());
+        }
+        for (int i=0; i<accelerometerY.length; i++) {
+            accelerometerY[i].value = (accelerometerY[i].value-AccelYStats.getMean()) / (AccelYStats.getStdev());
+        }
+        for (int i=0; i<accelerometerZ.length; i++) {
+            accelerometerZ[i].value = (accelerometerZ[i].value-AccelZStats.getMean()) / (AccelZStats.getStdev());
+        }
+
+
+
 
         try {
             System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
-            accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"));
+            accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"), MagnitudeStats);
             ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
 
