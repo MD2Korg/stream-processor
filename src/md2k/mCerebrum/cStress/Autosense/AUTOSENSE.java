@@ -59,5 +59,7 @@ public class AUTOSENSE {
     public static final int G_QUALITY_BAND_OFF = 3;
     public static final int G_QUALITY_BAD = 2;
 
+    public static final int MAX_SEQ_SIZE = 4096;
+
 
 }

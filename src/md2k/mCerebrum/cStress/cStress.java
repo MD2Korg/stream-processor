@@ -14,6 +14,7 @@ import md2k.mCerebrum.cStress.Structs.StressProbability;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -325,11 +326,11 @@ public class cStress {
 
     public double process() {
 
-        DataPoint[] accelerometerX = generateDataPointArray(ACCELX, sensorConfig.getFrequency("ACCELX"));
-        DataPoint[] accelerometerY = generateDataPointArray(ACCELY, sensorConfig.getFrequency("ACCELY"));
-        DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ, sensorConfig.getFrequency("ACCELZ"));
-        DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
-        DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
+        DataPoint[] accelerometerX = generateDataPointArray(ACCELX);
+        DataPoint[] accelerometerY = generateDataPointArray(ACCELY);
+        DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ);
+        DataPoint[] ecg = generateDataPointArray(ECG,);
+        DataPoint[] rip = generateDataPointArray(RIP);
 
         for (DataPoint dp : ecg) {
             ECGStats.add( (dp.value-ECGStats.getMean())/ECGStats.getStdev() ); //Normalize data values based on running statistics
@@ -356,18 +357,35 @@ public class cStress {
     }
 
 
-    private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data, double frequency) {
-        ArrayList<DataPoint> result = new ArrayList<>();
+    private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data) {
 
-        for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
-            for (int i = 0; i < 5; i++) {
-                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency)); //TODO: Fix this to be something more realistic
-                result.add(dp);
+        int vectorSize = (( data.get(data.size()-1).seq - data.get(0).seq ) % AUTOSENSE.MAX_SEQ_SIZE) + 1;
+
+        DataPoint[] result = new DataPoint[vectorSize];
+
+        int count =0;
+        int currentSeqNum = data.get(0).seq;
+        for(AUTOSENSE_PACKET ap : data) {
+            while(currentSeqNum != ap.seq) { //Identify next received sequence number, skip the missing data.
+                currentSeqNum = (currentSeqNum + 1) % AUTOSENSE.MAX_SEQ_SIZE;
+                count += 5;
+            }
+            for(int j=count; j<count+5; j++) { //Populate the result array, accounting for missing data.
+                result[j] = new DataPoint(ap.data[j-count],ap.timestamp);
             }
         }
-        DataPoint[] dpArray = new DataPoint[result.size()];
-        result.toArray(dpArray);
-        return dpArray;
+
+        double expectedSampleTiming = (double)(data.get(data.size()-1).timestamp - data.get(0).timestamp) / ((data.size()*5)-4);
+
+        long startTime = result[4].timestamp;
+        for(int i=4; i>0; i--) { //Back propagate timing information from starttime based on sample timing
+            result[i].timestamp = startTime - (long)( (4-i) * expectedSampleTiming );
+        }
+        for(int i=5; i<result.length; i++) { //Propagate timing information from starttime based on sample timing through the last packet
+            result[i].timestamp = (long)((i-5)*expectedSampleTiming) + startTime;
+        }
+
+        return result;
     }
 
     public void add(AUTOSENSE_PACKET ap) {

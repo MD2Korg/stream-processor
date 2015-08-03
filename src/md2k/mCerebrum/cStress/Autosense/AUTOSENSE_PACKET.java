@@ -30,6 +30,7 @@ public class AUTOSENSE_PACKET {
 
     public long timestamp;
     public int channelID;
+    public int seq;
     public int[] data;
 
     public AUTOSENSE_PACKET(long timestamp, int channelID, int seq, int[] data) {
