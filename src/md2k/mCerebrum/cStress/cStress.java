@@ -310,9 +310,9 @@ public class cStress {
 
             stressResult.probability = svm.svm_predict(Model, data);
             if (stressResult.probability < bias) {
-                stressResult.label = 0; //Not-stressed label
+                stressResult.label = AUTOSENSE.NOT_STRESSED;
             } else {
-                stressResult.label = 1; //Stressed label
+                stressResult.label = AUTOSENSE.STRESSED;
             }
         }
 

@@ -44,5 +44,7 @@ public class AUTOSENSE {
     public static final int QUALITY_MISSING = 4;
     public static final int QUALITY_BAND_LOOSE = 2;
 
+    public static final int NOT_STRESSED = 0;
+    public static final int STRESSED = 1;
 
 }
