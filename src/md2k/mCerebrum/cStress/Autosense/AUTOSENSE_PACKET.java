@@ -32,10 +32,11 @@ public class AUTOSENSE_PACKET {
     public int channelID;
     public int[] data;
 
-    public AUTOSENSE_PACKET(long timestamp, int channelID, int[] data) {
+    public AUTOSENSE_PACKET(long timestamp, int channelID, int seq, int[] data) {
         this.timestamp = timestamp;
         this.channelID = channelID;
         this.data = data;
+        this.seq = seq;
     }
 
     public String toString() {
