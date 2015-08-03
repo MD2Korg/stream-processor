@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.tests;
 
-import md2k.mCerebrum.cStress.Features.ECGFeatures;
+import md2k.mCerebrum.cStress.Library;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,17 +11,17 @@ import static org.junit.Assert.*;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -75,7 +75,7 @@ public class ECGFeaturesTest {
         int windowLength = 10;
         trueBlackman10 = new double[]{ 0, 0.0509, 0.2580, 0.6300, 0.9511, 0.9511, 0.6300, 0.2580, 0.0509, 0};
 
-        result = ECGFeatures.blackman(windowLength);
+        result = Library.blackman(windowLength);
 
         sum = 0.0;
         for(int i=0; i<result.length; i++) {
@@ -85,7 +85,7 @@ public class ECGFeaturesTest {
 
         //Test window of length 0
         windowLength = 0;
-        result = ECGFeatures.blackman(windowLength);
+        result = Library.blackman(windowLength);
         assertArrayEquals(result,new double[0],1e-4);
     }
 
@@ -100,7 +100,7 @@ public class ECGFeaturesTest {
         double[] kernel = {1,0,1};
         double[] trueAnswer = {2,4,4,4,2};
 
-        double[] result = ECGFeatures.conv(signal,kernel);
+        double[] result = Library.conv(signal, kernel);
 
         assertArrayEquals(result,trueAnswer,1e-3);
     }

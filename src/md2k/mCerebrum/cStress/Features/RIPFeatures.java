@@ -1,11 +1,11 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.SensorConfiguration;
+import md2k.mCerebrum.cStress.Library;
+import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Intercepts;
 import md2k.mCerebrum.cStress.Structs.MaxMin;
 import md2k.mCerebrum.cStress.Structs.PeakValley;
-import org.apache.commons.math3.analysis.function.Exp;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -14,17 +14,17 @@ import java.util.ArrayList;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -129,7 +129,7 @@ public class RIPFeatures {
 
     public  PeakValley peakvalley_v2(DataPoint[] rip) {
 
-        DataPoint[] sample = smooth(rip, 5);
+        DataPoint[] sample = Library.smooth(rip, 5);
 
         int windowLength = (int) Math.round(8.0 * sensorConfig.getFrequency("RIP"));
 
@@ -168,7 +168,7 @@ public class RIPFeatures {
 
             DataPoint[] temp = new DataPoint[UI[i] - DI[i]];
             System.arraycopy(sample, DI[i], temp, 0, UI[i] - DI[i]);
-                MaxMin maxMinTab = localMaxMin(temp, 1);
+                MaxMin maxMinTab = Library.localMaxMin(temp, 1);
 
             if (maxMinTab.mintab.length == 0) {
                 int valleyindex = 0;
@@ -261,76 +261,6 @@ public class RIPFeatures {
         return result;
     }
 
-
-    public MaxMin localMaxMin(DataPoint[] temp, int delta) {
-        /*
-        %PEAKDET Detect peaks in a vector
-        %        [MAXTAB, MINTAB] = PEAKDET(V, DELTA) finds the local
-        %        maxima and minima ("peaks") in the vector V.
-        %        MAXTAB and MINTAB consists of two columns. Column 1
-        %        contains indices in V, and column 2 the found values.
-        %
-        %        With [MAXTAB, MINTAB] = PEAKDET(V, DELTA, X) the indices
-        %        in MAXTAB and MINTAB are replaced with the corresponding
-        %        X-values.
-        %
-        %        A point is considered a maximum peak if it has the maximal
-        %        value, and was preceded (to the left) by a value lower by
-        %        DELTA.
-
-        % Eli Billauer, 3.4.05 (Explicitly not copyrighted).
-        % Timothy Hnat <twhnat@memphis.edu>, Reimplemented in Java
-        % This function is released to the public domain; Any use is allowed.
-         */
-        MaxMin result = new MaxMin();
-        ArrayList<DataPoint> maxtab = new ArrayList<>();
-        ArrayList<DataPoint> mintab = new ArrayList<>();
-
-        double mn = 1e9;
-        double mx = -1e9;
-
-        boolean lookformax = true;
-
-        double tempvalue;
-        int mxpos = -1;
-        int mnpos = -1;
-
-        for (int x = 0; x < temp.length; x++) {
-            tempvalue = temp[x].value;
-            if (tempvalue > mx) {
-                mx = tempvalue;
-                mxpos = x;
-            }
-            if (tempvalue < mn) {
-                mn = tempvalue;
-                mnpos = x;
-            }
-
-            if (lookformax) {
-                if (tempvalue < mx - delta) {
-                    DataPoint d = new DataPoint(mx, mxpos);
-                    maxtab.add(d);
-                    mn = tempvalue;
-                    mnpos = x;
-                    lookformax = false;
-                }
-            } else {
-                if (tempvalue > mn + delta) {
-                    DataPoint d = new DataPoint(mn, mnpos);
-                    mintab.add(d);
-                    mx = tempvalue;
-                    mxpos = x;
-                    lookformax = true;
-                }
-            }
-        }
-
-
-        maxtab.toArray(result.maxtab);
-        mintab.toArray(result.mintab);
-
-        return result;
-    }
 
     /**
      * Intercept Outlier Detector
@@ -491,38 +421,6 @@ public class RIPFeatures {
             result.UI[ii] = UpIntercept2.get(ii);
             result.DI[ii] = DownIntercept2.get(ii);
         }
-
-        return result;
-    }
-
-    public  DataPoint[] smooth(DataPoint[] rip, int n) {
-        //Reimplementation of Matlab's smooth function
-        DataPoint[] result = new DataPoint[rip.length];
-
-        int windowSize = 1;
-        double sum;
-        for(int i=0; i<rip.length; i++) {
-            sum = 0.0;
-            int startingPoint;
-            if( (rip.length-i+1) < n ) {
-                startingPoint = rip.length-windowSize;
-            } else {
-                startingPoint = (int) Math.max(Math.floor(i - n / 2), 0);
-            }
-            for(int j=startingPoint; j<startingPoint+windowSize; j++) {
-                sum += rip[j].value;
-            }
-            sum /= (double) windowSize;
-
-            result[i] = new DataPoint(sum, rip[i].timestamp);
-
-            if(windowSize < n && (rip.length-i) > n) { //Increase windowSize until n
-                windowSize += 2;
-            } else if ( (rip.length-i+1) < n) {
-                windowSize -= 2;
-            }
-        }
-
 
         return result;
     }

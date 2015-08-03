@@ -28,16 +28,25 @@ package md2k.mCerebrum.cStress.Autosense;
  */
 public class AUTOSENSE_PACKET {
 
-    public long timestamp;
-    public int channelID;
-    public int[] data;
+    public long timestamp; //Packet timestamp as recorded by the Android phone
+    public int channelID; //Channel ID from Autosense
+    public int[] data; //Data array of 5 samples
 
+    /**
+     * Constructor
+     * @param timestamp
+     * @param channelID
+     * @param data
+     */
     public AUTOSENSE_PACKET(long timestamp, int channelID, int[] data) {
         this.timestamp = timestamp;
         this.channelID = channelID;
         this.data = data;
     }
 
+    /**
+     * @return Simplified string representation of the packet
+     */
     public String toString() {
         return new StringBuilder().append(this.timestamp).append(" (").append(this.channelID).append(") ").toString();
     }

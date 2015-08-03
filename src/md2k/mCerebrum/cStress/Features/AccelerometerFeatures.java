@@ -1,14 +1,9 @@
 package md2k.mCerebrum.cStress.Features;
 
+import md2k.mCerebrum.cStress.Library;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
-import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.transform.DftNormalization;
-import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
 
-import javax.xml.crypto.Data;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -39,8 +34,6 @@ import java.util.ArrayList;
  */
 public class AccelerometerFeatures {
     public boolean Activity;
-
-    //accelerometerfeature_extraction.m
 
 //    public double MaxOfMean;
 //    public double MeanOfMean;
@@ -115,6 +108,13 @@ public class AccelerometerFeatures {
 //    public double StartTimestamp;
 //    public double EndTimestamp;
 
+    /** Accelerometer Feature Computation
+     * Reference: accelerometerfeature_extraction.m
+     * @param segx
+     * @param segy
+     * @param segz
+     * @param samplingFreq
+     */
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq) {
         int windowSize = 10*1000;
 
@@ -267,7 +267,7 @@ public class AccelerometerFeatures {
             DataPoint[] wz = segzWindowed.get(i);
 
 
-            double[] magnitude = magnitude(wx,wy,wz);
+            double[] magnitude = Library.magnitude(wx, wy, wz);
 
             DescriptiveStatistics statsMagnitude = new DescriptiveStatistics();
             for (double d : magnitude) {
@@ -666,67 +666,5 @@ public class AccelerometerFeatures {
         return minActive > (accelFeature.length/2);
     }
 
-    public static double computeEnergy(double[] data, int inc) {
-        double result = 0;
-
-        int NFFT = nextPower2(data.length);
-
-        double[] buffer = new double[NFFT];
-        System.arraycopy(data, 0, buffer, 0, data.length);
-
-        FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
-        Complex[] fftC = f.transform(buffer, TransformType.FORWARD);
-
-        for (Complex aFftC : fftC) {
-            result += (aFftC.abs() / inc) * (aFftC.abs() / inc);
-        }
-        return result;
-    }
-
-    public static int nextPower2(int length) {
-        int result = 1;
-        while (result < length) {
-            result *= 2;
-        }
-        return result;
-    }
-
-    public static double[] magnitude(DataPoint[] x, DataPoint[] y, DataPoint[] z) {
-        double[] result = new double[Math.min(Math.min(x.length, y.length), z.length)];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = Math.sqrt(Math.pow(x[i].value, 2) + Math.pow(y[i].value, 2) + Math.pow(z[i].value, 2));
-        }
-        return result;
-    }
-
-
-    public static double[] crossing(DataPoint[] x, double mean) {
-        ArrayList<Double> crossings = new ArrayList<>();
-
-        for (int i = 0; i < x.length - 1; i++) {
-            if ((x[i].value > mean && x[i + 1].value <= mean) || x[i].value < mean && x[i + 1].value >= mean) {
-                crossings.add((double) (i + 1));
-            }
-        }
-        double[] result = new double[crossings.size()];
-        for (int i = 0; i < crossings.size(); i++) {
-            result[i] = crossings.get(i);
-        }
-        return result;
-    }
-
-    public static double[] diff(DataPoint[] dp) {
-        double[] result;
-        if (dp.length == 0) {
-            result = new double[0];
-        } else {
-            result = new double[dp.length - 1];
-
-            for (int i = 1; i < dp.length; i++) {
-                result[i - 1] = dp[i].value - dp[i - 1].value;
-            }
-        }
-        return result;
-    }
 
 }

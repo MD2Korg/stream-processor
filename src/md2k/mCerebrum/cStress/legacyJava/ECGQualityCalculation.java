@@ -1,8 +1,5 @@
 package md2k.mCerebrum.cStress.legacyJava;
 
-import md2k.mCerebrum.cStress.Autosense.AutosenseSample;
-
-import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -164,20 +161,20 @@ public class ECGQualityCalculation {
         }
         return DATA_QUALITY_GOOD;
     }
-
-    //TODO: Change to DataPoint[]
-    public int currentQuality(ArrayList<AutosenseSample> ecg) {
-
-        int[] data = new int[ecg.size()];
-
-        int i=0;
-        for(AutosenseSample s: ecg) {
-            data[i++] = s.value;
-        }
-
-        return currentQuality(data);
-
-    }
+//
+//    //TODO: Change to DataPoint[]
+//    public int currentQuality(ArrayList<AutosenseSample> ecg) {
+//
+//        int[] data = new int[ecg.size()];
+//
+//        int i=0;
+//        for(AutosenseSample s: ecg) {
+//            data[i++] = s.value;
+//        }
+//
+//        return currentQuality(data);
+//
+//    }
 
 }
 

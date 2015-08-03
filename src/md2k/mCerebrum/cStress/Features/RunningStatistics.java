@@ -31,6 +31,11 @@ public class RunningStatistics {
     private double stdev;
     private long count;
 
+    //TODO: Needs a persistence and initialization layer
+
+    /**
+     * Class to keep track of running statistics.
+     */
     public RunningStatistics() {
         this.mean = 0.0;
         this.stdev = 0.0;

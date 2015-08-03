@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.tests;
 
-import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
+import md2k.mCerebrum.cStress.Library;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.junit.Test;
 
@@ -10,17 +10,17 @@ import static org.junit.Assert.*;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -41,11 +41,11 @@ public class AccelerometerFeaturesTest {
 
     @Test
     public void testNextPower2() throws Exception {
-        assertTrue(AccelerometerFeatures.nextPower2(0)==1);
-        assertTrue(AccelerometerFeatures.nextPower2(1)==1);
-        assertTrue(AccelerometerFeatures.nextPower2(200)==256);
-        assertTrue(AccelerometerFeatures.nextPower2(255)==256);
-        assertTrue(AccelerometerFeatures.nextPower2(1000)==1024);
+        assertTrue(Library.nextPower2(0)==1);
+        assertTrue(Library.nextPower2(1)==1);
+        assertTrue(Library.nextPower2(200)==256);
+        assertTrue(Library.nextPower2(255)==256);
+        assertTrue(Library.nextPower2(1000)==1024);
     }
 
     @Test
@@ -58,14 +58,14 @@ public class AccelerometerFeaturesTest {
             y[i] = new DataPoint(i*i,i);
             z[i] = new DataPoint(i*i*i,i);
         }
-        double[] result = AccelerometerFeatures.magnitude(x,y,z);
+        double[] result = Library.magnitude(x, y, z);
 
         double[] correctResult = {0, 1.73205080756888, 9.16515138991168, 28.6181760425084, 66.0908465674332};
         assertArrayEquals(result,correctResult,1e-3);
 
         DataPoint[] input = new DataPoint[0];
         double[] emptyresult = {};
-        result = AccelerometerFeatures.magnitude(input,y,z);
+        result = Library.magnitude(input, y, z);
         assertArrayEquals(result, emptyresult,1e-9);
 
 
@@ -87,17 +87,17 @@ public class AccelerometerFeaturesTest {
 
         double mean = 2.0;
 
-        double[] result = AccelerometerFeatures.crossing(input,mean);
+        double[] result = Library.crossing(input, mean);
 
         double[] correctResult = {1,3,5,7,8};
         assertArrayEquals(result, correctResult,1e-9);
 
-        result = AccelerometerFeatures.crossing(input,-100);
+        result = Library.crossing(input, -100);
         double[] emptyresult = {};
         assertArrayEquals(result, emptyresult,1e-9);
 
         input = new DataPoint[0];
-        result = AccelerometerFeatures.crossing(input,mean);
+        result = Library.crossing(input, mean);
         assertArrayEquals(result, emptyresult,1e-9);
 
 
@@ -110,13 +110,13 @@ public class AccelerometerFeaturesTest {
             input[i] = new DataPoint(i*i,i);
         }
 
-        double[] result = AccelerometerFeatures.diff(input);
+        double[] result = Library.diff(input);
 
         double[] correctResult = {1,3,5,7,9,11,13,15,17};
         assertArrayEquals(result, correctResult,1e-9);
 
         DataPoint[] zeroinput = new DataPoint[0];
-        result = AccelerometerFeatures.diff(zeroinput);
+        result = Library.diff(zeroinput);
         assertTrue(result.length == 0);
 
     }

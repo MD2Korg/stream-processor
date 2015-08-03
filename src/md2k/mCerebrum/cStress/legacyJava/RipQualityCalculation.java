@@ -1,8 +1,5 @@
 package md2k.mCerebrum.cStress.legacyJava;
 
-import md2k.mCerebrum.cStress.Autosense.AutosenseSample;
-
-import java.util.ArrayList;
 
 
 /**
@@ -164,18 +161,18 @@ public class RipQualityCalculation {
         return DATA_QUALITY_GOOD;
     }
 
-    //TODO: Change to DataPoint[]
-    public int currentQuality(ArrayList<AutosenseSample> rip) {
-
-        int[] data = new int[rip.size()];
-
-        int i=0;
-        for(AutosenseSample s: rip) {
-            data[i++] = s.value;
-        }
-
-        return currentQuality(data);
-
-    }
+//    //TODO: Change to DataPoint[]
+//    public int currentQuality(ArrayList<AutosenseSample> rip) {
+//
+//        int[] data = new int[rip.size()];
+//
+//        int i=0;
+//        for(AutosenseSample s: rip) {
+//            data[i++] = s.value;
+//        }
+//
+//        return currentQuality(data);
+//
+//    }
 }
 
