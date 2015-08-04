@@ -1,7 +1,8 @@
 package md2k.mCerebrum.cStress;
 
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Structs.MaxMin;
+import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
+import md2k.mCerebrum.cStress.Structs.*;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.transform.DftNormalization;
@@ -363,6 +364,758 @@ public class Library {
         }
         result.add(temp);
 
+
+        return result;
+    }
+
+    /**
+     * Outlier detection for RR-interval data
+     * Reference: detect_outlier_v2.m
+     * @param sample RR-interval values
+     * @param timestamp RR-interval timestamps
+     * @return Outlier array
+     */
+    public static int[] detect_outlier_v2(double[] sample, long[] timestamp) {
+        ArrayList<Integer> outlier = new ArrayList<>();
+
+        if (timestamp.length != 0) {
+            ArrayList<Double> valid_rrInterval = new ArrayList<>();
+            ArrayList<Long> valid_timestamp = new ArrayList<>();
+            DescriptiveStatistics valid_rrInterval_stats = new DescriptiveStatistics();
+            for (int i = 0; i < sample.length; i++) {
+                if (sample[i] > 0.3 && sample[i] < 2.0) {
+                    valid_rrInterval.add(sample[i]);
+                    valid_rrInterval_stats.addValue(sample[i]);
+                    valid_timestamp.add(timestamp[i]);
+                }
+            }
+            DescriptiveStatistics diff_rrInterval = new DescriptiveStatistics();
+            for (int i = 1; i < valid_rrInterval.size(); i++) {
+                diff_rrInterval.addValue(Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i - 1)));
+            }
+            double MED = 4.5 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
+            double MAD = (valid_rrInterval_stats.getPercentile(50) - 2.8 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
+            double CBD = (MED + MAD) / 2.0;
+            if (CBD < 0.2) {
+                CBD = 0.2;
+            }
+
+            for (double aSample : sample) {
+                outlier.add(AUTOSENSE.QUALITY_BAD);
+            }
+            outlier.set(0, AUTOSENSE.QUALITY_GOOD);
+            double standard_rrInterval = valid_rrInterval.get(0);
+            boolean prev_beat_bad = false;
+
+            for (int i = 1; i < valid_rrInterval.size() - 1; i++) {
+                double ref = valid_rrInterval.get(i);
+                if (ref > 0.3 && ref < 2.0) {
+                    double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rrInterval.get(i));
+                    double beat_diff_pre = Math.abs(valid_rrInterval.get(i - 1) - valid_rrInterval.get(i));
+                    double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i + 1));
+
+                    if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
+                        for (int j = 0; j < timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j, AUTOSENSE.QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
+                        prev_beat_bad = true;
+                    } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
+                        for (int j = 0; j < timestamp.length; j++) {
+                            if (timestamp[j] == valid_timestamp.get(i)) {
+                                outlier.set(j, AUTOSENSE.QUALITY_GOOD);
+                            }
+                        }
+                        prev_beat_bad = false;
+                        standard_rrInterval = valid_rrInterval.get(i);
+                    } else if (!prev_beat_bad && beat_diff_pre > CBD) {
+                        prev_beat_bad = true;
+                    }
+
+                }
+            }
+
+        }
+
+        int[] result = new int[outlier.size()];
+        for (int i = 0; i < outlier.size(); i++) {
+            result[i] = outlier.get(i);
+        }
+        return result;
+    }
+
+    /**
+     * R-peak detector
+     * @param datapoints Raw ECG datapoints
+     * @param frequency ECG sampling frequency
+     * @return Indexes of R-peaks
+     */
+    public static long[] detect_Rpeak(DataPoint[] datapoints, double frequency) {
+        double[] sample = new double[datapoints.length];
+        double[] timestamps = new double[datapoints.length];
+        for (int i = 0; i < sample.length; i++) {
+            sample[i] = datapoints[i].value;
+            timestamps[i] = datapoints[i].timestamp;
+        }
+
+        int window_l = (int) Math.ceil(frequency / 5.0);
+
+        double thr1 = 0.5;
+        double f = 2.0 / frequency;
+        double[] F = {0.0, 4.5 * f, 5.0 * f, 20.0 * f, 20.5 * f, 1};
+        double[] A = {0, 0, 1, 1, 0, 0};
+        double[] w = {500.0 / 0.02, 1.0 / 0.02, 500 / 0.02};
+        double fl = 256;
+
+        double[] y2 = applyFilterNormalize(sample, firls(fl, F, A, w), 90);
+        double[] y3 = applyFilterNormalize(y2, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
+        double[] y4 = applySquareFilterNormalize(y3, 90);
+        double[] y5 = applyFilterNormalize(y4, blackman(window_l), 90);
+
+        ArrayList<Integer> pkt = new ArrayList<>();
+        ArrayList<Double> valuepks = new ArrayList<>();
+        for (int i = 2; i < y5.length - 2; i++) {
+            if (y5[i - 2] < y5[i - 1] && y5[i - 1] < y5[i] && y5[i] >= y5[i + 1] && y5[i + 1] > y5[i + 2]) {
+                pkt.add(i);
+                valuepks.add(y5[i]);
+            }
+        }
+
+        double rr_ave = 0.0;
+        for (int i = 1; i < pkt.size(); i++) {
+            rr_ave += pkt.get(i) - pkt.get(i - 1);
+        }
+        rr_ave /= (pkt.size() - 1);
+
+        double thr2 = 0.5 * thr1;
+        double sig_lev = 4.0 * thr1;
+        double noise_lev = 0.1 * sig_lev;
+
+        int c1 = 0;
+        ArrayList<Integer> c2 = new ArrayList<>();
+        int i = 0;
+        ArrayList<Integer> Rpeak_temp1 = new ArrayList<>();
+
+
+        while (i < pkt.size()) {
+            if (Rpeak_temp1.size() == 0) {
+                if (y5[pkt.get(i)] >= thr1 && y5[pkt.get(i)] < (3.0 * sig_lev)) {
+                    if(Rpeak_temp1.size() <= c1) {
+                        Rpeak_temp1.add(0);
+                    }
+                    Rpeak_temp1.set(c1,pkt.get(i));
+                    sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
+                    if(c2.size() <= c1) {
+                        c2.add(0);
+                    }
+                    c2.set(c1,i);
+                    c1 += 1;
+                } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
+                    noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
+                }
+
+                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                thr2 = 0.5 * thr1;
+                i += 1;
+
+                rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
+            } else {
+                if (((pkt.get(i) - pkt.get(c2.get(c1 - 1))) > 1.66 * rr_ave) && (i - c2.get(c1 - 1)) > 1) {
+                    ArrayList<Double> searchback_array_inrange = new ArrayList<>();
+                    ArrayList<Integer> searchback_array_inrange_index = new ArrayList<>();
+
+                    for (int j = c2.get(c1 - 1) + 1; j < i - 1; j++) {
+                        if (valuepks.get(i) < 3.0 * sig_lev && valuepks.get(i) > thr2) {
+                            searchback_array_inrange.add(valuepks.get(i));
+                            searchback_array_inrange_index.add(j - c2.get(c1 - 1));
+                        }
+                    }
+
+                    if (searchback_array_inrange.size() > 0) {
+                        double searchback_max = searchback_array_inrange.get(0);
+                        int searchback_max_index = 0;
+                        for (int j = 0; j < searchback_array_inrange.size(); j++) {
+                            if (searchback_array_inrange.get(j) > searchback_max) {
+                                searchback_max = searchback_array_inrange.get(i);
+                                searchback_max_index = j;
+                            }
+                        }
+                        if(Rpeak_temp1.size() >= c1) {
+                            Rpeak_temp1.add(0);
+                        }
+                        Rpeak_temp1.set(c1,pkt.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
+                        sig_lev = 0.125 * y5[Rpeak_temp1.get(c1 - 1)] + 0.875 * sig_lev;
+                        if(c1 >= c2.size()) {
+                            c2.add(0);
+                        }
+                        c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
+                        i = c2.get(c1 - 1) + 1;
+                        c1 += 1;
+                        thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                        thr2 = 0.5 * thr1;
+                        rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
+                        continue;
+                    }
+                } else if (y5[pkt.get(i)] >= thr1 && y5[pkt.get(i)] < 3.0 * sig_lev) {
+                    if(Rpeak_temp1.size() >= c1) {
+                        Rpeak_temp1.add(0);
+                    }
+                    Rpeak_temp1.set(c1,pkt.get(i));
+                    sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
+                    if(c2.size() <= c1) {
+                        c2.add(0);
+                    }
+                    c2.set(c1, i);
+                    c1 += 1;
+                } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
+                    noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
+                }
+                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                thr2 = 0.5 * thr1;
+                i++;
+                rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
+            }
+        }
+
+        boolean difference = false;
+
+        ArrayList<Integer> Rpeak_temp2 = new ArrayList<>();
+        for (Integer j : Rpeak_temp1) {
+            Rpeak_temp2.add(j);
+        }
+
+
+        while (!difference) {
+            int length_Rpeak_temp2 = Rpeak_temp2.size();
+            ArrayList<Integer> diffRpeak = new ArrayList<>();
+            for(int j=1; j<Rpeak_temp2.size(); j++) {
+                diffRpeak.add(Rpeak_temp2.get(j)-Rpeak_temp2.get(j-1));
+            }
+
+            ArrayList<Double> comp1 = new ArrayList<>();
+            ArrayList<Double> comp2 = new ArrayList<>();
+            ArrayList<Integer> eli_index = new ArrayList<>();
+
+            for(int j=0; j<diffRpeak.size(); j++) {
+                if (diffRpeak.get(j) < (0.5*frequency)) {
+                    comp1.add(sample[Rpeak_temp2.get(j)]);
+                    comp2.add(sample[Rpeak_temp2.get(j + 1)]);
+                    if (comp1.get(comp1.size()-1) < comp2.get(comp2.size()-1)) {
+                        eli_index.add(0);
+                    } else {
+                        eli_index.add(1);
+                    }
+                } else {
+                    eli_index.add(-999999);
+                }
+            }
+
+            for(int j=0; j<diffRpeak.size(); j++) {
+                if (diffRpeak.get(j) < (0.5*frequency)) {
+                    Rpeak_temp2.set(j+eli_index.get(j), -999999);
+                }
+            }
+
+            Rpeak_temp2.removeIf(s -> s == -999999);
+
+            difference = length_Rpeak_temp2 == Rpeak_temp2.size();
+
+        }
+
+        ArrayList<Integer> Rpeak_temp3 = new ArrayList<>();
+        Rpeak_temp3.add(Rpeak_temp2.get(0));
+
+        for (int k = 1; k < Rpeak_temp2.size() - 1; k++) {
+            double maxValue = -1e9;
+            int index = 0;
+            for (int j = Rpeak_temp2.get(k) - (int) Math.ceil(frequency / 10.0); j < Rpeak_temp2.get(k) + (int) Math.ceil(frequency / 10.0); j++) {
+                if (sample[j] > maxValue) {
+                    maxValue = sample[j];
+                    index = j;
+                }
+            }
+            Rpeak_temp3.add(index - 1);
+        }
+
+
+        long[] result = new long[Rpeak_temp3.size()];
+        for (int k = 0; k < Rpeak_temp3.size(); k++) {
+            result[k] = (long) Rpeak_temp3.get(k);
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param rpeak_temp1
+     * @param rr_ave
+     * @return
+     */
+    public static double rr_ave_update(ArrayList<Integer> rpeak_temp1, double rr_ave) {
+        ArrayList<Integer> peak_interval = new ArrayList<>();
+
+        if (rpeak_temp1.size() == 0) {
+            return rr_ave;
+        } else {
+            peak_interval.add(rpeak_temp1.get(0));
+            for (int i = 1; i < rpeak_temp1.size(); i++) {
+                peak_interval.add(rpeak_temp1.get(i) - rpeak_temp1.get(i - 1));
+            }
+
+            if (peak_interval.size() < 8) {
+                return rr_ave;
+            } else {
+                double result = 0.0;
+                for (int i = peak_interval.size() - 8; i < peak_interval.size(); i++) {
+                    result += peak_interval.get(i);
+                }
+                result /= 8.0;
+                return result;
+            }
+        }
+    }
+
+    /**
+     * Lomb–Scargle periodogram implementation
+     * Reference: HeartRateLomb.m
+     * @param dp DataPoint array
+     * @return Lomb structure with P and f defined
+     */
+    public static Lomb lomb(DataPoint[] dp) {
+        double T = dp[dp.length - 1].timestamp - dp[0].timestamp;
+        int nf = (int) Math.round(0.5 * 4.0 * 1.0 * dp.length);
+        double[] f = new double[nf];
+
+        for (int i = 0; i < nf; i++) {
+            f[i] = (i + 1) / (T * 4);
+        }
+
+        nf = f.length;
+
+        DescriptiveStatistics stats = new DescriptiveStatistics();
+        for (DataPoint aData : dp) {
+            stats.addValue(aData.value);
+        }
+
+        double mx = stats.getMean();
+        double vx = stats.getVariance();
+
+        for (DataPoint aDp : dp) {
+            aDp.value -= mx;
+        }
+
+        double[] P = new double[nf];
+        double[] wt;
+        double[] swt;
+        double[] cwt;
+        double Ss2wt;
+        double Sc2wt;
+        double wtau;
+        double swtau;
+        double cwtau;
+        double[] swttau;
+        double[] cwttau;
+        double swttau2;
+        double cwttau2;
+        wt = new double[dp.length];
+        swt = new double[dp.length];
+        cwt = new double[dp.length];
+        swttau = new double[swt.length];
+        cwttau = new double[swt.length];
+        double part1;
+        double part2;
+
+        for (int i = 0; i < nf; i++) {
+            Ss2wt = 0;
+            Sc2wt = 0;
+
+            for (int j = 0; j < wt.length; j++) {
+                wt[j] = 2.0 * Math.PI * f[i] * dp[j].timestamp;
+                swt[j] = Math.sin(wt[j]);
+                cwt[j] = Math.cos(wt[j]);
+
+                Ss2wt += cwt[j] * swt[j];
+                Sc2wt += (cwt[j] - swt[j]) * (cwt[j] + swt[j]);
+
+            }
+            Ss2wt *= 2;
+
+            wtau = 0.5 * Math.atan2(Ss2wt, Sc2wt);
+            swtau = Math.sin(wtau);
+            cwtau = Math.cos(wtau);
+
+
+            swttau2 = 0;
+            cwttau2 = 0;
+
+            for (int j = 0; j < swt.length; j++) {
+                swttau[j] = swt[j] * cwtau - cwt[j] * swtau;
+                cwttau[j] = cwt[j] * cwtau - swt[j] * swtau;
+
+                swttau2 += swttau[j] * swttau[j];
+                cwttau2 += cwttau[j] * cwttau[j];
+            }
+
+
+            part1 = 0;
+            part2 = 0;
+            for (int j = 0; j < cwttau.length; j++) {
+                part1 += (dp[j].value * cwttau[j]) * (dp[j].value * cwttau[j]);
+                part2 += (dp[j].value * swttau[j]) * (dp[j].value * swttau[j]);
+            }
+
+            P[i] = ((part1 / cwttau2) + (part2 / swttau2)) / (2 * vx);
+
+        }
+
+        Lomb result = new Lomb();
+        result.P = P;
+        result.f = f;
+
+        return result;
+    }
+
+    /**
+     * Heartrate Low Frequency - High Frequency ratio
+     * @param P
+     * @param f
+     * @param lowRate Low frequency cutoff
+     * @param highRate High frequency cutoff
+     * @return LF/HF ratio
+     */
+    public static double heartRateLFHF(double[] P, double[] f, double lowRate, double highRate) {
+        double result1 = 0;
+        for (int i = 0; i < P.length; i++) {
+            if (f[i] < lowRate) {
+                result1 += P[i];
+            }
+        }
+        double result2 = 0;
+        for (int i = 0; i < P.length; i++) {
+            if (f[i] >= lowRate && f[i] <= highRate) {
+                result2 += P[i];
+            }
+        }
+        return result1 / result2;
+    }
+
+    /**
+     * Heartrate Power
+     * @param P
+     * @param f
+     * @param lowFrequency Low frequency cutoff
+     * @param highFrequency High frequency cutoff
+     * @return
+     */
+    public static double heartRatePower(double[] P, double[] f, double lowFrequency, double highFrequency) {
+        double result = 0;
+        for (int i = 0; i < P.length; i++) {
+            if (f[i] >= lowFrequency && f[i] <= highFrequency) {
+                result += P[i];
+            }
+        }
+
+        return result;
+    }
+
+    public static PeakValley peakvalley_v2(DataPoint[] rip, SensorConfiguration sc) {
+
+        DataPoint[] sample = smooth(rip, 5);
+
+        int windowLength = (int) Math.round(8.0 * sc.getFrequency("RIP"));
+
+        DataPoint[] MAC = mac(sample, windowLength);
+
+        ArrayList<Integer> upInterceptIndex = new ArrayList<>();
+        ArrayList<Integer> downInterceptIndex = new ArrayList<>();
+
+        for (int i = 1; i < MAC.length; i++) {
+            if (sample[i - 1].value <= MAC[i - 1].value && sample[i].value > MAC[i].value) {
+                upInterceptIndex.add(i - 1);
+            } else if (sample[i - 1].value >= MAC[i - 1].value && sample[i].value < MAC[i].value) {
+                downInterceptIndex.add(i - 1);
+            }
+        }
+
+        Intercepts UIDI = InterceptOutlierDetectorRIPLamia(upInterceptIndex, downInterceptIndex, sample, windowLength, sc);
+
+        int[] UI = UIDI.UI;
+        int[] DI = UIDI.DI;
+
+        ArrayList<Integer> peakIndex = new ArrayList<>();
+        ArrayList<Integer> valleyIndex = new ArrayList<>();
+
+        for (int i = 0; i < DI.length-1; i++) {
+
+            int peakindex = 0;
+            double peakValue = -1e9;
+            for (int j = UI[i]; j < DI[i + 1]; j++) {
+                if (sample[j].value > peakValue) {
+                    peakindex = j;
+                    peakValue = sample[j].value;
+                }
+            }
+            peakIndex.add(peakindex);
+
+            DataPoint[] temp = new DataPoint[UI[i] - DI[i]];
+            System.arraycopy(sample, DI[i], temp, 0, UI[i] - DI[i]);
+                MaxMin maxMinTab = localMaxMin(temp, 1);
+
+            if (maxMinTab.mintab.length == 0) {
+                int valleyindex = 0;
+                double valleyValue = 1e9;
+                for (int j = DI[i]; j < UI[i]; j++) {
+                    if (sample[j].value < valleyValue) {
+                        valleyindex = j;
+                        valleyValue = sample[j].value;
+                    }
+                }
+                valleyIndex.add(valleyindex);
+            } else {
+                valleyIndex.add(DI[i] + (int) maxMinTab.mintab[maxMinTab.mintab.length - 1].timestamp - 1); //timestamp is index in this case
+            }
+        }
+
+        double[] inspirationAmplitude = new double[valleyIndex.size()];
+        double[] expirationAmplitude;
+
+        double meanInspirationAmplitude = 0.0;
+        double meanExpirationAmplitude;
+
+        for (int i = 0; i < valleyIndex.size() - 1; i++) {
+            inspirationAmplitude[i] = sample[peakIndex.get(i)].value - sample[valleyIndex.get(i)].value;
+
+            meanInspirationAmplitude += inspirationAmplitude[i];
+        }
+        meanInspirationAmplitude /= (valleyIndex.size() - 1);
+
+        ArrayList<Integer> finalPeakIndex = new ArrayList<>();
+        ArrayList<Integer> finalValleyIndex = new ArrayList<>();
+
+        for (int i = 0; i < inspirationAmplitude.length; i++) {
+            if (inspirationAmplitude[i] > 0.15 * meanInspirationAmplitude) {
+                finalPeakIndex.add(peakIndex.get(i));
+                finalValleyIndex.add(valleyIndex.get(i));
+            }
+        }
+
+
+        expirationAmplitude = new double[finalValleyIndex.size()-1];
+        meanExpirationAmplitude = 0.0;
+        for(int i=0; i<finalValleyIndex.size()-1; i++) {
+            expirationAmplitude[i] = Math.abs(sample[finalValleyIndex.get(i+1)].value-sample[finalPeakIndex.get(i)].value);
+            meanExpirationAmplitude += expirationAmplitude[i];
+        }
+        meanExpirationAmplitude /= (finalValleyIndex.size()-1);
+
+
+
+        ArrayList<Integer> resultPeakIndex = new ArrayList<>();
+        ArrayList<Integer> resultValleyIndex = new ArrayList<>();
+
+        resultValleyIndex.add(finalValleyIndex.get(0));
+
+        for (int i = 0; i < expirationAmplitude.length; i++) {
+            if (expirationAmplitude[i] > 0.15 * meanExpirationAmplitude) {
+                resultValleyIndex.add(finalValleyIndex.get(i + 1));
+                resultPeakIndex.add(finalPeakIndex.get(i));
+            }
+        }
+        resultPeakIndex.add(finalPeakIndex.get(finalPeakIndex.size() - 1));
+
+        PeakValley result = new PeakValley();
+        result.valleyIndex = resultValleyIndex;
+        result.peakIndex = resultPeakIndex;
+
+        return result;
+    }
+
+    /**
+     * Moving Average Curve
+     * @param sample
+     * @param windowLength
+     * @return
+     */
+    public static DataPoint[] mac(DataPoint[] sample, int windowLength) {
+
+        DataPoint[] result = new DataPoint[sample.length-2*windowLength];
+
+        for(int i=windowLength;i < sample.length-windowLength; i++) {
+            result[i-windowLength] = new DataPoint(0.0,0);
+            for(int j=-windowLength; j<windowLength; j++) {
+                result[i-windowLength].value += sample[i+j].value;
+            }
+            result[i-windowLength].value /= (2.0*windowLength); //Compute mean
+            result[i-windowLength].timestamp = sample[i+windowLength].timestamp;
+
+        }
+        return result;
+    }
+
+    /**
+     * Intercept Outlier Detector
+     * Reference: Intercept_outlier_detector_RIP_lamia.m
+     * @param upInterceptIndex
+     * @param downInterceptIndex
+     * @param sample
+     * @param windowLength
+     * @return
+     */
+    public static Intercepts InterceptOutlierDetectorRIPLamia(ArrayList<Integer> upInterceptIndex, ArrayList<Integer> downInterceptIndex, DataPoint[] sample, int windowLength, SensorConfiguration sc) {
+        Intercepts result = new Intercepts();
+
+        int minimumLength = Math.min(upInterceptIndex.size(), downInterceptIndex.size());
+
+        ArrayList<Integer> D = new ArrayList<>();
+        ArrayList<Integer> U = new ArrayList<>();
+        for(int i=0; i<minimumLength; i++) {
+            U.add(upInterceptIndex.get(i));
+            D.add(downInterceptIndex.get(i));
+        }
+
+        ArrayList<Integer> UI = new ArrayList<>();
+        ArrayList<Integer> DI = new ArrayList<>();
+
+        int i = 0;
+        int j = 0;
+        while(i < U.size()-2) {
+            if (j > (D.size()-1)) {
+                break;
+            }
+
+            while(j < D.size()-1) {
+               if(U.get(0) < D.get(0)) {
+                   if (i == U.size() || j == D.size()) {
+                       break;
+                   }
+
+                   if (U.get(i) < D.get(j) && D.get(j) < U.get(i+1)) {
+                       UI.add(U.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aD : D) {
+                           if ((aD > D.get(j)) && (aD < U.get(i+1))) {
+                               ind.add(aD);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           DI.add(D.get(j));
+                           j++;
+                       } else {
+                           DI.add(ind.get(ind.size()-1));
+                           j = ind.get(ind.size()-1)+1;
+                       }
+                       i++;
+                   } else if (U.get(i) < D.get(j) && D.get(j) > U.get(i+1)) {
+                       DI.add(D.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aU : U) {
+                           if ((aU > U.get(i)) && (aU < D.get(j))) {
+                               ind.add(aU);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           UI.add(U.get(i));
+                           i++;
+                       } else {
+                           UI.add(ind.get(ind.size()-1));
+                           i = ind.get(ind.size()-1)+1;
+                       }
+                       j++;
+                   }
+               } else if (D.get(0) < U.get(0)) {
+                   if (i == D.size() || j == U.size()) {
+                       break;
+                   }
+
+                   if (D.get(i) < U.get(j) && U.get(j) < D.get(i+1)) {
+                       DI.add(D.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aU : U) {
+                           if ((aU > U.get(j)) && (aU < D.get(i+1))) {
+                               ind.add(aU);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           UI.add(U.get(j));
+                           j++;
+                       } else {
+                           UI.add(ind.get(ind.size()-1));
+                           j = ind.get(ind.size()-1)+1;
+                       }
+                       i++;
+                   } else if (D.get(i) < U.get(j) && U.get(j) > D.get(i+1)) {
+                       UI.add(U.get(i));
+                       ArrayList<Integer> ind = new ArrayList<>();
+                       for (Integer aD : D) {
+                           if ((aD > D.get(i)) && (aD < U.get(j))) {
+                               ind.add(aD);
+                           }
+                       }
+                       if (ind.size() == 0) {
+                           DI.add(D.get(i));
+                           i++;
+                       } else {
+                           DI.add(ind.get(ind.size()-1));
+                           i = ind.get(ind.size()-1)+1;
+                       }
+                       j++;
+                   }
+               }
+            }
+        }
+
+        if (UI.size() ==0 && DI.size() == 0) {
+            return result;
+        }
+        if (UI.get(0) < DI.get(0)) {
+            UI.remove(0);
+        }
+
+        minimumLength = Math.min(UI.size(),DI.size());
+        while(UI.size() > minimumLength) {
+            UI.remove(UI.size()-1);
+        }
+        while(DI.size() > minimumLength) {
+            DI.remove(DI.size()-1);
+        }
+
+
+        ArrayList<Integer> DownIntercept = new ArrayList<>();
+        ArrayList<Integer> UpIntercept = new ArrayList<>();
+        double fr;
+        for(int ii=0; ii<DI.size()-1; ii++) {
+            fr = 60000.0 / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
+            if (fr >= 8.0 && fr <= 65) {
+                DownIntercept.add(DI.get(ii));
+                UpIntercept.add(UI.get(ii));
+            }
+        }
+
+
+        ArrayList<Integer> DownIntercept2 = new ArrayList<>();
+        ArrayList<Integer> UpIntercept2 = new ArrayList<>();
+        double equivalentSamplePoints = 8.0/20.0 * sc.getFrequency("RIP");
+        double upToDownDistance;
+        for(int ii=0; ii<DownIntercept.size()-1; ii++) {
+            upToDownDistance = DownIntercept.get(ii+1)-UpIntercept.get(ii)+1;
+            if(upToDownDistance > equivalentSamplePoints) {
+                UpIntercept2.add(UpIntercept.get(ii));
+                DownIntercept2.add(DownIntercept.get(ii));
+            }
+        }
+
+
+        result.UI = new int[UpIntercept2.size()];
+        result.DI = new int[UpIntercept2.size()];
+        for(int ii=0; ii<UpIntercept2.size(); ii++) {
+            result.UI[ii] = UpIntercept2.get(ii);
+            result.DI[ii] = DownIntercept2.get(ii);
+        }
 
         return result;
     }

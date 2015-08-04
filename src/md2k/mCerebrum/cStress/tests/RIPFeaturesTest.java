@@ -49,44 +49,4 @@ public class RIPFeaturesTest {
 
     }
 
-//    @Test
-//    public void testWindow() throws Exception {
-//
-//    }
-
-//    @Test
-//    public void testPeakvalley_v2() throws Exception {
-//
-//    }
-
-    @Test
-    public void testLocalMaxMin() throws Exception {
-
-
-    }
-
-//    @Test
-//    public void testInterceptOutlierDetectorRIPLamia() throws Exception {
-//
-//
-//
-//    }
-
-    @Test
-    public void testSmooth() throws Exception {
-        double[] inputdata = {1, 2, 3, 4, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -4, -3, -2, -1, 0, 3, 5, 3, 0, -3, -5, -3, 0};
-        double[] correctResult = {1.0000, 2.0000, 3.0000, 3.6000, 3.8000, 3.6000, 3.0000, 2.0000, 1.0000, 0.0000, -1.0000, -2.0000, -3.0000, -3.6000, -3.8000, -3.6000, -3.0000, -2.0000, -0.6000, 1.0000, 2.0000, 2.2000, 1.6000, 0, -1.6000, -2.2000, -2.6667, 0};
-        DataPoint[] inputdp = new DataPoint[inputdata.length];
-        for(int i = 0; i<inputdata.length; i++) {
-            inputdp[i] = new DataPoint(inputdata[i],i);
-        }
-
-        DataPoint[] result = Library.smooth(inputdp, 5);
-        double sum = 0.0;
-        for(int i=0; i< result.length; i++) {
-            sum += Math.abs(result[i].value-correctResult[i]);
-        }
-        assertTrue(sum < 1e-4);
-
-    }
 }
