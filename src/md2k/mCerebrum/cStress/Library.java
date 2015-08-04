@@ -162,7 +162,7 @@ public class Library {
             statsY2.addValue(d*d);
         }
         for (int i = 0; i < result.length; i++) {
-            result[i] = statsY2.getElement(i) / statsY2.getPercentile(normalizePercentile);
+            result[i] = statsY2.getElement(i) / statsY2.getPercentile(normalizePercentile); //TODO: getPercentile returns different values than Matlab's implementation
         }
 
         return result;
