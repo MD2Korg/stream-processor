@@ -44,9 +44,9 @@ public class RunningStatistics {
 
     public void add(double x) {
         double tmp = mean;
+        count++;
         mean += (x-tmp) / count;
         stdev += (x-tmp) * (x-mean);
-        count += 1;
     }
 
     public double getMean() {

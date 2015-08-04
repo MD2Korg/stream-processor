@@ -118,9 +118,9 @@ public class AccelerometerFeatures {
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq, RunningStatistics MagnitudeStats) {
         int windowSize = 10*1000;
 
-        ArrayList<DataPoint[]> segxWindowed = window(segx,windowSize);
-        ArrayList<DataPoint[]> segyWindowed = window(segy,windowSize);
-        ArrayList<DataPoint[]> segzWindowed = window(segz,windowSize);
+        ArrayList<DataPoint[]> segxWindowed = Library.window(segx, windowSize);
+        ArrayList<DataPoint[]> segyWindowed = Library.window(segy, windowSize);
+        ArrayList<DataPoint[]> segzWindowed = Library.window(segz, windowSize);
 
 
 
@@ -608,35 +608,6 @@ public class AccelerometerFeatures {
 //        this.StartTimestamp = segx[0].timestamp;
 //        this.EndTimestamp = segx[segx.length-1].timestamp;
 
-    }
-
-    private ArrayList<DataPoint[]> window(DataPoint[] data, int size) {
-        ArrayList<DataPoint[]> result = new ArrayList<>();
-
-        long startTime = data[0].timestamp;
-        ArrayList<DataPoint> tempArray = new ArrayList<>();
-        DataPoint[] temp;
-        for(DataPoint dp: data) {
-            if(dp.timestamp < startTime+size) {
-                tempArray.add(dp);
-            } else {
-                temp = new DataPoint[tempArray.size()];
-                for(int i=0; i<temp.length; i++) {
-                    temp[i] = tempArray.get(i);
-                }
-                result.add(temp);
-                tempArray = new ArrayList<>();
-                startTime += size;
-            }
-        }
-        temp = new DataPoint[tempArray.size()];
-        for(int i=0; i<temp.length; i++) {
-            temp[i] = tempArray.get(i);
-        }
-        result.add(temp);
-
-
-        return result;
     }
 
     public boolean activityAnalysis(double[] accelFeature, RunningStatistics magnitudeStats) {
