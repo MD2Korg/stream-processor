@@ -367,21 +367,22 @@ public class cStress {
             AccelZStats.add(dp.value);
         }
 
+
         //Normalize
-        for (int i=0; i<ecg.length; i++) {
-            ecg[i].value = (ecg[i].value-ECGStats.getMean()) / (ECGStats.getStdev());
+        for (DataPoint anEcg : ecg) {
+            anEcg.value = (anEcg.value - ECGStats.getMean()) / (ECGStats.getStdev());
         }
-        for (int i=0; i<rip.length; i++) {
-            rip[i].value = (rip[i].value-RIPStats.getMean()) / (RIPStats.getStdev());
+        for (DataPoint aRip : rip) {
+            aRip.value = (aRip.value - RIPStats.getMean()) / (RIPStats.getStdev());
         }
-        for (int i=0; i<accelerometerX.length; i++) {
-            accelerometerX[i].value = (accelerometerX[i].value-AccelXStats.getMean()) / (AccelXStats.getStdev());
+        for (DataPoint anAccelerometerX : accelerometerX) {
+            anAccelerometerX.value = (anAccelerometerX.value - AccelXStats.getMean()) / (AccelXStats.getStdev());
         }
-        for (int i=0; i<accelerometerY.length; i++) {
-            accelerometerY[i].value = (accelerometerY[i].value-AccelYStats.getMean()) / (AccelYStats.getStdev());
+        for (DataPoint anAccelerometerY : accelerometerY) {
+            anAccelerometerY.value = (anAccelerometerY.value - AccelYStats.getMean()) / (AccelYStats.getStdev());
         }
-        for (int i=0; i<accelerometerZ.length; i++) {
-            accelerometerZ[i].value = (accelerometerZ[i].value-AccelZStats.getMean()) / (AccelZStats.getStdev());
+        for (DataPoint anAccelerometerZ : accelerometerZ) {
+            anAccelerometerZ.value = (anAccelerometerZ.value - AccelZStats.getMean()) / (AccelZStats.getStdev());
         }
 
 
