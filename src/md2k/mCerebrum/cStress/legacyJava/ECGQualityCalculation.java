@@ -1,21 +1,24 @@
 package md2k.mCerebrum.cStress.legacyJava;
 
 
+import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.Structs.DataPoint;
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,53 +31,43 @@ package md2k.mCerebrum.cStress.legacyJava;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class ECGQualityCalculation {
-    // ===========================================================
-    private static final int BUFF_LENGTH = 3;
-    private static int[] envelBuff;
-    private static int envelHead;
-    private static int[] classBuff;
-    private static int classHead;
-    // ========
-    private static final int ACCEPTABLE_OUTLIER_PERCENT = 50;
-    private static final int OUTLIER_THRESHOLD_HIGH = 4500;
-    private static final int OUTLIER_THRESHOLD_LOW = 20;
-    private static final int BAD_SEGMENTS_THRESHOLD = 2;
 
-    public final static int DATA_QUALITY_GOOD = 0;
-    public final static int DATA_QUALITY_NOISE = 1;
-    public final static int DATA_QUALITY_BAND_LOOSE = 2;
-    public final static int DATA_QUALITY_BAND_OFF = 3;
+    private int BUFF_LENGTH;
+    private int[] envelBuff;
+    private int envelHead;
+    private int[] classBuff;
+    private int classHead;
+    private int ACCEPTABLE_OUTLIER_PERCENT;
+    private int OUTLIER_THRESHOLD_HIGH;
+    private int OUTLIER_THRESHOLD_LOW;
+    private int BAD_SEGMENTS_THRESHOLD;
+    private int ECK_THRESHOLD_BAND_LOOSE;
 
-    private final static int ECK_THRESHOLD_BAND_LOOSE = 47;
-    //private final static int ECK_THRESHOLD_BAND_OFF = 20;
+    private int large_stuck = 0;
+    private int small_stuck = 0;
+    private int large_flip = 0;
+    private int small_flip = 0;
+    private int max_value = 0;
+    private int min_value = 0;
+    private int segment_class = 0;
 
-    //private static final String TAG = "ECKQualityCalculation";
-    // ========
-    private static int large_stuck = 0;
-    private static int small_stuck = 0;
-    private static int large_flip = 0;
-    private static int small_flip = 0;
-    private static int max_value = 0;
-    private static int min_value = 0;
-    private static int segment_class = 0;
-    private static int discontinuous = 0;
-    // ========
-    private static int SEGMENT_GOOD = 0;
-    private static int SEGMENT_BAD = 1;
-    // ========
-    private static int bad_segments = 0;
-    private static int amplitude_small = 0;
-    //private static int amplitude_very_small=0;
-    // ===========================================================
+    private int SEGMENT_GOOD = 0;
+    private int SEGMENT_BAD = 1;
+
+    private int bad_segments = 0;
+    private int amplitude_small = 0;
 
 
-    // ===========================================================
-    public ECGQualityCalculation() {
-        // ===========================================================
-        //if(Log.DEBUG) Log.d(TAG,"starting");
-        envelBuff = new int[BUFF_LENGTH];
-        classBuff = new int[BUFF_LENGTH];
-        for (int i = 0; i < BUFF_LENGTH; i++) {
+    public ECGQualityCalculation(int bufferLength, int acceptableOutlierPercent, int outlierThresholdHigh, int outlierThresholdLow, int badSegmentsThreshold, int ecgThresholdBandLoose) {
+        ACCEPTABLE_OUTLIER_PERCENT = acceptableOutlierPercent;//50;
+        OUTLIER_THRESHOLD_HIGH = outlierThresholdHigh;//4500;
+        OUTLIER_THRESHOLD_LOW = outlierThresholdLow;//20;
+        BAD_SEGMENTS_THRESHOLD = badSegmentsThreshold//2;
+        ECK_THRESHOLD_BAND_LOOSE = ecgThresholdBandLoose;//47;
+
+        envelBuff = new int[bufferLength];
+        classBuff = new int[bufferLength];
+        for (int i = 0; i < bufferLength; i++) {
             envelBuff[i] = 2 * ECK_THRESHOLD_BAND_LOOSE;
             classBuff[i] = 0;
         }
@@ -82,14 +75,13 @@ public class ECGQualityCalculation {
         classHead = 0;
     }
 
-    // ===========================================================
+
     private void classifyDataPoints(int[] data) {
-        // ===========================================================
         large_stuck = 0;
         small_stuck = 0;
         large_flip = 0;
         small_flip = 0;
-        discontinuous = 0;
+        int discontinuous = 0;
         max_value = data[0];
         min_value = data[0];
         for (int i = 0; i < data.length; i++) {
@@ -112,9 +104,8 @@ public class ECGQualityCalculation {
         }
     }
 
-    // ===========================================================
+
     private void classifySegment(int[] data) {
-        // ===========================================================
         int outliers = large_stuck + large_flip + small_stuck + small_flip;
         if (100 * outliers > ACCEPTABLE_OUTLIER_PERCENT * data.length) {
             segment_class = SEGMENT_BAD;
@@ -123,58 +114,45 @@ public class ECGQualityCalculation {
         }
     }
 
-    // ===========================================================
+
     private void classifyBuffer() {
-        // ===========================================================
         bad_segments = 0;
         amplitude_small = 0;
-        //amplitude_very_small=0;
         for (int i = 1; i < envelBuff.length; i++) {
-            if (classBuff[i] == SEGMENT_BAD) bad_segments++;
-            //if(envelBuff[i]<ECK_THRESHOLD_BAND_OFF) amplitude_very_small++;
-            if (envelBuff[i] < ECK_THRESHOLD_BAND_LOOSE) amplitude_small++;
+            if (classBuff[i] == SEGMENT_BAD) {
+                bad_segments++;
+            }
+            if (envelBuff[i] < ECK_THRESHOLD_BAND_LOOSE) {
+                amplitude_small++;
+            }
         }
     }
 
-    // ===========================================================
-    public int currentQuality(int[] data) {
-        // ===========================================================
-        classifyDataPoints(data);
-        /*large_stuck=0;
-		small_stuck=0;
-		large_flip=0;
-		small_flip=0;*/
 
+    public int currentQuality(int[] data) {
+        classifyDataPoints(data);
         classifySegment(data);
-        //segment_class=SEGMENT_GOOD;
 
         classBuff[(classHead++) % classBuff.length] = segment_class;
         envelBuff[(envelHead++) % envelBuff.length] = max_value - min_value;
         classifyBuffer();
 
         if (bad_segments > BAD_SEGMENTS_THRESHOLD) {
-            return DATA_QUALITY_BAND_OFF;
-            //}else if(2*amplitude_very_small>envelBuff.length){
-            //return DATA_QUALITY_BAND_OFF;
+            return AUTOSENSE.QUALITY_BAND_OFF;
         } else if (2 * amplitude_small > envelBuff.length) {
-            return DATA_QUALITY_BAND_LOOSE;
+            return AUTOSENSE.QUALITY_BAND_LOOSE;
         }
-        return DATA_QUALITY_GOOD;
+        return AUTOSENSE.QUALITY_GOOD;
     }
-//
-//    //TODO: Change to DataPoint[]
-//    public int currentQuality(ArrayList<AutosenseSample> ecg) {
-//
-//        int[] data = new int[ecg.size()];
-//
-//        int i=0;
-//        for(AutosenseSample s: ecg) {
-//            data[i++] = s.value;
-//        }
-//
-//        return currentQuality(data);
-//
-//    }
+
+    public int currentQuality(DataPoint[] ecg) {
+        int[] data = new int[ecg.length];
+        int i=0;
+        for(DataPoint s: ecg) {
+            data[i++] = (int) s.value;
+        }
+        return currentQuality(data);
+    }
 
 }
 
