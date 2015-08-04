@@ -11,6 +11,8 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
 import md2k.mCerebrum.cStress.Structs.StressProbability;
+import md2k.mCerebrum.cStress.legacyJava.ECGQualityCalculation;
+import md2k.mCerebrum.cStress.legacyJava.RipQualityCalculation;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -340,6 +342,14 @@ public class cStress {
         DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ, sensorConfig.getFrequency("ACCELZ"));
         DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
+
+        //This check must happen before any normalization.  It operates on the RAW signals.
+        RipQualityCalculation ripQuality = new RipQualityCalculation(5,50,4500,20,2,20,150);
+        ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3,50,4500,20,2,47);
+        if(!ripQuality.computeQuality(rip, 5*1000, 0.67) || !ecgQuality.computeQuality(ecg, 5*1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
+            return 0.0; //data quality failure
+        }
+
 
         for (DataPoint dp : ecg) {
             ECGStats.add(dp.value);
