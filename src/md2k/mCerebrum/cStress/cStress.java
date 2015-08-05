@@ -407,7 +407,7 @@ public class cStress {
 
 
     private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data, double frequency) {
-        ArrayList<DataPoint> result = new ArrayList<>();
+        ArrayList<DataPoint> result = new ArrayList<DataPoint>();
 
         for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
             for (int i = 0; i < 5; i++) {
@@ -460,11 +460,11 @@ public class cStress {
     }
 
     private void resetBuffers() {
-        this.ECG = new ArrayList<>();
-        this.RIP = new ArrayList<>();
-        this.ACCELX = new ArrayList<>();
-        this.ACCELY = new ArrayList<>();
-        this.ACCELZ = new ArrayList<>();
+        this.ECG = new ArrayList<AUTOSENSE_PACKET>();
+        this.RIP = new ArrayList<AUTOSENSE_PACKET>();
+        this.ACCELX = new ArrayList<AUTOSENSE_PACKET>();
+        this.ACCELY = new ArrayList<AUTOSENSE_PACKET>();
+        this.ACCELZ = new ArrayList<AUTOSENSE_PACKET>();
     }
 
 

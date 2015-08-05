@@ -35,7 +35,7 @@ public class SensorConfiguration {
     private HashMap<String,Sensor> sensors;
 
     public SensorConfiguration() {
-        this.sensors = new HashMap<>();
+        this.sensors = new HashMap<String,Sensor>();
     }
 
     public void add(String identifier, double frequency, int channel) {

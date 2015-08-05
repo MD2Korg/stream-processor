@@ -10,6 +10,7 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -96,7 +97,7 @@ public class Library {
      * @return
      */
     public static double[] crossing(DataPoint[] x, double mean) {
-        ArrayList<Double> crossings = new ArrayList<>();
+        ArrayList<Double> crossings = new ArrayList<Double>();
 
         for (int i = 0; i < x.length - 1; i++) {
             if ((x[i].value > mean && x[i + 1].value <= mean) || x[i].value < mean && x[i + 1].value >= mean) {
@@ -253,8 +254,8 @@ public class Library {
         % This function is released to the public domain; Any use is allowed.
          */
         MaxMin result = new MaxMin();
-        ArrayList<DataPoint> maxtab = new ArrayList<>();
-        ArrayList<DataPoint> mintab = new ArrayList<>();
+        ArrayList<DataPoint> maxtab = new ArrayList<DataPoint>();
+        ArrayList<DataPoint> mintab = new ArrayList<DataPoint>();
 
         double mn = 1e9;
         double mx = -1e9;
@@ -340,10 +341,10 @@ public class Library {
     }
 
     public static ArrayList<DataPoint[]> window(DataPoint[] data, int size) {
-        ArrayList<DataPoint[]> result = new ArrayList<>();
+        ArrayList<DataPoint[]> result = new ArrayList<DataPoint[]>();
 
         long startTime = data[0].timestamp;
-        ArrayList<DataPoint> tempArray = new ArrayList<>();
+        ArrayList<DataPoint> tempArray = new ArrayList<DataPoint>();
         DataPoint[] temp;
         for(DataPoint dp: data) {
             if(dp.timestamp < startTime+size) {
@@ -354,7 +355,7 @@ public class Library {
                     temp[i] = tempArray.get(i);
                 }
                 result.add(temp);
-                tempArray = new ArrayList<>();
+                tempArray = new ArrayList<DataPoint>();
                 startTime += size;
             }
         }
@@ -376,11 +377,11 @@ public class Library {
      * @return Outlier array
      */
     public static int[] detect_outlier_v2(double[] sample, long[] timestamp) {
-        ArrayList<Integer> outlier = new ArrayList<>();
+        ArrayList<Integer> outlier = new ArrayList<Integer>();
 
         if (timestamp.length != 0) {
-            ArrayList<Double> valid_rrInterval = new ArrayList<>();
-            ArrayList<Long> valid_timestamp = new ArrayList<>();
+            ArrayList<Double> valid_rrInterval = new ArrayList<Double>();
+            ArrayList<Long> valid_timestamp = new ArrayList<Long>();
             DescriptiveStatistics valid_rrInterval_stats = new DescriptiveStatistics();
             for (int i = 0; i < sample.length; i++) {
                 if (sample[i] > 0.3 && sample[i] < 2.0) {
@@ -476,8 +477,8 @@ public class Library {
         double[] y4 = applySquareFilterNormalize(y3, 90);
         double[] y5 = applyFilterNormalize(y4, blackman(window_l), 90);
 
-        ArrayList<Integer> pkt = new ArrayList<>();
-        ArrayList<Double> valuepks = new ArrayList<>();
+        ArrayList<Integer> pkt = new ArrayList<Integer>();
+        ArrayList<Double> valuepks = new ArrayList<Double>();
         for (int i = 2; i < y5.length - 2; i++) {
             if (y5[i - 2] < y5[i - 1] && y5[i - 1] < y5[i] && y5[i] >= y5[i + 1] && y5[i + 1] > y5[i + 2]) {
                 pkt.add(i);
@@ -496,9 +497,9 @@ public class Library {
         double noise_lev = 0.1 * sig_lev;
 
         int c1 = 0;
-        ArrayList<Integer> c2 = new ArrayList<>();
+        ArrayList<Integer> c2 = new ArrayList<Integer>();
         int i = 0;
-        ArrayList<Integer> Rpeak_temp1 = new ArrayList<>();
+        ArrayList<Integer> Rpeak_temp1 = new ArrayList<Integer>();
 
 
         while (i < pkt.size()) {
@@ -525,8 +526,8 @@ public class Library {
                 rr_ave = rr_ave_update(Rpeak_temp1, rr_ave);
             } else {
                 if (((pkt.get(i) - pkt.get(c2.get(c1 - 1))) > 1.66 * rr_ave) && (i - c2.get(c1 - 1)) > 1) {
-                    ArrayList<Double> searchback_array_inrange = new ArrayList<>();
-                    ArrayList<Integer> searchback_array_inrange_index = new ArrayList<>();
+                    ArrayList<Double> searchback_array_inrange = new ArrayList<Double>();
+                    ArrayList<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
 
                     for (int j = c2.get(c1 - 1) + 1; j < i - 1; j++) {
                         if (valuepks.get(i) < 3.0 * sig_lev && valuepks.get(i) > thr2) {
@@ -583,7 +584,7 @@ public class Library {
 
         boolean difference = false;
 
-        ArrayList<Integer> Rpeak_temp2 = new ArrayList<>();
+        ArrayList<Integer> Rpeak_temp2 = new ArrayList<Integer>();
         for (Integer j : Rpeak_temp1) {
             Rpeak_temp2.add(j);
         }
@@ -591,14 +592,14 @@ public class Library {
 
         while (!difference) {
             int length_Rpeak_temp2 = Rpeak_temp2.size();
-            ArrayList<Integer> diffRpeak = new ArrayList<>();
+            ArrayList<Integer> diffRpeak = new ArrayList<Integer>();
             for(int j=1; j<Rpeak_temp2.size(); j++) {
                 diffRpeak.add(Rpeak_temp2.get(j)-Rpeak_temp2.get(j-1));
             }
 
-            ArrayList<Double> comp1 = new ArrayList<>();
-            ArrayList<Double> comp2 = new ArrayList<>();
-            ArrayList<Integer> eli_index = new ArrayList<>();
+            ArrayList<Double> comp1 = new ArrayList<Double>();
+            ArrayList<Double> comp2 = new ArrayList<Double>();
+            ArrayList<Integer> eli_index = new ArrayList<Integer>();
 
             for(int j=0; j<diffRpeak.size(); j++) {
                 if (diffRpeak.get(j) < (0.5*frequency)) {
@@ -620,13 +621,17 @@ public class Library {
                 }
             }
 
-            Rpeak_temp2.removeIf(s -> s == -999999);
+            for (Iterator<Integer> it=Rpeak_temp2.iterator(); it.hasNext(); ) {
+    			if (it.next() == -999999) {
+    				it.remove();
+    			}
+    		}
 
             difference = length_Rpeak_temp2 == Rpeak_temp2.size();
 
         }
 
-        ArrayList<Integer> Rpeak_temp3 = new ArrayList<>();
+        ArrayList<Integer> Rpeak_temp3 = new ArrayList<Integer>();
         Rpeak_temp3.add(Rpeak_temp2.get(0));
 
         for (int k = 1; k < Rpeak_temp2.size() - 1; k++) {
@@ -657,7 +662,7 @@ public class Library {
      * @return
      */
     public static double rr_ave_update(ArrayList<Integer> rpeak_temp1, double rr_ave) {
-        ArrayList<Integer> peak_interval = new ArrayList<>();
+        ArrayList<Integer> peak_interval = new ArrayList<Integer>();
 
         if (rpeak_temp1.size() == 0) {
             return rr_ave;
@@ -831,8 +836,8 @@ public class Library {
 
         DataPoint[] MAC = mac(sample, windowLength);
 
-        ArrayList<Integer> upInterceptIndex = new ArrayList<>();
-        ArrayList<Integer> downInterceptIndex = new ArrayList<>();
+        ArrayList<Integer> upInterceptIndex = new ArrayList<Integer>();
+        ArrayList<Integer> downInterceptIndex = new ArrayList<Integer>();
 
         for (int i = 1; i < MAC.length; i++) {
             if (sample[i - 1].value <= MAC[i - 1].value && sample[i].value > MAC[i].value) {
@@ -847,8 +852,8 @@ public class Library {
         int[] UI = UIDI.UI;
         int[] DI = UIDI.DI;
 
-        ArrayList<Integer> peakIndex = new ArrayList<>();
-        ArrayList<Integer> valleyIndex = new ArrayList<>();
+        ArrayList<Integer> peakIndex = new ArrayList<Integer>();
+        ArrayList<Integer> valleyIndex = new ArrayList<Integer>();
 
         for (int i = 0; i < DI.length-1; i++) {
 
@@ -894,8 +899,8 @@ public class Library {
         }
         meanInspirationAmplitude /= (valleyIndex.size() - 1);
 
-        ArrayList<Integer> finalPeakIndex = new ArrayList<>();
-        ArrayList<Integer> finalValleyIndex = new ArrayList<>();
+        ArrayList<Integer> finalPeakIndex = new ArrayList<Integer>();
+        ArrayList<Integer> finalValleyIndex = new ArrayList<Integer>();
 
         for (int i = 0; i < inspirationAmplitude.length; i++) {
             if (inspirationAmplitude[i] > 0.15 * meanInspirationAmplitude) {
@@ -916,8 +921,8 @@ public class Library {
             meanExpirationAmplitude /= (finalValleyIndex.size() - 1);
 
 
-            ArrayList<Integer> resultPeakIndex = new ArrayList<>();
-            ArrayList<Integer> resultValleyIndex = new ArrayList<>();
+            ArrayList<Integer> resultPeakIndex = new ArrayList<Integer>();
+            ArrayList<Integer> resultValleyIndex = new ArrayList<Integer>();
 
             resultValleyIndex.add(finalValleyIndex.get(0));
 
@@ -971,15 +976,15 @@ public class Library {
 
         int minimumLength = Math.min(upInterceptIndex.size(), downInterceptIndex.size());
 
-        ArrayList<Integer> D = new ArrayList<>();
-        ArrayList<Integer> U = new ArrayList<>();
+        ArrayList<Integer> D = new ArrayList<Integer>();
+        ArrayList<Integer> U = new ArrayList<Integer>();
         for(int i=0; i<minimumLength; i++) {
             U.add(upInterceptIndex.get(i));
             D.add(downInterceptIndex.get(i));
         }
 
-        ArrayList<Integer> UI = new ArrayList<>();
-        ArrayList<Integer> DI = new ArrayList<>();
+        ArrayList<Integer> UI = new ArrayList<Integer>();
+        ArrayList<Integer> DI = new ArrayList<Integer>();
 
         int i = 0;
         int j = 0;
@@ -996,7 +1001,7 @@ public class Library {
 
                    if (U.get(i) < D.get(j) && D.get(j) < U.get(i+1)) {
                        UI.add(U.get(i));
-                       ArrayList<Integer> ind = new ArrayList<>();
+                       ArrayList<Integer> ind = new ArrayList<Integer>();
                        for (Integer aD : D) {
                            if ((aD > D.get(j)) && (aD < U.get(i+1))) {
                                ind.add(aD);
@@ -1012,7 +1017,7 @@ public class Library {
                        i++;
                    } else if (U.get(i) < D.get(j) && D.get(j) > U.get(i+1)) {
                        DI.add(D.get(i));
-                       ArrayList<Integer> ind = new ArrayList<>();
+                       ArrayList<Integer> ind = new ArrayList<Integer>();
                        for (Integer aU : U) {
                            if ((aU > U.get(i)) && (aU < D.get(j))) {
                                ind.add(aU);
@@ -1034,7 +1039,7 @@ public class Library {
 
                    if (D.get(i) < U.get(j) && U.get(j) < D.get(i+1)) {
                        DI.add(D.get(i));
-                       ArrayList<Integer> ind = new ArrayList<>();
+                       ArrayList<Integer> ind = new ArrayList<Integer>();
                        for (Integer aU : U) {
                            if ((aU > U.get(j)) && (aU < D.get(i+1))) {
                                ind.add(aU);
@@ -1050,7 +1055,7 @@ public class Library {
                        i++;
                    } else if (D.get(i) < U.get(j) && U.get(j) > D.get(i+1)) {
                        UI.add(U.get(i));
-                       ArrayList<Integer> ind = new ArrayList<>();
+                       ArrayList<Integer> ind = new ArrayList<Integer>();
                        for (Integer aD : D) {
                            if ((aD > D.get(i)) && (aD < U.get(j))) {
                                ind.add(aD);
@@ -1085,8 +1090,8 @@ public class Library {
         }
 
 
-        ArrayList<Integer> DownIntercept = new ArrayList<>();
-        ArrayList<Integer> UpIntercept = new ArrayList<>();
+        ArrayList<Integer> DownIntercept = new ArrayList<Integer>();
+        ArrayList<Integer> UpIntercept = new ArrayList<Integer>();
         double fr;
         for(int ii=0; ii<DI.size()-1; ii++) {
             fr = 60000.0 / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
@@ -1097,8 +1102,8 @@ public class Library {
         }
 
 
-        ArrayList<Integer> DownIntercept2 = new ArrayList<>();
-        ArrayList<Integer> UpIntercept2 = new ArrayList<>();
+        ArrayList<Integer> DownIntercept2 = new ArrayList<Integer>();
+        ArrayList<Integer> UpIntercept2 = new ArrayList<Integer>();
         double equivalentSamplePoints = 8.0/20.0 * sc.getFrequency("RIP");
         double upToDownDistance;
         for(int ii=0; ii<DownIntercept.size()-1; ii++) {

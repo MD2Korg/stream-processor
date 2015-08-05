@@ -259,7 +259,7 @@ public class AccelerometerFeatures {
 //        double minOfCrossing = statsCrossing.getMin();
 //        double meanOfCrossing = statsCrossing.getPercentile(50);
 
-        ArrayList<Double> stdMagnitudeArray = new ArrayList<>();
+        ArrayList<Double> stdMagnitudeArray = new ArrayList<Double>();
         for(int i=0; i<segxWindowed.size(); i++) {
 
             DataPoint[] wx = segxWindowed.get(i);
