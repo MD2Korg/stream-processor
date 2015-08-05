@@ -29,6 +29,6 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class PeakValley {
-        public ArrayList<Integer> peakIndex;
-        public ArrayList<Integer> valleyIndex;
+        public ArrayList<Integer> peakIndex = new ArrayList<>();
+        public ArrayList<Integer> valleyIndex = new ArrayList<>();
     }

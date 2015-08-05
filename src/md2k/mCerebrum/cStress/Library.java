@@ -904,34 +904,34 @@ public class Library {
             }
         }
 
-
-        expirationAmplitude = new double[finalValleyIndex.size()-1];
-        meanExpirationAmplitude = 0.0;
-        for(int i=0; i<finalValleyIndex.size()-1; i++) {
-            expirationAmplitude[i] = Math.abs(sample[finalValleyIndex.get(i+1)].value-sample[finalPeakIndex.get(i)].value);
-            meanExpirationAmplitude += expirationAmplitude[i];
-        }
-        meanExpirationAmplitude /= (finalValleyIndex.size()-1);
-
-
-
-        ArrayList<Integer> resultPeakIndex = new ArrayList<>();
-        ArrayList<Integer> resultValleyIndex = new ArrayList<>();
-
-        resultValleyIndex.add(finalValleyIndex.get(0));
-
-        for (int i = 0; i < expirationAmplitude.length; i++) {
-            if (expirationAmplitude[i] > 0.15 * meanExpirationAmplitude) {
-                resultValleyIndex.add(finalValleyIndex.get(i + 1));
-                resultPeakIndex.add(finalPeakIndex.get(i));
-            }
-        }
-        resultPeakIndex.add(finalPeakIndex.get(finalPeakIndex.size() - 1));
-
         PeakValley result = new PeakValley();
-        result.valleyIndex = resultValleyIndex;
-        result.peakIndex = resultPeakIndex;
 
+        if (finalValleyIndex.size() > 0) {
+            expirationAmplitude = new double[finalValleyIndex.size() - 1];
+            meanExpirationAmplitude = 0.0;
+            for (int i = 0; i < finalValleyIndex.size() - 1; i++) {
+                expirationAmplitude[i] = Math.abs(sample[finalValleyIndex.get(i + 1)].value - sample[finalPeakIndex.get(i)].value);
+                meanExpirationAmplitude += expirationAmplitude[i];
+            }
+            meanExpirationAmplitude /= (finalValleyIndex.size() - 1);
+
+
+            ArrayList<Integer> resultPeakIndex = new ArrayList<>();
+            ArrayList<Integer> resultValleyIndex = new ArrayList<>();
+
+            resultValleyIndex.add(finalValleyIndex.get(0));
+
+            for (int i = 0; i < expirationAmplitude.length; i++) {
+                if (expirationAmplitude[i] > 0.15 * meanExpirationAmplitude) {
+                    resultValleyIndex.add(finalValleyIndex.get(i + 1));
+                    resultPeakIndex.add(finalPeakIndex.get(i));
+                }
+            }
+            resultPeakIndex.add(finalPeakIndex.get(finalPeakIndex.size() - 1));
+
+            result.valleyIndex = resultValleyIndex;
+            result.peakIndex = resultPeakIndex;
+        }
         return result;
     }
 
