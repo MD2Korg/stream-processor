@@ -621,7 +621,6 @@ public class Library {
                 }
             }
 
-            //Rpeak_temp2.removeIf(s -> s == -999999);
             for (Iterator<Integer> it=Rpeak_temp2.iterator(); it.hasNext(); ) {
     			if (it.next() == -999999) {
     				it.remove();
