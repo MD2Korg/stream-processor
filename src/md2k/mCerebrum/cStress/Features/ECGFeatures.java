@@ -69,7 +69,7 @@ public class ECGFeatures {
         if (computeRR()) {
 
             RRStats = new DescriptiveStatistics();
-            RRStatsTimestamps = new ArrayList<>();
+            RRStatsTimestamps = new ArrayList<Long>();
 
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {

@@ -38,7 +38,7 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
 
 
     public TOSParser() {
-        this.data = new TreeMap<>();
+        this.data = new TreeMap<Long, AUTOSENSE_PACKET>();
     }
 
     public void importData(String filename) {

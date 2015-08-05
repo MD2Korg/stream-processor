@@ -99,7 +99,7 @@ public class RIPFeatures {
     }
 
     private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {
-        ArrayList<Integer> cInd = new ArrayList<>();
+        ArrayList<Integer> cInd = new ArrayList<Integer>();
         for(int i=0; i<ecg.RRStatsTimestamps.size(); i++) {
             if (ecg.RRStatsTimestamps.get(i)>=starttime && ecg.RRStatsTimestamps.get(i)<endtime) {
                 cInd.add(i);
