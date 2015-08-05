@@ -37,11 +37,9 @@ import static org.junit.Assert.*;
  */
 public class RIPFeaturesTest {
 
-    RIPFeatures ripFeature;
-
     @Before
     public void setUp() throws Exception {
-        ripFeature = new RIPFeatures();
+
     }
 
     @After

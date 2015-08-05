@@ -2,6 +2,8 @@ package md2k.mCerebrum.cStress.tests;
 
 import md2k.mCerebrum.cStress.Library;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -34,5 +36,14 @@ import static org.junit.Assert.*;
  */
 public class AccelerometerFeaturesTest {
 
+    @Before
+    public void setUp() throws Exception {
+
+    }
+
+    @After
+    public void tearDown() throws Exception {
+
+    }
 
 }
