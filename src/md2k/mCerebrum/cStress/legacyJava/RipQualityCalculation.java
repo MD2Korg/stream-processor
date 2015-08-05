@@ -178,7 +178,7 @@ public class RipQualityCalculation {
             for(DataPoint s: dpA) {
                 data[i++] = (int) s.value;
             }
-            if (currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
+            if (data.length > 0 && currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
                 resultCount++;
             }
         }

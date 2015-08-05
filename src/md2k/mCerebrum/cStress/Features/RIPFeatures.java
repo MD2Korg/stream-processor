@@ -105,19 +105,22 @@ public class RIPFeatures {
                 cInd.add(i);
             }
         }
+        double max = 0.0;
+        double min = 0.0;
 
-        double max = ecg.RRStats.getElement(cInd.get(0));
-        double min = ecg.RRStats.getElement(cInd.get(0));
+        if (cInd.size() != 0) {
+            max = ecg.RRStats.getElement(cInd.get(0));
+            min = ecg.RRStats.getElement(cInd.get(0));
 
-        for(int i=0; i<cInd.size(); i++) {
-            if (ecg.RRStats.getElement(i) > max) {
-                max = ecg.RRStats.getElement(i);
-            }
-            if (ecg.RRStats.getElement(i) < min) {
-                min = ecg.RRStats.getElement(i);
+            for (int i = 0; i < cInd.size(); i++) {
+                if (ecg.RRStats.getElement(i) > max) {
+                    max = ecg.RRStats.getElement(i);
+                }
+                if (ecg.RRStats.getElement(i) < min) {
+                    min = ecg.RRStats.getElement(i);
+                }
             }
         }
-
         return max-min;
     }
 
