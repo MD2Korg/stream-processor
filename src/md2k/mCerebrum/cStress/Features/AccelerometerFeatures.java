@@ -285,7 +285,7 @@ public class AccelerometerFeatures {
         this.Activity = activityAnalysis(this.StdevMagnitude, MagnitudeStats); //From Autosense Matlab code
 
 
-//        int NFFT = nextPower2(magnitude.length);
+//        int NFFT = Math.pow(nextPower2(magnitude.length),2);
 //
 //        double[] bufferMagnitude = new double[NFFT];
 //        System.arraycopy(magnitude, 0, bufferMagnitude, 0, magnitude.length);
@@ -330,17 +330,17 @@ public class AccelerometerFeatures {
 //                sum_fft_fivehz += fftMag[i];
 //        }
 //
-//        double[] tempx = new double[nextPower2(segx.length)];
+//        double[] tempx = new double[Math.pow(nextPower2(segx.length),2)];
 //        for (int i = 0; i < segx.length; i++) {
 //            tempx[i] = segx[i].value;
 //        }
 //
-//        double[] tempy = new double[nextPower2(segy.length)];
+//        double[] tempy = new double[Math.pow(nextPower2(segy.length),2)];
 //        for (int i = 0; i < segy.length; i++) {
 //            tempy[i] = segy[i].value;
 //        }
 //
-//        double[] tempz = new double[nextPower2(segz.length)];
+//        double[] tempz = new double[Math.pow(nextPower2(segz.length),2)];
 //        for (int i = 0; i < segz.length; i++) {
 //            tempz[i] = segz[i].value;
 //        }
@@ -445,7 +445,7 @@ public class AccelerometerFeatures {
 //
 //        if (segx.length > 16) {
 //
-//            NFFT = nextPower2(segx.length);
+//            NFFT = Math.pow(nextPower2(segx.length),2);
 //
 //            double[] bufferSegX = new double[NFFT];
 //            System.arraycopy(tempx, 0, bufferSegX, 0, segx.length);
@@ -467,7 +467,7 @@ public class AccelerometerFeatures {
 //
 //        if (segy.length > 16) {
 //
-//            NFFT = nextPower2(segy.length);
+//            NFFT = Math.pow(nextPower2(segy.length),2);
 //
 //            double[] bufferSegY = new double[NFFT];
 //            System.arraycopy(tempy, 0, bufferSegY, 0, segy.length);
@@ -489,7 +489,7 @@ public class AccelerometerFeatures {
 //
 //        if (segz.length > 16) {
 //
-//            NFFT = nextPower2(segz.length);
+//            NFFT = Math.pow(nextPower2(segz.length),2);
 //
 //            double[] bufferSegZ = new double[NFFT];
 //            System.arraycopy(tempz, 0, bufferSegZ, 0, segz.length);

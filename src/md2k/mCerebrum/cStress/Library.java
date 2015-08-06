@@ -69,11 +69,10 @@ public class Library {
      * @return
      */
     public static int nextPower2(int length) {
-        int result = 1;
-        while (result < length) {
-            result *= 2;
-        }
-        return result;
+        if(length == 0)
+            return 0;
+        else
+            return (int)Math.ceil(Math.log(length)/Math.log(2));
     }
 
     /**

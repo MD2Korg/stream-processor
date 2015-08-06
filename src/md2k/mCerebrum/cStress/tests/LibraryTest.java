@@ -56,11 +56,11 @@ public class LibraryTest {
 
     @Test
     public void testNextPower2() throws Exception {
-        assertTrue(Library.nextPower2(0)==1);
-        assertTrue(Library.nextPower2(1)==1);
-        assertTrue(Library.nextPower2(20)==32);
-        assertTrue(Library.nextPower2(255)==256);
-        assertTrue(Library.nextPower2(1000)==1024);
+        assertTrue(Library.nextPower2(0)==0);
+        assertTrue(Library.nextPower2(1)==0);
+        assertTrue(Library.nextPower2(20)==5);
+        assertTrue(Library.nextPower2(255)==8);
+        assertTrue(Library.nextPower2(1000)==10);
     }
 
     @Test
