@@ -760,7 +760,7 @@ public class Library {
 
             for (int j = 0; j < swt.length; j++) {
                 swttau[j] = swt[j] * cwtau - cwt[j] * swtau;
-                cwttau[j] = cwt[j] * cwtau - swt[j] * swtau;
+                cwttau[j] = cwt[j] * cwtau + swt[j] * swtau;
 
                 swttau2 += swttau[j] * swttau[j];
                 cwttau2 += cwttau[j] * cwttau[j];
@@ -770,9 +770,11 @@ public class Library {
             part1 = 0;
             part2 = 0;
             for (int j = 0; j < cwttau.length; j++) {
-                part1 += (dp[j].value * cwttau[j]) * (dp[j].value * cwttau[j]);
-                part2 += (dp[j].value * swttau[j]) * (dp[j].value * swttau[j]);
+                part1 += (dp[j].value * cwttau[j]);
+                part2 += (dp[j].value * swttau[j]);
             }
+            part1 = part1*part1; //Square result
+            part2 = part2*part2; //Square result
 
             P[i] = ((part1 / cwttau2) + (part2 / swttau2)) / (2 * vx);
 
