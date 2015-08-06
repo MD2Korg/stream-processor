@@ -265,8 +265,12 @@ public class LibraryTest {
 
     @Test
     public void testSmooth() throws Exception {
-        double[] inputdata = {1, 2, 3, 4, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -4, -3, -2, -1, 0, 3, 5, 3, 0, -3, -5, -3, 0};
-        double[] correctResult = {1.0, 2.0, 3.0, 3.60, 3.80, 3.60, 3.0, 2.0, 1.0, 0.0, -1.0, -2.0, -3.0, -3.60, -3.80, -3.60, -3.0, -2.0, -0.60, 1.0, 2.0, 2.20, 1.60, 0, -1.60, -2.20, -2.6667, 0};
+        double[] inputdata = {1, 2, 3, 4, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5,
+                -4, -3, -2, -1, 0, 3, 5, 3, 0, -3, -5, -3, 0};
+
+        double[] correctResult = {1.0, 2.0, 3.0, 3.60, 3.80, 3.60, 3.0, 2.0, 1.0, 0.0, -1.0,
+                -2.0, -3.0, -3.60, -3.80, -3.60, -3.0, -2.0, -0.60, 1.0, 2.0, 2.20, 1.60, 0, -1.60, -2.20, -2.6667, 0};
+
         DataPoint[] inputdp = new DataPoint[inputdata.length];
         for(int i = 0; i<inputdata.length; i++) {
             inputdp[i] = new DataPoint(inputdata[i],i);
@@ -490,8 +494,6 @@ public class LibraryTest {
 
         double result34 = Library.heartRatePower(result.P,result.f,0.3,0.4);
         assertEquals(22.3384393631384, result34, 1e-8);
-
-
 
     }
 
