@@ -39,6 +39,7 @@ import java.util.Iterator;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class Library {
+
     /**
      * Compute the signal energy using FFTs
      * @param data
@@ -179,7 +180,7 @@ public class Library {
         int M = (int) Math.floor((window_l + 1) / 2);
 
         for (int i = 0; i < M; i++) {
-            result[i] = 0.42 - 0.5 * Math.cos(2.0 * Math.PI * (double) i / (window_l - 1)) + 0.08 * Math.cos(4.0 * Math.PI * (double) i / (window_l - 1));
+            result[i] = 0.42 - 0.5 * Math.cos(2.0 * Math.PI * (double) i / (window_l - 1)) + 0.08 * Math.cos(4.0 * Math.PI * (double) i / (window_l - 1)); //These constants are specific to the Blackman filter
             result[window_l - i - 1] = result[i];
         }
 
@@ -196,7 +197,7 @@ public class Library {
      * @return Implemented filter
      */
     public static double[] firls(double fl, double[] f, double[] a, double[] w) {
-        //Hardcoded to the specifications of the Autosense ECG sensor right now
+        //Hardcoded to the specifications of the Autosense ECG sensor.  Determined from the Matlab code
 
         double[] result = {-4.7274160329724543e-04, -4.3910892627884660e-04, 8.6902448327532778e-04, 1.2580375981368801e-03, -7.0870338859324122e-05, -3.1826848647111390e-04, 2.6535857915570944e-04, -8.1833969244558271e-04, -1.4124933569042541e-03, -1.9995228246965813e-05, 6.7313359750941992e-05, -6.0349375063082288e-04, 8.6714439266190248e-04, 1.5065160936261314e-03, 1.0310266272463235e-04, 5.4715012534279738e-04, 1.1904732453105013e-03, -7.6681365348830479e-04, -1.2037758114175129e-03, 3.1547725670266574e-05, -1.2630183530614810e-03, -1.7863067743220608e-03, 4.5997532952314775e-04, 3.2716936532409155e-04, -5.2644177116152754e-04, 1.7385569813462844e-03, 1.9889763081328412e-03, -1.0568777171727037e-04, 1.0085738914257093e-03, 1.3166081526795959e-03, -1.6828106527494776e-03, -1.3954395354213642e-03, 3.6314731240927499e-06, -2.3580287405187803e-03, -2.0329727875177984e-03, 1.0570699668543437e-03, -1.2914364939980619e-04, -3.8546902662939887e-04, 3.1026282496662044e-03, 2.0891652801290394e-03, -1.7040978539860152e-04, 2.2345403662638666e-03, 1.1662141454746484e-03, -2.7739626598314152e-03, -9.8117447601674384e-04, -4.4741116462223640e-04, -4.0970300710684790e-03, -1.8325183286848025e-03, 1.3776445217444490e-03, -1.3211583879184985e-03, 3.7867414252479948e-04, 4.7380839079786659e-03, 1.6152763281382203e-03, 5.0172009801508800e-04, 4.1276888849617836e-03, 3.2171309686397854e-04, -3.5444229001001413e-03, 5.9320034125439428e-05, -1.9474610880852858e-03, -6.1508063614239862e-03, -9.9665665297590886e-04, 7.1573500042050489e-04, -3.0500439336000633e-03, 2.2375273611317816e-03, 6.0494339632141611e-03, 6.6666900112815589e-04, 2.6644168389563642e-03, 6.2464301815488002e-03, -1.3664646323453468e-03, -3.1859375309960399e-03, 1.3346226939768935e-03, -5.0751244870958813e-03, -7.8491706097835925e-03, 2.0337081693415804e-04, -1.8091340945618182e-03, -4.6875184234183237e-03, 5.3652517463266009e-03, 6.1905855566496198e-03, -7.4368051532226921e-05, 7.0575372722313061e-03, 7.8206867803311906e-03, -3.4972150936961369e-03, -7.6079548874512096e-04, 1.8835178013748015e-03, -1.0170003906003467e-02, -8.3679423125302028e-03, 7.4577361924604336e-04, -7.1106914021255080e-03, -5.2165564908720000e-03, 9.4292401382520472e-03, 4.2997116416556890e-03, 8.9934836096324411e-04, 1.4397066723214469e-02, 7.9962549473134286e-03, -4.8304877652048297e-03, 4.7345958483973353e-03, 4.9390510587356005e-05, -1.7446053084899240e-02, -7.0564384166495178e-03, -1.6381246987009848e-03, -1.6536831781652900e-02, -3.3074012030242165e-03, 1.3580158825803681e-02, -4.6367025497966462e-04, 6.7704049102291549e-03, 2.6487077400862109e-02, 6.1540352580244520e-03, -2.4533091741271327e-03, 1.5497475687230644e-02, -7.7410309481643867e-03, -2.8629194004745218e-02, -3.6522550021604841e-03, -1.3632609634575103e-02, -3.6030712287501945e-02, 3.8924925851573531e-03, 1.6707802872026386e-02, -1.1053287553442563e-02, 3.1002542423973951e-02, 5.7319009934381555e-02, 1.6637598373033171e-03, 1.8714840588857272e-02, 5.1616797200589280e-02, -4.8886309433549893e-02, -7.3414476566383474e-02, 4.0083352853056056e-03, -1.4044338414188356e-01, -2.4550216720451279e-01, 1.4662066861996509e-01, 4.7941126114385940e-01, 1.4662066861996509e-01, -2.4550216720451279e-01, -1.4044338414188356e-01, 4.0083352853056056e-03, -7.3414476566383474e-02, -4.8886309433549893e-02, 5.1616797200589280e-02, 1.8714840588857272e-02, 1.6637598373033171e-03, 5.7319009934381555e-02, 3.1002542423973951e-02, -1.1053287553442563e-02, 1.6707802872026386e-02, 3.8924925851573531e-03, -3.6030712287501945e-02, -1.3632609634575103e-02, -3.6522550021604841e-03, -2.8629194004745218e-02, -7.7410309481643867e-03, 1.5497475687230644e-02, -2.4533091741271327e-03, 6.1540352580244520e-03, 2.6487077400862109e-02, 6.7704049102291549e-03, -4.6367025497966462e-04, 1.3580158825803681e-02, -3.3074012030242165e-03, -1.6536831781652900e-02, -1.6381246987009848e-03, -7.0564384166495178e-03, -1.7446053084899240e-02, 4.9390510587356005e-05, 4.7345958483973353e-03, -4.8304877652048297e-03, 7.9962549473134286e-03, 1.4397066723214469e-02, 8.9934836096324411e-04, 4.2997116416556890e-03, 9.4292401382520472e-03, -5.2165564908720000e-03, -7.1106914021255080e-03, 7.4577361924604336e-04, -8.3679423125302028e-03, -1.0170003906003467e-02, 1.8835178013748015e-03, -7.6079548874512096e-04, -3.4972150936961369e-03, 7.8206867803311906e-03, 7.0575372722313061e-03, -7.4368051532226921e-05, 6.1905855566496198e-03, 5.3652517463266009e-03, -4.6875184234183237e-03, -1.8091340945618182e-03, 2.0337081693415804e-04, -7.8491706097835925e-03, -5.0751244870958813e-03, 1.3346226939768935e-03, -3.1859375309960399e-03, -1.3664646323453468e-03, 6.2464301815488002e-03, 2.6644168389563642e-03, 6.6666900112815589e-04, 6.0494339632141611e-03, 2.2375273611317816e-03, -3.0500439336000633e-03, 7.1573500042050489e-04, -9.9665665297590886e-04, -6.1508063614239862e-03, -1.9474610880852858e-03, 5.9320034125439428e-05, -3.5444229001001413e-03, 3.2171309686397854e-04, 4.1276888849617836e-03, 5.0172009801508800e-04, 1.6152763281382203e-03, 4.7380839079786659e-03, 3.7867414252479948e-04, -1.3211583879184985e-03, 1.3776445217444490e-03, -1.8325183286848025e-03, -4.0970300710684790e-03, -4.4741116462223640e-04, -9.8117447601674384e-04, -2.7739626598314152e-03, 1.1662141454746484e-03, 2.2345403662638666e-03, -1.7040978539860152e-04, 2.0891652801290394e-03, 3.1026282496662044e-03, -3.8546902662939887e-04, -1.2914364939980619e-04, 1.0570699668543437e-03, -2.0329727875177984e-03, -2.3580287405187803e-03, 3.6314731240927499e-06, -1.3954395354213642e-03, -1.6828106527494776e-03, 1.3166081526795959e-03, 1.0085738914257093e-03, -1.0568777171727037e-04, 1.9889763081328412e-03, 1.7385569813462844e-03, -5.2644177116152754e-04, 3.2716936532409155e-04, 4.5997532952314775e-04, -1.7863067743220608e-03, -1.2630183530614810e-03, 3.1547725670266574e-05, -1.2037758114175129e-03, -7.6681365348830479e-04, 1.1904732453105013e-03, 5.4715012534279738e-04, 1.0310266272463235e-04, 1.5065160936261314e-03, 8.6714439266190248e-04, -6.0349375063082288e-04, 6.7313359750941992e-05, -1.9995228246965813e-05, -1.4124933569042541e-03, -8.1833969244558271e-04, 2.6535857915570944e-04, -3.1826848647111390e-04, -7.0870338859324122e-05, 1.2580375981368801e-03, 8.6902448327532778e-04, -4.3910892627884660e-04, -4.7274160329724543e-04};
 
@@ -340,6 +341,12 @@ public class Library {
         return result;
     }
 
+    /**
+     * Basic time bounded windowing.
+     * @param data
+     * @param size
+     * @return
+     */
     public static ArrayList<DataPoint[]> window(DataPoint[] data, int size) {
         ArrayList<DataPoint[]> result = new ArrayList<DataPoint[]>();
 
@@ -394,11 +401,11 @@ public class Library {
             for (int i = 1; i < valid_rrInterval.size(); i++) {
                 diff_rrInterval.addValue(Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i - 1)));
             }
-            double MED = 4.5 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
-            double MAD = (valid_rrInterval_stats.getPercentile(50) - 2.8 * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
+            double MED = AUTOSENSE.MED_CONSTANT * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
+            double MAD = (valid_rrInterval_stats.getPercentile(50) - AUTOSENSE.MAD_CONSTANT * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
             double CBD = (MED + MAD) / 2.0;
-            if (CBD < 0.2) {
-                CBD = 0.2;
+            if (CBD < AUTOSENSE.CBD_THRESHOLD) {
+                CBD = AUTOSENSE.CBD_THRESHOLD;
             }
 
             for (double aSample : sample) {
@@ -410,7 +417,7 @@ public class Library {
 
             for (int i = 1; i < valid_rrInterval.size() - 1; i++) {
                 double ref = valid_rrInterval.get(i);
-                if (ref > 0.3 && ref < 2.0) {
+                if (ref > AUTOSENSE.REF_MINIMUM && ref < AUTOSENSE.REF_MAXIMUM) {
                     double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rrInterval.get(i));
                     double beat_diff_pre = Math.abs(valid_rrInterval.get(i - 1) - valid_rrInterval.get(i));
                     double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i + 1));
@@ -449,6 +456,18 @@ public class Library {
         return result;
     }
 
+
+    /**
+     * Basic EWMA function
+     * @param x
+     * @param y
+     * @param alpha
+     * @return
+     */
+    public static double ewma(double x, double y, double alpha) {
+        return alpha * x + (1-alpha) * y;
+    }
+
     /**
      * R-peak detector
      * @param datapoints Raw ECG datapoints
@@ -465,12 +484,12 @@ public class Library {
 
         int window_l = (int) Math.ceil(frequency / 5.0);
 
-        double thr1 = 0.5;
+        double thr1 = AUTOSENSE.THR1_INIT;
         double f = 2.0 / frequency;
         double[] F = {0.0, 4.5 * f, 5.0 * f, 20.0 * f, 20.5 * f, 1};
         double[] A = {0, 0, 1, 1, 0, 0};
         double[] w = {500.0 / 0.02, 1.0 / 0.02, 500 / 0.02};
-        double fl = 256;
+        double fl = AUTOSENSE.FL_INIT;
 
         double[] y2 = applyFilterNormalize(sample, firls(fl, F, A, w), 90);
         double[] y3 = applyFilterNormalize(y2, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
@@ -493,8 +512,8 @@ public class Library {
         rr_ave /= (pkt.size() - 1);
 
         double thr2 = 0.5 * thr1;
-        double sig_lev = 4.0 * thr1;
-        double noise_lev = 0.1 * sig_lev;
+        double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
+        double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
 
         int c1 = 0;
         ArrayList<Integer> c2 = new ArrayList<Integer>();
@@ -509,14 +528,14 @@ public class Library {
                         Rpeak_temp1.add(0);
                     }
                     Rpeak_temp1.set(c1,pkt.get(i));
-                    sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
+                    sig_lev = ewma(y5[pkt.get(i)],sig_lev, AUTOSENSE.EWMA_ALPHA);
                     if(c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1,i);
                     c1 += 1;
                 } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
-                    noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
+                    noise_lev = ewma(y5[pkt.get(i)],noise_lev, AUTOSENSE.EWMA_ALPHA);
                 }
 
                 thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
@@ -549,7 +568,7 @@ public class Library {
                             Rpeak_temp1.add(0);
                         }
                         Rpeak_temp1.set(c1,pkt.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                        sig_lev = 0.125 * y5[Rpeak_temp1.get(c1 - 1)] + 0.875 * sig_lev;
+                        sig_lev = ewma(y5[Rpeak_temp1.get(c1 - 1)], sig_lev, AUTOSENSE.EWMA_ALPHA);
                         if(c1 >= c2.size()) {
                             c2.add(0);
                         }
@@ -566,14 +585,14 @@ public class Library {
                         Rpeak_temp1.add(0);
                     }
                     Rpeak_temp1.set(c1,pkt.get(i));
-                    sig_lev = 0.125 * y5[pkt.get(i)] + 0.875 * sig_lev;
+                    sig_lev = ewma(y5[pkt.get(i)],sig_lev, AUTOSENSE.EWMA_ALPHA);
                     if(c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i);
                     c1 += 1;
                 } else if (y5[pkt.get(i)] < thr1 && y5[pkt.get(i)] > thr2) {
-                    noise_lev = 0.125 * y5[pkt.get(i)] + 0.875 * noise_lev;
+                    noise_lev = ewma(y5[pkt.get(i)],noise_lev, AUTOSENSE.EWMA_ALPHA);
                 }
                 thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
                 thr2 = 0.5 * thr1;
@@ -637,7 +656,7 @@ public class Library {
         for (int k = 1; k < Rpeak_temp2.size() - 1; k++) {
             double maxValue = -1e9;
             int index = 0;
-            for (int j = Rpeak_temp2.get(k) - (int) Math.ceil(frequency / 10.0); j < Rpeak_temp2.get(k) + (int) Math.ceil(frequency / 10.0); j++) {
+            for (int j = Rpeak_temp2.get(k) - (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR); j < Rpeak_temp2.get(k) + (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR); j++) {
                 if (sample[j] > maxValue) {
                     maxValue = sample[j];
                     index = j;
@@ -672,11 +691,11 @@ public class Library {
                 peak_interval.add(rpeak_temp1.get(i) - rpeak_temp1.get(i - 1));
             }
 
-            if (peak_interval.size() < 8) {
+            if (peak_interval.size() < AUTOSENSE.PEAK_INTERVAL_MINIMUM_SIZE) {
                 return rr_ave;
             } else {
                 double result = 0.0;
-                for (int i = peak_interval.size() - 8; i < peak_interval.size(); i++) {
+                for (int i = peak_interval.size() - AUTOSENSE.PEAK_INTERVAL_MINIMUM_SIZE; i < peak_interval.size(); i++) {
                     result += peak_interval.get(i);
                 }
                 result /= 8.0;
@@ -832,9 +851,9 @@ public class Library {
 
     public static PeakValley peakvalley_v2(DataPoint[] rip, SensorConfiguration sc) {
 
-        DataPoint[] sample = smooth(rip, 5);
+        DataPoint[] sample = smooth(rip, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
 
-        int windowLength = (int) Math.round(8.0 * sc.getFrequency("RIP"));
+        int windowLength = (int) Math.round(AUTOSENSE.WINDOW_LENGTH_SECS * sc.getFrequency("RIP"));
 
         DataPoint[] MAC = mac(sample, windowLength);
 
@@ -905,7 +924,7 @@ public class Library {
         ArrayList<Integer> finalValleyIndex = new ArrayList<Integer>();
 
         for (int i = 0; i < inspirationAmplitude.length; i++) {
-            if (inspirationAmplitude[i] > 0.15 * meanInspirationAmplitude) {
+            if (inspirationAmplitude[i] > AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanInspirationAmplitude) {
                 finalPeakIndex.add(peakIndex.get(i));
                 finalValleyIndex.add(valleyIndex.get(i));
             }
@@ -929,7 +948,7 @@ public class Library {
             resultValleyIndex.add(finalValleyIndex.get(0));
 
             for (int i = 0; i < expirationAmplitude.length; i++) {
-                if (expirationAmplitude[i] > 0.15 * meanExpirationAmplitude) {
+                if (expirationAmplitude[i] > AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanExpirationAmplitude) {
                     resultValleyIndex.add(finalValleyIndex.get(i + 1));
                     resultPeakIndex.add(finalPeakIndex.get(i));
                 }
@@ -1096,8 +1115,8 @@ public class Library {
         ArrayList<Integer> UpIntercept = new ArrayList<Integer>();
         double fr;
         for(int ii=0; ii<DI.size()-1; ii++) {
-            fr = 60000.0 / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
-            if (fr >= 8.0 && fr <= 65) {
+            fr = (double)windowLength / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
+            if (fr >= AUTOSENSE.RESPIRATION_MINIMUM && fr <= AUTOSENSE.RESPIRATION_MAXIMUM) {
                 DownIntercept.add(DI.get(ii));
                 UpIntercept.add(UI.get(ii));
             }
@@ -1106,7 +1125,7 @@ public class Library {
 
         ArrayList<Integer> DownIntercept2 = new ArrayList<Integer>();
         ArrayList<Integer> UpIntercept2 = new ArrayList<Integer>();
-        double equivalentSamplePoints = 8.0/20.0 * sc.getFrequency("RIP");
+        double equivalentSamplePoints = AUTOSENSE.WINDOW_LENGTH_SECS/ AUTOSENSE.WINDOW_DIVIDER_FACTOR * sc.getFrequency("RIP");
         double upToDownDistance;
         for(int ii=0; ii<DownIntercept.size()-1; ii++) {
             upToDownDistance = DownIntercept.get(ii+1)-UpIntercept.get(ii)+1;
