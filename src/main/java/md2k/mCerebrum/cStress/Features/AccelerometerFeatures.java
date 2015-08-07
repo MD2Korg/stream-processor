@@ -33,6 +33,7 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AccelerometerFeatures {
+    public static final double ACTIVITY_THRESHOLD = 0.35;
     public boolean Activity;
 
 //    public double MaxOfMean;
@@ -618,7 +619,7 @@ public class AccelerometerFeatures {
 
         boolean[] activityOrNot = new boolean[accelFeature.length];
         for(int i=0; i<accelFeature.length; i++) {
-            activityOrNot[i] = accelFeature[i] > (lowlimit + 0.35 * range);
+            activityOrNot[i] = accelFeature[i] > (lowlimit + ACTIVITY_THRESHOLD * range);
         }
 
         int minActive = 0;
