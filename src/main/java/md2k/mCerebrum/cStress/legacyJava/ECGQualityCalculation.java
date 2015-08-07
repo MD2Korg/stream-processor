@@ -10,6 +10,7 @@ import static md2k.mCerebrum.cStress.Library.window;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * - Kurt Plarre <kplarre@memphis.edu>
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
  * <p>
