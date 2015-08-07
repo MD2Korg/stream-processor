@@ -34,8 +34,9 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ECGFeatures {
-
+public class ECGFeatures 
+{	
+	
     public DescriptiveStatistics RRStats;
     public ArrayList<Long> RRStatsTimestamps;
 
@@ -44,7 +45,7 @@ public class ECGFeatures {
     private final double frequency;
 
     //Feature storage
-    private double[] rr_value = new double[0];
+    public double[] rr_value = new double[0];
     private long[] rr_timestamp = new long[0];
     private long[] rr_index = new long[0];
     private int[] rr_outlier = new int[0];
@@ -55,11 +56,10 @@ public class ECGFeatures {
     private double LombHighFrequencyEnergy;
     private double LombLowHighFrequencyEnergyRatio;
 
-    public ECGFeatures(DataPoint[] dp, double freq) {
-
+    public ECGFeatures(DataPoint[] dp, double freq, BinnedStatistics ECGStats, boolean activity) 
+    {
         datapoints = dp;
         frequency = freq;
-
 
         //TS correction here...
         //Data Quality here...
@@ -68,12 +68,25 @@ public class ECGFeatures {
 
         if (computeRR()) {
 
+        	//Decide if we should add the RR intervals from this minute to the running stats
+        	if(!activity)
+        	{
+        		for (int i=0;i<rr_value.length;i++) 
+        		{
+					if(rr_outlier[i] == AUTOSENSE.QUALITY_GOOD)
+						ECGStats.add((int)(rr_value[i]*1000));
+        		}
+        	}
+        	
+        	
+        	//Normalize RR intervals using Winsorized mean and stddev
+        
             RRStats = new DescriptiveStatistics();
             RRStatsTimestamps = new ArrayList<>();
 
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
-                    RRStats.addValue(rr_value[i]);
+                    RRStats.addValue((rr_value[i]-ECGStats.getWinsorizedMean()/1000) / (ECGStats.getWinsorizedStdev()/1000));
                     RRStatsTimestamps.add(rr_timestamp[i]);
                 }
             }
