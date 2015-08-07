@@ -36,6 +36,7 @@ public class Main {
         TOSParser tp = new TOSParser();
         tp.importData(args[0]); //A TOS file is the input argument
 
+
         cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
 
         for(AUTOSENSE_PACKET ap: tp) {
