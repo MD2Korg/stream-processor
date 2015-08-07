@@ -1,4 +1,4 @@
-package tests;
+package md2k.mCerebrum.cStress.tests;
 
 import org.junit.After;
 import org.junit.Before;

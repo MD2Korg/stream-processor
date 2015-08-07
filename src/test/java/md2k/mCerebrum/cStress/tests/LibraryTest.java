@@ -1,4 +1,4 @@
-package tests;
+package md2k.mCerebrum.cStress.tests;
 
 import md2k.mCerebrum.cStress.Library;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
