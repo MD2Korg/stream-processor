@@ -1,7 +1,5 @@
 package md2k.mCerebrum.cStress.tests;
 
-import md2k.mCerebrum.cStress.Library;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +32,7 @@ import static org.junit.Assert.*;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AccelerometerFeaturesTest {
+public class RIPFeaturesTest {
 
     @Before
     public void setUp() throws Exception {

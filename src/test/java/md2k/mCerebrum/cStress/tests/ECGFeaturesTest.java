@@ -1,6 +1,5 @@
 package md2k.mCerebrum.cStress.tests;
 
-import md2k.mCerebrum.cStress.Library;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
