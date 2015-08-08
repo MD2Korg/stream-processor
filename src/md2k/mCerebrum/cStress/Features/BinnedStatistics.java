@@ -149,7 +149,7 @@ public class BinnedStatistics {
 		int sum = 0;
     	for(int i=0;i<num_bins;i++)
     	{
-    		sum += bins[i]*i;
+    		sum += bins[i]*(i+min_value);
     	}
 		mean = (double)sum/count;
         return mean;
@@ -159,7 +159,7 @@ public class BinnedStatistics {
 		int sum = 0;
     	for(int i=0;i<num_bins;i++)
     	{
-    		sum += bins[i]*(i-mean)*(i-mean);
+    		sum += bins[i]*((i+min_value)-mean)*((i+min_value)-mean);
 		}
 		stdev = Math.sqrt(sum/ (count-1));
         return stdev;
@@ -174,7 +174,7 @@ public class BinnedStatistics {
 		int sum = 0;
     	for(int i=0;i<num_bins;i++)
     	{
-    		sum += bins[i]*((i>high) ? high : ((i<low) ? low : i));
+    		sum += bins[i]*(((i+min_value)>high) ? high : (((i+min_value)<low) ? low : i+min_value));
     	}
 		winsorized_mean = (double)sum/count;
         return winsorized_mean;
@@ -185,7 +185,7 @@ public class BinnedStatistics {
 		int sum = 0;
     	for(int i=0;i<num_bins;i++)
     	{
-			double temp = ((i>high) ? high : ((i<low) ? low : i));
+			double temp = (((i+min_value)>high) ? high : (((i+min_value)<low) ? low : i+min_value));
     		sum += bins[i]*(temp-winsorized_mean)*(temp-winsorized_mean);
 		}
 		winsorized_stdev = Math.sqrt(sum/ (count-1));
