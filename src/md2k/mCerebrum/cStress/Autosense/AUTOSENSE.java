@@ -44,9 +44,6 @@ public class AUTOSENSE {
     public static final int QUALITY_MISSING = 4;
     public static final int QUALITY_BAND_LOOSE = 2;
 
-    public static final int NOT_STRESSED = 0;
-    public static final int STRESSED = 1;
-
     public static final int WRIST_ACCEL_X_LEFT = 26;
     public static final int WRIST_ACCEL_Y_LEFT = 27;
     public static final int WRIST_ACCEL_Z_LEFT = 28;
