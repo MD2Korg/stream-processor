@@ -47,4 +47,21 @@ public class AUTOSENSE {
     public static final int NOT_STRESSED = 0;
     public static final int STRESSED = 1;
 
+    public static final int WRIST_ACCEL_X_LEFT = 26;
+    public static final int WRIST_ACCEL_Y_LEFT = 27;
+    public static final int WRIST_ACCEL_Z_LEFT = 28;
+    public static final int WRIST_GYRO_X_LEFT = 29;
+    public static final int WRIST_GYRO_Y_LEFT = 30;
+    public static final int WRIST_GYRO_Z_LEFT = 31;
+
+
+    public static final int G_QUALITY_GOOD = 0;
+    public static final int G_QUALITY_MISSING = 4;
+    public static final int G_QUALITY_NOISE = 1;
+    public static final int G_QUALITY_BAND_LOOSE = 2;
+    public static final int G_QUALITY_BAND_OFF = 3;
+    public static final int G_QUALITY_BAD = 2;
+
+    public static final int MAX_SEQ_SIZE = 4096;
+
 }
