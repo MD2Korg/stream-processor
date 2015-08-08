@@ -90,14 +90,14 @@ public class cStress {
 
     public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile) {
         this.windowSize = windowSize;
-        this.ECGStats = new BinnedStatistics();
+        this.ECGStats = new BinnedStatistics(800,2000);
         
         this.RIPBinnedStats = new BinnedStatistics[RIPFeatures.NUM_BASE_FEATURES];
-    	this.RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION] = new BinnedStatistics(20000);
-    	this.RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION] = new BinnedStatistics(20000);
-    	this.RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION] = new BinnedStatistics(20000);
-    	this.RIPBinnedStats[RIPFeatures.FIND_STRETCH] = new BinnedStatistics(5000);
-    	this.RIPBinnedStats[RIPFeatures.FIND_RSA] = new BinnedStatistics(5000);
+    	this.RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION] = new BinnedStatistics(500,12000);
+    	this.RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION] = new BinnedStatistics(500,12000);
+    	this.RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION] = new BinnedStatistics(500,12000);
+    	this.RIPBinnedStats[RIPFeatures.FIND_STRETCH] = new BinnedStatistics(0,5000);
+    	this.RIPBinnedStats[RIPFeatures.FIND_RSA] = new BinnedStatistics(0,4200);
     	
     	this.RIPStats = new RunningStatistics[2];
     	this.RIPStats[0] = new RunningStatistics();
@@ -365,14 +365,6 @@ public class cStress {
         DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
-        /*KH: This block is not needed for ECG and RIP, because we don't want to store the actual ECG and RIP samples, but the RR intervals and RIP features (ecg. insp duration, expir duration, etc).*/
-        /*for (int i=0; i< ecgFeatures.RRStatsR DataPoint dp : ecg) {
-            ECGStats.add(dp.value);
-        }
-        for (DataPoint dp : rip) {
-            RIPStats.add(dp.value);
-        }
-        */
         for (DataPoint dp : accelerometerX) {
             AccelXStats.add(dp.value);
         }
@@ -384,16 +376,6 @@ public class cStress {
         }
 
         
-        //Normalize
-        /*KH: Likewise, we don't want to normalize ECG or RIP samples, but the ECG and RIP base features*/
-        /*
-        for (int i=0; i<ecg.length; i++) {
-            ecg[i].value = (ecg[i].value-ECGStats.getMean()) / (ECGStats.getStdev());
-        }
-        for (int i=0; i<rip.length; i++) {
-            rip[i].value = (rip[i].value-RIPStats.getMean()) / (RIPStats.getStdev());
-        }
-        */
         for (int i=0; i<accelerometerX.length; i++) {
             accelerometerX[i].value = (accelerometerX[i].value-AccelXStats.getMean()) / (AccelXStats.getStdev());
         }

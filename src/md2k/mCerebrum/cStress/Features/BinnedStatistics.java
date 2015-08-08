@@ -33,7 +33,7 @@ package md2k.mCerebrum.cStress.Features;
 public class BinnedStatistics {
 
 	private static final int DEFAULT_MAXVAL = 5000;
-	private int max_value;
+	private static final int DEFAULT_MINVAL = 0;
     private double mean;
     private double stdev;
     
@@ -46,13 +46,18 @@ public class BinnedStatistics {
 	private double low;
 	private double high;
     
+	private int min_value;
+	private int max_value;
+	private int num_bins;
+	
     private int [] bins;
     //TODO: Needs a persistence and initialization layer
 
     /**
      * Class to keep track of running statistics.
      */
-    public BinnedStatistics(int max_value) {
+    public BinnedStatistics(int min_value,int max_value) 
+    {
         this.mean = 0.0;
         this.stdev = 0.0;
         this.count = 0;
@@ -62,15 +67,17 @@ public class BinnedStatistics {
         this.med = 0;
 		this.low = 0;
 		this.high = 0;
+		this.min_value = min_value;
 		this.max_value = max_value;
-        this.bins = new int[max_value+1];
-        for(int i=0;i<=max_value;i++)
+		this.num_bins = max_value-min_value+1;
+        this.bins = new int[num_bins];
+        for(int i=0;i<num_bins;i++)
         	this.bins[i] = 0;
     }
 
     public BinnedStatistics()
     {
-    	this(BinnedStatistics.DEFAULT_MAXVAL);
+    	this(BinnedStatistics.DEFAULT_MINVAL,BinnedStatistics.DEFAULT_MAXVAL);
     }
     
     
@@ -84,20 +91,20 @@ public class BinnedStatistics {
     public void computeMed()
     {
         int sum = 0;
-    	for(int i=0;i<=max_value;i++)
+    	for(int i=0;i<num_bins;i++)
     	{
     		sum += bins[i];
     		if (sum > count/2)
     		{
-    			med = i;
+    			med = i+min_value;
     			break;
     		}
     		else if (sum == count/2)
     		{
     			if(count %2 ==0)
-    				med = (2*i+1)/2;
+    				med = (2*i+1)/2+min_value;
     			else
-    				med = i;
+    				med = i+min_value;
     			
     			break;
     		}
@@ -106,18 +113,15 @@ public class BinnedStatistics {
     
     public void computeMad()
     {
-    	int [] madbins= new int[max_value];
-		for(int i=0;i<max_value;i++)
-    	{
+    	int [] madbins= new int[num_bins-1];
+		for(int i=0;i<num_bins-1;i++)
     		madbins[i] = 0;
-    	}
-    	for(int i=0;i<=max_value;i++)
-    	{
-    		madbins[Math.abs(i-med)] += bins[i];
-    	}
+		
+    	for(int i=0;i<num_bins;i++)
+    		madbins[Math.abs(i+min_value-med)] += bins[i];
     	
 		int sum = 0;
-    	for(int i=0;i<max_value;i++)
+    	for(int i=0;i<num_bins-1;i++)
     	{
     		sum += madbins[i];
     		if (sum > count/2)
@@ -143,7 +147,7 @@ public class BinnedStatistics {
     public double getMean() {
 		
 		int sum = 0;
-    	for(int i=0;i<=max_value;i++)
+    	for(int i=0;i<num_bins;i++)
     	{
     		sum += bins[i]*i;
     	}
@@ -153,7 +157,7 @@ public class BinnedStatistics {
 
     public double getStdev() {
 		int sum = 0;
-    	for(int i=0;i<=max_value;i++)
+    	for(int i=0;i<num_bins;i++)
     	{
     		sum += bins[i]*(i-mean)*(i-mean);
 		}
@@ -168,7 +172,7 @@ public class BinnedStatistics {
 		computeMad();
         
 		int sum = 0;
-    	for(int i=0;i<=max_value;i++)
+    	for(int i=0;i<num_bins;i++)
     	{
     		sum += bins[i]*((i>high) ? high : ((i<low) ? low : i));
     	}
@@ -179,7 +183,7 @@ public class BinnedStatistics {
     public double getWinsorizedStdev() 
 	{
 		int sum = 0;
-    	for(int i=0;i<=max_value;i++)
+    	for(int i=0;i<num_bins;i++)
     	{
 			double temp = ((i>high) ? high : ((i<low) ? low : i));
     		sum += bins[i]*(temp-winsorized_mean)*(temp-winsorized_mean);

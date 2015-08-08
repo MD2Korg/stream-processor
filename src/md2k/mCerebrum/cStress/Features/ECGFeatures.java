@@ -84,8 +84,10 @@ public class ECGFeatures
             RRStats = new DescriptiveStatistics();
             RRStatsTimestamps = new ArrayList<>();
 
-            for (int i = 0; i < rr_value.length; i++) {
-                if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
+            for (int i = 0; i < rr_value.length; i++) 
+            {
+                if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) 
+                {
                     RRStats.addValue((rr_value[i]-ECGStats.getWinsorizedMean()/1000) / (ECGStats.getWinsorizedStdev()/1000));
                     RRStatsTimestamps.add(rr_timestamp[i]);
                 }
