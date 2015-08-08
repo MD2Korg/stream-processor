@@ -45,7 +45,7 @@ public class ECGFeatures
     private final double frequency;
 
     //Feature storage
-    public double[] rr_value = new double[0];
+    private double[] rr_value = new double[0];
     private long[] rr_timestamp = new long[0];
     private long[] rr_index = new long[0];
     private int[] rr_outlier = new int[0];
