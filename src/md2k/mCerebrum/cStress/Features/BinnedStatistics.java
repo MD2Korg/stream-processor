@@ -81,6 +81,22 @@ public class BinnedStatistics {
     }
     
     
+    public void reset();
+    {
+        mean = 0.0;
+        stdev = 0.0;
+        count = 0;
+        winsorized_mean = 0.0;
+        winsorized_stdev = 0.0;
+        mad = 0;
+        med = 0;
+		low = 0;
+		high = 0;
+		
+        for(int i=0;i<num_bins;i++)
+        	bins[i] = 0;
+    }
+    
     public void add(int x) 
     {
     	bins[x]++;
@@ -89,7 +105,7 @@ public class BinnedStatistics {
 
     
     public void computeMed()
-    {
+    
         int sum = 0;
     	for(int i=0;i<num_bins;i++)
     	{
