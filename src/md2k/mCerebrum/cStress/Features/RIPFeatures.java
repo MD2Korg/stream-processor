@@ -131,8 +131,8 @@ public class RIPFeatures {
         	RIPStats[0].add(BreathRate);
         	RIPStats[1].add(MinuteVolume);
         }
-        MinuteVolume = (MinuteVolume-RIPStats[1].getMean())/RIPStats[1].getStdev();
         BreathRate = (BreathRate-RIPStats[0].getMean())/RIPStats[0].getStdev();
+        MinuteVolume = (MinuteVolume-RIPStats[1].getMean())/RIPStats[1].getStdev();
     }
 
     private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {
