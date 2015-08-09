@@ -1,13 +1,11 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Library;
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Intercepts;
 import md2k.mCerebrum.cStress.Structs.MaxMin;
 import md2k.mCerebrum.cStress.Structs.PeakValley;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class RIPFeatures {
-	
 	public static final int FIND_INSP_DURATION = 0;
 	public static final int FIND_EXPR_DURATION = 1;
 	public static final int FIND_RESP_DURATION = 2;
@@ -47,7 +44,7 @@ public class RIPFeatures {
 	public static final int FIND_RSA = 4;
 	public static final int NUM_BASE_FEATURES = 5;
 	
-    public double MinuteVolume;
+	public double MinuteVolume;
     public double BreathRate;
 
     //ripfeature_extraction.m
@@ -94,7 +91,6 @@ public class RIPFeatures {
         PeakValley pvData = peakvalley_v2(rip); //There is no trailing valley in this output.
 
 
-        //Code to add data to RIP Statistics
         if(!activity)
         {
 	        for(int i=0; i<pvData.valleyIndex.size()-1; i++) 

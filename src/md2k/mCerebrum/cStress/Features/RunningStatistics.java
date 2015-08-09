@@ -55,5 +55,5 @@ public class RunningStatistics {
     public double getStdev() {
         return Math.sqrt(stdev / (count-1));
     }
-
+     
 }

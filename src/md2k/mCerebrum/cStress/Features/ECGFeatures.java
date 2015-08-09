@@ -34,9 +34,10 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class ECGFeatures 
-{	
-	
+
+
+public class ECGFeatures {
+
     public DescriptiveStatistics RRStats;
     public ArrayList<Long> RRStatsTimestamps;
 
@@ -56,10 +57,11 @@ public class ECGFeatures
     private double LombHighFrequencyEnergy;
     private double LombLowHighFrequencyEnergyRatio;
 
-    public ECGFeatures(DataPoint[] dp, double freq, BinnedStatistics ECGStats, boolean activity) 
+    public ECGFeatures(DataPoint[] dp, double freq,BinnedStatistics ECGStats, boolean activity) 
     {
         datapoints = dp;
         frequency = freq;
+
 
         //TS correction here...
         //Data Quality here...
@@ -92,7 +94,7 @@ public class ECGFeatures
                     RRStatsTimestamps.add(rr_timestamp[i]);
                 }
             }
-
+           
             HeartRate = ((double) RRStats.getN()) / (dp[dp.length - 1].timestamp - dp[0].timestamp);
 
             DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];

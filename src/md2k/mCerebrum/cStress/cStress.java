@@ -16,7 +16,6 @@ import md2k.mCerebrum.cStress.Structs.StressProbability;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -54,7 +53,6 @@ import java.util.ArrayList;
  *			Restructured code to make sure normalization is done to ECG and RIP features, using Running stats, containined only non-activity features	 
  * 
  */
-
 public class cStress {
 
     long windowStartTime = -1;
@@ -73,6 +71,7 @@ public class cStress {
     BinnedStatistics ECGStats;
     BinnedStatistics [] RIPBinnedStats;
     RunningStatistics [] RIPStats;
+    
     RunningStatistics AccelXStats;
     RunningStatistics AccelYStats;
     RunningStatistics AccelZStats;
@@ -103,9 +102,8 @@ public class cStress {
     	this.RIPStats = new RunningStatistics[2];
     	this.RIPStats[0] = new RunningStatistics();
     	this.RIPStats[1] = new RunningStatistics();
-    	
-
-
+    	this.ECGStats = new RunningStatistics();
+        this.RIPStats = new RunningStatistics();
         this.AccelXStats = new RunningStatistics();
         this.AccelYStats = new RunningStatistics();
         this.AccelZStats = new RunningStatistics();
@@ -357,14 +355,14 @@ public class cStress {
         return accelFeatures.Activity;
     }
 
-    
+
     public double process() {
 
-        DataPoint[] accelerometerX = generateDataPointArray(ACCELX);
-        DataPoint[] accelerometerY = generateDataPointArray(ACCELY);
-        DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ);
-        DataPoint[] ecg = generateDataPointArray(ECG,);
-        DataPoint[] rip = generateDataPointArray(RIP);
+        DataPoint[] accelerometerX = generateDataPointArray(ACCELX, sensorConfig.getFrequency("ACCELX"));
+        DataPoint[] accelerometerY = generateDataPointArray(ACCELY, sensorConfig.getFrequency("ACCELY"));
+        DataPoint[] accelerometerZ = generateDataPointArray(ACCELZ, sensorConfig.getFrequency("ACCELZ"));
+        DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
+        DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
         for (DataPoint dp : accelerometerX) {
             AccelXStats.add(dp.value);
@@ -376,7 +374,7 @@ public class cStress {
             AccelZStats.add(dp.value);
         }
 
-        
+        //Normalize
         for (int i=0; i<accelerometerX.length; i++) {
             accelerometerX[i].value = (accelerometerX[i].value-AccelXStats.getMean()) / (AccelXStats.getStdev());
         }
@@ -386,6 +384,8 @@ public class cStress {
         for (int i=0; i<accelerometerZ.length; i++) {
             accelerometerZ[i].value = (accelerometerZ[i].value-AccelZStats.getMean()) / (AccelZStats.getStdev());
         }
+
+
 
 
         try {
@@ -407,35 +407,18 @@ public class cStress {
     }
 
 
-    private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data) {
+    private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data, double frequency) {
+        ArrayList<DataPoint> result = new ArrayList<>();
 
-        int vectorSize = (( data.get(data.size()-1).seq - data.get(0).seq ) % AUTOSENSE.MAX_SEQ_SIZE) + 1;
-
-        DataPoint[] result = new DataPoint[vectorSize];
-
-        int count =0;
-        int currentSeqNum = data.get(0).seq;
-        for(AUTOSENSE_PACKET ap : data) {
-            while(currentSeqNum != ap.seq) { //Identify next received sequence number, skip the missing data.
-                currentSeqNum = (currentSeqNum + 1) % AUTOSENSE.MAX_SEQ_SIZE;
-                count += 5;
-            }
-            for(int j=count; j<count+5; j++) { //Populate the result array, accounting for missing data.
-                result[j] = new DataPoint(ap.data[j-count],ap.timestamp);
+        for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
+            for (int i = 0; i < 5; i++) {
+                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency)); //TODO: Fix this to be something more realistic
+                result.add(dp);
             }
         }
-
-        double expectedSampleTiming = (double)(data.get(data.size()-1).timestamp - data.get(0).timestamp) / ((data.size()*5)-4);
-
-        long startTime = result[4].timestamp;
-        for(int i=4; i>0; i--) { //Back propagate timing information from starttime based on sample timing
-            result[i].timestamp = startTime - (long)( (4-i) * expectedSampleTiming );
-        }
-        for(int i=5; i<result.length; i++) { //Propagate timing information from starttime based on sample timing through the last packet
-            result[i].timestamp = (long)((i-5)*expectedSampleTiming) + startTime;
-        }
-
-        return result;
+        DataPoint[] dpArray = new DataPoint[result.size()];
+        result.toArray(dpArray);
+        return dpArray;
     }
 
     public void add(AUTOSENSE_PACKET ap) {
