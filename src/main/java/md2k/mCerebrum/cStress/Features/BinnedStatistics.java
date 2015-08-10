@@ -1,6 +1,9 @@
 package md2k.mCerebrum.cStress.Features;
 
 
+import java.util.HashMap;
+
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -34,11 +37,7 @@ public class BinnedStatistics {
 
     private static final int DEFAULT_MAXVAL = 5000;
     private static final int DEFAULT_MINVAL = 0;
-    private double mean;
-    private double stdev;
 
-    private double winsorized_mean;
-    private double winsorized_stdev;
     private long count;
 
     private int med;
@@ -46,33 +45,24 @@ public class BinnedStatistics {
     private double low;
     private double high;
 
-    private int min_value;
-    private int max_value;
-    private int num_bins;
+    private int numBins;
 
-    private int[] bins;
+    private HashMap<Integer,Integer> bins;
     //TODO: Needs a persistence and initialization layer
 
     /**
      * Class to keep track of running statistics.
      */
-    public BinnedStatistics(int min_value, int max_value) {
-        this.mean = 0.0;
-        this.stdev = 0.0;
+    public BinnedStatistics(int minValue, int maxValue) {
         this.count = 0;
-        this.winsorized_mean = 0.0;
-        this.winsorized_stdev = 0.0;
         this.mad = 0;
         this.med = 0;
         this.low = 0;
         this.high = 0;
-        this.min_value = min_value;
-        this.max_value = max_value;
-        this.num_bins = max_value - min_value + 1;
-        this.bins = new int[num_bins];
-        for (int i = 0; i < num_bins; i++) {
-            this.bins[i] = 0;
-        }
+        this.numBins = maxValue - minValue + 1;
+
+        this.bins = new HashMap<Integer, Integer>();
+
     }
 
     public BinnedStatistics() {
@@ -81,89 +71,97 @@ public class BinnedStatistics {
 
 
     public void reset() {
-        mean = 0.0;
-        stdev = 0.0;
         count = 0;
-        winsorized_mean = 0.0;
-        winsorized_stdev = 0.0;
         mad = 0;
         med = 0;
         low = 0;
         high = 0;
 
-        for (int i = 0; i < num_bins; i++) {
-            bins[i] = 0;
-        }
+        this.bins = new HashMap<Integer, Integer>();
     }
 
     public void add(int x) {
-        bins[x]++;
+        if(!bins.containsKey(x)) {
+            bins.put(x,0);
+        }
+        bins.put(x,bins.get(x)+1);
         count++;
     }
 
 
-    public void computeMed() {
+    private void computeMed() {
         int sum = 0;
-        for (int i = 0; i < num_bins; i++) {
-            sum += bins[i];
-            if (sum > count / 2) {
-                med = i + min_value;
-                break;
-            } else if (sum == count / 2) {
-                if (count % 2 == 0)
-                    med = (2 * i + 1) / 2 + min_value;
-                else
-                    med = i + min_value;
+        for (int i = 0; i < numBins; i++) {
+            if(bins.containsKey(i)) {
+                sum += bins.get(i);
+                if (sum > count / 2) {
+                    this.med = i;
+                    break;
+                } else if (sum == count / 2) {
+                    if (count % 2 == 0)
+                        this.med = (2 * i + 1) / 2;
+                    else
+                        this.med = i;
 
-                break;
+                    break;
+                }
             }
         }
     }
 
-    public void computeMad() {
-        int[] madbins = new int[num_bins - 1];
-        for (int i = 0; i < num_bins - 1; i++)
-            madbins[i] = 0;
+    private void computeMad() {
+        HashMap<Integer,Integer> madbins = new HashMap<Integer, Integer>();
 
-        for (int i = 0; i < num_bins; i++)
-            madbins[Math.abs(i + min_value - med)] += bins[i];
+        for (int i = 0; i < numBins; i++)
+            if(bins.containsKey(i)) {
+                int index = Math.abs(i - med);
+                if(!madbins.containsKey(index)) {
+                    madbins.put(index,0);
+                }
+                madbins.put(index, bins.get(i));
+            }
 
         int sum = 0;
-        for (int i = 0; i < num_bins - 1; i++) {
-            sum += madbins[i];
-            if (sum > count / 2) {
-                mad = i;
-                break;
-            } else if (sum == count / 2) {
-                if (count % 2 == 0)
-                    mad = (2 * i + 1) / 2.0;
-                else
+        for (int i = 0; i < numBins - 1; i++) {
+            if(madbins.containsKey(i)) {
+                sum += madbins.get(i);
+                if (sum > count / 2) {
                     mad = i;
+                    break;
+                } else if (sum == count / 2) {
+                    if (count % 2 == 0)
+                        mad = (2 * i + 1) / 2.0;
+                    else
+                        mad = i;
 
-                break;
+                    break;
+                }
             }
         }
-        low = med - 3.0 * mad;
-        high = med + 3.0 * mad;
+        this.low = med - 3.0 * mad;
+        this.high = med + 3.0 * mad;
     }
 
 
     public double getMean() {
-        int sum = 0;
-        for (int i = 0; i < num_bins; i++) {
-            sum += bins[i] * (i + min_value);
+        double sum = 0;
+        for (int i = 0; i < numBins; i++) {
+            if(bins.containsKey(i)) {
+                sum += bins.get(i) * i;
+            }
         }
-        mean = (double) sum / count;
-        return mean;
+        return sum / count;
     }
 
     public double getStdev() {
-        int sum = 0;
-        for (int i = 0; i < num_bins; i++) {
-            sum += bins[i] * ((i + min_value) - mean) * ((i + min_value) - mean);
+        double sum = 0;
+        double mean = getMean();
+        for (int i = 0; i < numBins; i++) {
+            if(bins.containsKey(i)) {
+                sum += bins.get(i) * ((i - mean) * (i - mean));
+            }
         }
-        stdev = Math.sqrt(sum / (count - 1));
-        return stdev;
+        return Math.sqrt(sum / (count - 1));
     }
 
 
@@ -171,22 +169,29 @@ public class BinnedStatistics {
         computeMed();
         computeMad();
 
-        int sum = 0;
-        for (int i = 0; i < num_bins; i++) {
-            sum += bins[i] * (((i + min_value) > high) ? high : (((i + min_value) < low) ? low : i + min_value));
+        double sum = 0;
+        for (int i = 0; i < numBins; i++) {
+            if(bins.containsKey(i)) {
+                sum += bins.get(i) * ((i > high) ? high : ((i < low) ? low : i ));
+            }
         }
-        winsorized_mean = (double) sum / count;
-        return winsorized_mean;
+        return sum / count;
     }
 
     public double getWinsorizedStdev() {
-        int sum = 0;
-        for (int i = 0; i < num_bins; i++) {
-            double temp = (((i + min_value) > high) ? high : (((i + min_value) < low) ? low : i + min_value));
-            sum += bins[i] * (temp - winsorized_mean) * (temp - winsorized_mean);
+        computeMed();
+        computeMad();
+
+        double winsorizedMean = getWinsorizedMean();
+
+        double sum = 0;
+        for (int i = 0; i < numBins; i++) {
+            double temp = ((i > high) ? high : ((i < low) ? low : i));
+            if(bins.containsKey(i)) {
+                sum += bins.get(i) * (temp - winsorizedMean) * (temp - winsorizedMean);
+            }
         }
-        winsorized_stdev = Math.sqrt(sum / (count - 1));
-        return winsorized_stdev;
+        return Math.sqrt(sum / (count - 1));
     }
 
 }
