@@ -7,6 +7,7 @@ import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
 import md2k.mCerebrum.cStress.Features.RunningStatistics;
+import md2k.mCerebrum.cStress.Features.BinnedStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
+ * - Karen Hovsepian <karoaper@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +48,7 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 public class cStress {
 
     long windowStartTime = -1;
@@ -61,8 +64,10 @@ public class cStress {
 
     // Keep track of mean and stdev.  This should be reset at the beginning of each day.
     // An EWMA-based solution may need to be added to seed the new day with appropriate information
-    RunningStatistics ECGStats;
-    RunningStatistics RIPStats;
+    BinnedStatistics ECGStats;
+    BinnedStatistics[] RIPBinnedStats;
+    RunningStatistics[] RIPStats;
+
     RunningStatistics AccelXStats;
     RunningStatistics AccelYStats;
     RunningStatistics AccelZStats;
@@ -81,8 +86,19 @@ public class cStress {
 
     public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile) {
         this.windowSize = windowSize;
-        this.ECGStats = new RunningStatistics();
-        this.RIPStats = new RunningStatistics();
+        this.ECGStats = new BinnedStatistics(800, 2000);
+
+        this.RIPBinnedStats = new BinnedStatistics[RIPFeatures.NUM_BASE_FEATURES];
+        this.RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION] = new BinnedStatistics(500, 12000);
+        this.RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION] = new BinnedStatistics(500, 12000);
+        this.RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION] = new BinnedStatistics(500, 12000);
+        this.RIPBinnedStats[RIPFeatures.FIND_STRETCH] = new BinnedStatistics(0, 5000);
+        this.RIPBinnedStats[RIPFeatures.FIND_RSA] = new BinnedStatistics(0, 4200);
+
+        this.RIPStats = new RunningStatistics[2];
+        this.RIPStats[0] = new RunningStatistics();
+        this.RIPStats[1] = new RunningStatistics();
+
         this.AccelXStats = new RunningStatistics();
         this.AccelYStats = new RunningStatistics();
         this.AccelZStats = new RunningStatistics();
@@ -112,7 +128,7 @@ public class cStress {
         try {
             br = new BufferedReader(new FileReader(featureVectorParameterFile));
             count = 0;
-            while ( (line = br.readLine()) != null ) {
+            while ((line = br.readLine()) != null) {
                 String[] meanstd = line.split(csvSplitBy);
                 this.featureVectorMean[count] = Double.parseDouble(meanstd[0]);
                 this.featureVectorStd[count] = Double.parseDouble(meanstd[1]);
@@ -146,7 +162,7 @@ public class cStress {
 
     private StressProbability evaluteStressModel(AccelerometerFeatures accelFeatures, ECGFeatures ecgFeatures, RIPFeatures ripFeatures, double bias) {
 
-        StressProbability stressResult = new StressProbability(-1,0.0);
+        StressProbability stressResult = new StressProbability(-1, 0.0);
 
         /* Ordered list of features for SVM model
         
@@ -245,7 +261,7 @@ public class cStress {
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
          */
-        double RSA_Quartile_Deviation = (ecgFeatures.RRStats.getPercentile(75) - ecgFeatures.RRStats.getPercentile(25) ) / 2.0;
+        double RSA_Quartile_Deviation = (ecgFeatures.RRStats.getPercentile(75) - ecgFeatures.RRStats.getPercentile(25)) / 2.0;
         double RSA_Mean = ecgFeatures.RRStats.getMean();
         double RSA_Median = ecgFeatures.RRStats.getPercentile(50);
         double RSA_80thPercentile = ecgFeatures.RRStats.getPercentile(80);
@@ -324,7 +340,7 @@ public class cStress {
     private double[] normalizeFV(double[] featureVector) {
         double[] result = new double[featureVector.length];
 
-        for(int i=0; i<featureVector.length; i++) {
+        for (int i = 0; i < featureVector.length; i++) {
             result[i] = (featureVector[i] - this.featureVectorMean[i]) / this.featureVectorStd[i];
         }
         return result;
@@ -344,19 +360,12 @@ public class cStress {
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
         //This check must happen before any normalization.  It operates on the RAW signals.
-        RipQualityCalculation ripQuality = new RipQualityCalculation(5,50,4500,20,2,20,150);
-        ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3,50,4500,20,2,47);
-        if(!ripQuality.computeQuality(rip, 5*1000, 0.67) || !ecgQuality.computeQuality(ecg, 5*1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
+        RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
+        ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
+        if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
             return 0.0; //data quality failure
         }
 
-
-        for (DataPoint dp : ecg) {
-            ECGStats.add(dp.value);
-        }
-        for (DataPoint dp : rip) {
-            RIPStats.add(dp.value);
-        }
         for (DataPoint dp : accelerometerX) {
             AccelXStats.add(dp.value);
         }
@@ -369,12 +378,6 @@ public class cStress {
 
 
         //Normalize
-        for (DataPoint anEcg : ecg) {
-            anEcg.value = (anEcg.value - ECGStats.getMean()) / (ECGStats.getStdev());
-        }
-        for (DataPoint aRip : rip) {
-            aRip.value = (aRip.value - RIPStats.getMean()) / (RIPStats.getStdev());
-        }
         for (DataPoint anAccelerometerX : accelerometerX) {
             anAccelerometerX.value = (anAccelerometerX.value - AccelXStats.getMean()) / (AccelXStats.getStdev());
         }
@@ -386,13 +389,12 @@ public class cStress {
         }
 
 
-
-
         try {
             System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
             accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"), MagnitudeStats);
-            ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"));
-            ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig);
+            //Passed ECGStats and Activity to ECGFeatures, so that appropriate normalization can be carried out, and if there's no activity, RR intervals can be added to ECGStats
+            ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"), ECGStats, accelFeatures.Activity);
+            ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig, RIPBinnedStats, RIPStats, accelFeatures.Activity);
 
             StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, 0.339329059788);
             System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);

@@ -43,10 +43,9 @@ public class RunningStatistics {
     }
 
     public void add(double x) {
-        double tmp = mean;
-        count++;
-        mean += (x-tmp) / count;
-        stdev += (x-tmp) * (x-mean);
+        count += 1;
+        mean += (x - mean) / count;
+        stdev += (x - mean) * (x - mean);
     }
 
     public double getMean() {
@@ -54,7 +53,7 @@ public class RunningStatistics {
     }
 
     public double getStdev() {
-        return Math.sqrt(stdev / (count-2));
+        return Math.sqrt(stdev / (count - 1));
     }
 
 }

@@ -36,6 +36,14 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class RIPFeatures {
+
+    public static final int FIND_INSP_DURATION = 0;
+    public static final int FIND_EXPR_DURATION = 1;
+    public static final int FIND_RESP_DURATION = 2;
+    public static final int FIND_STRETCH = 3;
+    public static final int FIND_RSA = 4;
+    public static final int NUM_BASE_FEATURES = 5;
+
     public double MinuteVolume;
     public double BreathRate;
 
@@ -55,11 +63,12 @@ public class RIPFeatures {
     /**
      * Core Respiration Features
      * Reference: ripFeature_Extraction.m
+     *
      * @param rip
      * @param ecg
      * @param sc
      */
-    public RIPFeatures(DataPoint[] rip, ECGFeatures ecg, SensorConfiguration sc) {
+    public RIPFeatures(DataPoint[] rip, ECGFeatures ecg, SensorConfiguration sc, BinnedStatistics[] RIPBinnedStats, RunningStatistics[] RIPStats, boolean activity) {
 
         //Initialize statistics
         InspDuration = new DescriptiveStatistics();
@@ -74,34 +83,53 @@ public class RIPFeatures {
         //TS correction here...
         //Data Quality here...
         //Interpolation...
-        //TODO: winsorization using activity input? Insp, Expr, Stretch, MinuteVentilation(Volume)
 
         PeakValley pvData = Library.peakvalley_v2(rip, sensorConfig); //There is no trailing valley in this output.
 
 
-        for(int i=0; i<pvData.valleyIndex.size()-1; i++) {
-
-            InspDuration.addValue(rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp);
-            ExprDuration.addValue(rip[pvData.valleyIndex.get(i+1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp);
-            RespDuration.addValue(rip[pvData.valleyIndex.get(i+1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp);
-            Stretch.addValue(rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value);
-            IERatio.addValue(InspDuration.getElement((int)InspDuration.getN()-1)-ExprDuration.getElement((int)ExprDuration.getN()-1));
-            RSA.addValue(rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i+1)].timestamp, ecg) );
+        if (!activity) {
+            for (int i = 0; i < pvData.valleyIndex.size() - 1; i++) {
+                RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].add((int) (rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp));
+                RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].add((int) (rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp));
+                RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].add((int) (rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp));
+                RIPBinnedStats[RIPFeatures.FIND_STRETCH].add((int) (rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value));
+                RIPBinnedStats[RIPFeatures.FIND_RSA].add((int) (rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg) * 1000));
+            }
         }
+
+        //Add values, normalized with Winsorized mean and std
+        for (int i = 0; i < pvData.valleyIndex.size() - 1; i++) {
+            InspDuration.addValue(((rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].getWinsorizedStdev());
+            ExprDuration.addValue(((rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].getWinsorizedStdev());
+            RespDuration.addValue(((rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].getWinsorizedStdev());
+            Stretch.addValue(((rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value) - RIPBinnedStats[RIPFeatures.FIND_STRETCH].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_STRETCH].getWinsorizedStdev());
+            IERatio.addValue(InspDuration.getElement((int) InspDuration.getN() - 1) / ExprDuration.getElement((int) ExprDuration.getN() - 1));
+            RSA.addValue((rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg) - RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedMean() / 1000.0) / (RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedStdev() / 1000));
+        }
+
 
         BreathRate = pvData.valleyIndex.size();
 
         MinuteVolume = 0.0;
-        for(int i=0; i<pvData.valleyIndex.size(); i++) {
+        for (int i = 0; i < pvData.valleyIndex.size(); i++) {
             MinuteVolume += (rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) / 1000.0 * (rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value) / 2.0;
         }
         MinuteVolume *= pvData.valleyIndex.size();
+
+        if (!activity) {
+            RIPStats[0].add(BreathRate);
+            RIPStats[1].add(MinuteVolume);
+        }
+        BreathRate = (BreathRate - RIPStats[0].getMean()) / RIPStats[0].getStdev();
+        MinuteVolume = (MinuteVolume - RIPStats[1].getMean()) / RIPStats[1].getStdev();
+
+
     }
 
     private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {
         ArrayList<Integer> cInd = new ArrayList<Integer>();
-        for(int i=0; i<ecg.RRStatsTimestamps.size(); i++) {
-            if (ecg.RRStatsTimestamps.get(i)>=starttime && ecg.RRStatsTimestamps.get(i)<endtime) {
+        for (int i = 0; i < ecg.RRStatsTimestamps.size(); i++) {
+            if (ecg.RRStatsTimestamps.get(i) >= starttime && ecg.RRStatsTimestamps.get(i) < endtime) {
                 cInd.add(i);
             }
         }
@@ -121,7 +149,7 @@ public class RIPFeatures {
                 }
             }
         }
-        return max-min;
+        return max - min;
     }
 
 

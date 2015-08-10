@@ -55,7 +55,7 @@ public class ECGFeatures {
     private double LombHighFrequencyEnergy;
     private double LombLowHighFrequencyEnergyRatio;
 
-    public ECGFeatures(DataPoint[] dp, double freq) {
+    public ECGFeatures(DataPoint[] dp, double freq, BinnedStatistics ECGStats, boolean activity) {
 
         datapoints = dp;
         frequency = freq;
@@ -64,16 +64,27 @@ public class ECGFeatures {
         //TS correction here...
         //Data Quality here...
         //Interpolation...
-        //TODO: winsorization using activity input? RR-interval
 
         if (computeRR()) {
+
+            //Decide if we should add the RR intervals from this minute to the running stats
+            if (!activity) {
+                for (int i = 0; i < rr_value.length; i++) {
+                    if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD)
+                        ECGStats.add((int) (rr_value[i] * 1000));
+                }
+            }
+
+
+            //Normalize RR intervals using Winsorized mean and stddev
 
             RRStats = new DescriptiveStatistics();
             RRStatsTimestamps = new ArrayList<Long>();
 
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
-                    RRStats.addValue(rr_value[i]);
+                    RRStats.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000) / (ECGStats.getWinsorizedStdev() / 1000));
+
                     RRStatsTimestamps.add(rr_timestamp[i]);
                 }
             }
@@ -99,6 +110,7 @@ public class ECGFeatures {
 
     /**
      * Compute RR intervals
+     *
      * @return True if successful, False if there is not enough data
      */
     private boolean computeRR() {
