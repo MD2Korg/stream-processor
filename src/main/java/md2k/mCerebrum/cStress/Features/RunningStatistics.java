@@ -1,7 +1,4 @@
-package md2k.mCerebrum;
-
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
-import md2k.mCerebrum.cStress.cStress;
+package md2k.mCerebrum.cStress.Features;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -12,11 +9,11 @@ import md2k.mCerebrum.cStress.cStress;
  * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ * list of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -29,20 +26,34 @@ import md2k.mCerebrum.cStress.cStress;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Main {
+public class RunningStatistics {
+    private double mean;
+    private double stdev;
+    private long count;
 
-    public static void main(String[] args) {
+    //TODO: Needs a persistence and initialization layer
 
-        TOSParser tp = new TOSParser();
-        tp.importData(args[0]); //A TOS file is the input argument
-
-        cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
-
-        for(AUTOSENSE_PACKET ap: tp) {
-            stress.add(ap);
-        }
-
-
-
+    /**
+     * Class to keep track of running statistics.
+     */
+    public RunningStatistics() {
+        this.mean = 0.0;
+        this.stdev = 0.0;
+        this.count = 0;
     }
+
+    public void add(double x) {
+        count += 1;
+        mean += (x - mean) / count;
+        stdev += (x - mean) * (x - mean);
+    }
+
+    public double getMean() {
+        return mean;
+    }
+
+    public double getStdev() {
+        return Math.sqrt(stdev / (count - 1));
+    }
+
 }

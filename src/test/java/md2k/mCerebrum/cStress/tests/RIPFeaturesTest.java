@@ -1,4 +1,10 @@
-package md2k.mCerebrum.cStress.Autosense;
+package md2k.mCerebrum.cStress.tests;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -9,11 +15,11 @@ package md2k.mCerebrum.cStress.Autosense;
  * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ * list of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,25 +32,16 @@ package md2k.mCerebrum.cStress.Autosense;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AUTOSENSE {
+public class RIPFeaturesTest {
 
-    public static final int CHEST_ECG = 0;
-    public static final int CHEST_ACCEL_X = 1;
-    public static final int CHEST_ACCEL_Y = 2;
-    public static final int CHEST_ACCEL_Z = 3;
-    public static final int CHEST_GSR = 4;
+    @Before
+    public void setUp() throws Exception {
 
-    public static final int CHEST_RIP = 7;
-    public static final int CHEST_BATTERY_SKINTEMP_AMBIENTTEMP = 8;
+    }
 
-    public static final int QUALITY_GOOD = 0;
-    public static final int QUALITY_NOISE = 1;
-    public static final int QUALITY_BAD = 2;
-    public static final int QUALITY_BAND_OFF = 3;
-    public static final int QUALITY_MISSING = 4;
-    public static final int QUALITY_BAND_LOOSE = 2;
+    @After
+    public void tearDown() throws Exception {
 
-    public static final int NOT_STRESSED = 0;
-    public static final int STRESSED = 1;
+    }
 
 }

@@ -1,6 +1,7 @@
-package md2k.mCerebrum.cStress.Structs;
+package md2k.mCerebrum;
 
-import java.util.ArrayList;
+import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
+import md2k.mCerebrum.cStress.cStress;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,7 +29,21 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class PeakValley {
-        public ArrayList<Integer> peakIndex;
-        public ArrayList<Integer> valleyIndex;
+public class Main {
+
+    public static void main(String[] args) {
+
+        TOSParser tp = new TOSParser();
+        tp.importData(args[0]); //A TOS file is the input argument
+
+
+        cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
+
+        for(AUTOSENSE_PACKET ap: tp) {
+            stress.add(ap);
+        }
+
+
+
     }
+}

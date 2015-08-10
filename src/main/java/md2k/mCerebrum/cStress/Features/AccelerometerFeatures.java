@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * - Md. Mahbubur Rahman <mmrahman@memphis.edu>
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
  *
@@ -33,6 +34,7 @@ import java.util.ArrayList;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 public class AccelerometerFeatures {
+    public static final double ACTIVITY_THRESHOLD = 0.35;
     public boolean Activity;
 
 //    public double MaxOfMean;
@@ -118,9 +120,9 @@ public class AccelerometerFeatures {
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq, RunningStatistics MagnitudeStats) {
         int windowSize = 10*1000;
 
-        ArrayList<DataPoint[]> segxWindowed = window(segx,windowSize);
-        ArrayList<DataPoint[]> segyWindowed = window(segy,windowSize);
-        ArrayList<DataPoint[]> segzWindowed = window(segz,windowSize);
+        ArrayList<DataPoint[]> segxWindowed = Library.window(segx, windowSize);
+        ArrayList<DataPoint[]> segyWindowed = Library.window(segy, windowSize);
+        ArrayList<DataPoint[]> segzWindowed = Library.window(segz, windowSize);
 
 
 
@@ -259,7 +261,7 @@ public class AccelerometerFeatures {
 //        double minOfCrossing = statsCrossing.getMin();
 //        double meanOfCrossing = statsCrossing.getPercentile(50);
 
-        ArrayList<Double> stdMagnitudeArray = new ArrayList<>();
+        ArrayList<Double> stdMagnitudeArray = new ArrayList<Double>();
         for(int i=0; i<segxWindowed.size(); i++) {
 
             DataPoint[] wx = segxWindowed.get(i);
@@ -285,7 +287,7 @@ public class AccelerometerFeatures {
         this.Activity = activityAnalysis(this.StdevMagnitude, MagnitudeStats); //From Autosense Matlab code
 
 
-//        int NFFT = nextPower2(magnitude.length);
+//        int NFFT = Math.pow(nextPower2(magnitude.length),2);
 //
 //        double[] bufferMagnitude = new double[NFFT];
 //        System.arraycopy(magnitude, 0, bufferMagnitude, 0, magnitude.length);
@@ -330,17 +332,17 @@ public class AccelerometerFeatures {
 //                sum_fft_fivehz += fftMag[i];
 //        }
 //
-//        double[] tempx = new double[nextPower2(segx.length)];
+//        double[] tempx = new double[Math.pow(nextPower2(segx.length),2)];
 //        for (int i = 0; i < segx.length; i++) {
 //            tempx[i] = segx[i].value;
 //        }
 //
-//        double[] tempy = new double[nextPower2(segy.length)];
+//        double[] tempy = new double[Math.pow(nextPower2(segy.length),2)];
 //        for (int i = 0; i < segy.length; i++) {
 //            tempy[i] = segy[i].value;
 //        }
 //
-//        double[] tempz = new double[nextPower2(segz.length)];
+//        double[] tempz = new double[Math.pow(nextPower2(segz.length),2)];
 //        for (int i = 0; i < segz.length; i++) {
 //            tempz[i] = segz[i].value;
 //        }
@@ -445,7 +447,7 @@ public class AccelerometerFeatures {
 //
 //        if (segx.length > 16) {
 //
-//            NFFT = nextPower2(segx.length);
+//            NFFT = Math.pow(nextPower2(segx.length),2);
 //
 //            double[] bufferSegX = new double[NFFT];
 //            System.arraycopy(tempx, 0, bufferSegX, 0, segx.length);
@@ -467,7 +469,7 @@ public class AccelerometerFeatures {
 //
 //        if (segy.length > 16) {
 //
-//            NFFT = nextPower2(segy.length);
+//            NFFT = Math.pow(nextPower2(segy.length),2);
 //
 //            double[] bufferSegY = new double[NFFT];
 //            System.arraycopy(tempy, 0, bufferSegY, 0, segy.length);
@@ -489,7 +491,7 @@ public class AccelerometerFeatures {
 //
 //        if (segz.length > 16) {
 //
-//            NFFT = nextPower2(segz.length);
+//            NFFT = Math.pow(nextPower2(segz.length),2);
 //
 //            double[] bufferSegZ = new double[NFFT];
 //            System.arraycopy(tempz, 0, bufferSegZ, 0, segz.length);
@@ -610,35 +612,6 @@ public class AccelerometerFeatures {
 
     }
 
-    private ArrayList<DataPoint[]> window(DataPoint[] data, int size) {
-        ArrayList<DataPoint[]> result = new ArrayList<>();
-
-        long startTime = data[0].timestamp;
-        ArrayList<DataPoint> tempArray = new ArrayList<>();
-        DataPoint[] temp;
-        for(DataPoint dp: data) {
-            if(dp.timestamp < startTime+size) {
-                tempArray.add(dp);
-            } else {
-                temp = new DataPoint[tempArray.size()];
-                for(int i=0; i<temp.length; i++) {
-                    temp[i] = tempArray.get(i);
-                }
-                result.add(temp);
-                tempArray = new ArrayList<>();
-                startTime += size;
-            }
-        }
-        temp = new DataPoint[tempArray.size()];
-        for(int i=0; i<temp.length; i++) {
-            temp[i] = tempArray.get(i);
-        }
-        result.add(temp);
-
-
-        return result;
-    }
-
     public boolean activityAnalysis(double[] accelFeature, RunningStatistics magnitudeStats) {
 
         double lowlimit = magnitudeStats.getMean() - 3.0 * magnitudeStats.getStdev(); //Using this instead of percentile01
@@ -647,7 +620,7 @@ public class AccelerometerFeatures {
 
         boolean[] activityOrNot = new boolean[accelFeature.length];
         for(int i=0; i<accelFeature.length; i++) {
-            activityOrNot[i] = accelFeature[i] > (lowlimit + 0.35 * range);
+            activityOrNot[i] = accelFeature[i] > (lowlimit + ACTIVITY_THRESHOLD * range);
         }
 
         int minActive = 0;

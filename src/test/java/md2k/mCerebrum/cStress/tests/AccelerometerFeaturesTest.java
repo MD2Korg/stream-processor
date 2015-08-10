@@ -1,4 +1,9 @@
-package md2k.mCerebrum.cStress.Features;
+package md2k.mCerebrum.cStress.tests;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -26,34 +31,16 @@ package md2k.mCerebrum.cStress.Features;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class RunningStatistics {
-    private double mean;
-    private double stdev;
-    private long count;
+public class AccelerometerFeaturesTest {
 
-    //TODO: Needs a persistence and initialization layer
+    @Before
+    public void setUp() throws Exception {
 
-    /**
-     * Class to keep track of running statistics.
-     */
-    public RunningStatistics() {
-        this.mean = 0.0;
-        this.stdev = 0.0;
-        this.count = 0;
     }
 
-    public void add(double x) {
-        count += 1;
-        mean += (x-mean) / count;
-        stdev += (x-mean) * (x-mean);
+    @After
+    public void tearDown() throws Exception {
+
     }
 
-    public double getMean() {
-        return mean;
-    }
-
-    public double getStdev() {
-        return Math.sqrt(stdev / (count-1));
-    }
-     
 }

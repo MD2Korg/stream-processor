@@ -1,5 +1,9 @@
 *.class
 
+*.iml
+*.ipr
+*.iws
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

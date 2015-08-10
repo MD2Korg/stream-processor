@@ -1,6 +1,5 @@
 package md2k.mCerebrum.cStress.tests;
 
-import md2k.mCerebrum.cStress.Library;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,79 +43,4 @@ public class ECGFeaturesTest {
     public void tearDown() throws Exception {
 
     }
-
-//    @Test
-//    public void testComputeRR() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testDetect_outlier_v2() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testDetect_Rpeak() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testRr_ave_update() throws Exception {
-//
-//    }
-
-    @Test
-    public void testBlackman() throws Exception {
-        double[] trueBlackman10;
-        double[] result;
-        double sum;
-
-        //Test window of length 10
-        int windowLength = 10;
-        trueBlackman10 = new double[]{ 0, 0.0509, 0.2580, 0.6300, 0.9511, 0.9511, 0.6300, 0.2580, 0.0509, 0};
-
-        result = Library.blackman(windowLength);
-
-        sum = 0.0;
-        for(int i=0; i<result.length; i++) {
-            sum += Math.abs(result[i]-trueBlackman10[i]);
-        }
-        assertEquals(sum,0.0,1e-3);
-
-        //Test window of length 0
-        windowLength = 0;
-        result = Library.blackman(windowLength);
-        assertArrayEquals(result,new double[0],1e-4);
-    }
-
-    @Test
-    public void testFirls() throws Exception {
-
-    }
-
-    @Test
-    public void testConv() throws Exception {
-        double[] signal = {1,2,3,2,1};
-        double[] kernel = {1,0,1};
-        double[] trueAnswer = {2,4,4,4,2};
-
-        double[] result = Library.conv(signal, kernel);
-
-        assertArrayEquals(result,trueAnswer,1e-3);
-    }
-
-//    @Test
-//    public void testHeartRateLFHF() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testHeartRatePower() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testLomb() throws Exception {
-//
-//    }
 }
