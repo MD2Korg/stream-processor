@@ -6,8 +6,8 @@ import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
-import md2k.mCerebrum.cStress.Features.RunningStatistics;
-import md2k.mCerebrum.cStress.Features.BinnedStatistics;
+import md2k.mCerebrum.cStress.Statistics.RunningStatistics;
+import md2k.mCerebrum.cStress.Statistics.BinnedStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;

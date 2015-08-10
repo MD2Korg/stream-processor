@@ -1,9 +1,10 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.Library;
+import md2k.mCerebrum.cStress.Library.Core;
 import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
+import md2k.mCerebrum.cStress.Statistics.BinnedStatistics;
+import md2k.mCerebrum.cStress.Statistics.RunningStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Structs.Intercepts;
 import md2k.mCerebrum.cStress.Structs.PeakValley;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -56,10 +57,6 @@ public class RIPFeatures {
 
     private SensorConfiguration sensorConfig;
 
-    public RIPFeatures() {
-
-    }
-
     /**
      * Core Respiration Features
      * Reference: ripFeature_Extraction.m
@@ -80,12 +77,8 @@ public class RIPFeatures {
 
         sensorConfig = sc;
 
-        //TS correction here...
-        //Data Quality here...
-        //Interpolation...
 
-        PeakValley pvData = Library.peakvalley_v2(rip, sensorConfig); //There is no trailing valley in this output.
-
+        PeakValley pvData = Core.peakvalley_v2(rip, sensorConfig); //There is no trailing valley in this output.
 
         if (!activity) {
             for (int i = 0; i < pvData.valleyIndex.size() - 1; i++) {

@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Features;
+package md2k.mCerebrum.cStress.Statistics;
 
 
 import java.util.HashMap;
@@ -35,9 +35,6 @@ import java.util.HashMap;
 
 public class BinnedStatistics {
 
-    private static final int DEFAULT_MAXVAL = 5000;
-    private static final int DEFAULT_MINVAL = 0;
-
     private long count;
 
     private int med;
@@ -63,10 +60,6 @@ public class BinnedStatistics {
 
         this.bins = new HashMap<Integer, Integer>();
 
-    }
-
-    public BinnedStatistics() {
-        this(BinnedStatistics.DEFAULT_MINVAL, BinnedStatistics.DEFAULT_MAXVAL);
     }
 
 

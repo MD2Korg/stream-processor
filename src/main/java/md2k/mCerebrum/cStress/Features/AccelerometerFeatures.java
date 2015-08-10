@@ -1,6 +1,7 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.Library;
+import md2k.mCerebrum.cStress.Library.Core;
+import md2k.mCerebrum.cStress.Statistics.RunningStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -120,9 +121,9 @@ public class AccelerometerFeatures {
     public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq, RunningStatistics MagnitudeStats) {
         int windowSize = 10*1000;
 
-        ArrayList<DataPoint[]> segxWindowed = Library.window(segx, windowSize);
-        ArrayList<DataPoint[]> segyWindowed = Library.window(segy, windowSize);
-        ArrayList<DataPoint[]> segzWindowed = Library.window(segz, windowSize);
+        ArrayList<DataPoint[]> segxWindowed = Core.window(segx, windowSize);
+        ArrayList<DataPoint[]> segyWindowed = Core.window(segy, windowSize);
+        ArrayList<DataPoint[]> segzWindowed = Core.window(segz, windowSize);
 
 
 
@@ -269,7 +270,7 @@ public class AccelerometerFeatures {
             DataPoint[] wz = segzWindowed.get(i);
 
 
-            double[] magnitude = Library.magnitude(wx, wy, wz);
+            double[] magnitude = Core.magnitude(wx, wy, wz);
 
             DescriptiveStatistics statsMagnitude = new DescriptiveStatistics();
             for (double d : magnitude) {
