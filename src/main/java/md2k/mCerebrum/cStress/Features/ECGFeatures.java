@@ -1,7 +1,8 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Library;
+import md2k.mCerebrum.cStress.Library.Core;
+import md2k.mCerebrum.cStress.Statistics.BinnedStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -60,11 +61,6 @@ public class ECGFeatures {
         datapoints = dp;
         frequency = freq;
 
-
-        //TS correction here...
-        //Data Quality here...
-        //Interpolation...
-
         if (computeRR()) {
 
             //Decide if we should add the RR intervals from this minute to the running stats
@@ -75,12 +71,10 @@ public class ECGFeatures {
                 }
             }
 
-
-            //Normalize RR intervals using Winsorized mean and stddev
-
             RRStats = new DescriptiveStatistics();
             RRStatsTimestamps = new ArrayList<Long>();
 
+            //Normalize RR intervals using Winsorized mean and stddev
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
                     RRStats.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000) / (ECGStats.getWinsorizedStdev() / 1000));
@@ -97,12 +91,12 @@ public class ECGFeatures {
             }
 
 
-            Lomb HRLomb = Library.lomb(rrDatapoints);
+            Lomb HRLomb = Core.lomb(rrDatapoints);
 
-            LombLowHighFrequencyEnergyRatio = Library.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-            LombLowFrequencyEnergy = Library.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-            LombMediumFrequencyEnergy = Library.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
-            LombHighFrequencyEnergy = Library.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
+            LombLowHighFrequencyEnergyRatio = Core.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+            LombLowFrequencyEnergy = Core.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+            LombMediumFrequencyEnergy = Core.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
+            LombHighFrequencyEnergy = Core.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
 
         }
     }
@@ -114,7 +108,7 @@ public class ECGFeatures {
      * @return True if successful, False if there is not enough data
      */
     private boolean computeRR() {
-        long[] Rpeak_index = Library.detect_Rpeak(datapoints, frequency);
+        long[] Rpeak_index = Core.detect_Rpeak(datapoints, frequency);
 
         long[] pkT = new long[Rpeak_index.length];
         for (int i = 0; i < Rpeak_index.length; i++) {
@@ -139,7 +133,7 @@ public class ECGFeatures {
         rr_index = new long[pkT.length];
         System.arraycopy(pkT, 0, rr_index, 0, pkT.length);
 
-        rr_outlier = Library.detect_outlier_v2(rr_value, rr_timestamp);
+        rr_outlier = Core.detect_outlier_v2(rr_value, rr_timestamp);
 
         DescriptiveStatistics valueStats = new DescriptiveStatistics();
         for (int i = 0; i < rr_value.length; i++) {

@@ -2,7 +2,7 @@ package md2k.mCerebrum.cStress.tests;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
-import md2k.mCerebrum.cStress.Library;
+import md2k.mCerebrum.cStress.Library.Core;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
 import md2k.mCerebrum.cStress.Structs.MaxMin;
@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class LibraryTest {
+public class CoreTest {
 
 
     @Before
@@ -61,11 +61,11 @@ public class LibraryTest {
 
     @Test
     public void testNextPower2() throws Exception {
-        assertTrue(Library.nextPower2(0)==0);
-        assertTrue(Library.nextPower2(1)==0);
-        assertTrue(Library.nextPower2(20)==5);
-        assertTrue(Library.nextPower2(255)==8);
-        assertTrue(Library.nextPower2(1000)==10);
+        assertTrue(Core.nextPower2(0)==0);
+        assertTrue(Core.nextPower2(1)==0);
+        assertTrue(Core.nextPower2(20)==5);
+        assertTrue(Core.nextPower2(255)==8);
+        assertTrue(Core.nextPower2(1000)==10);
     }
 
     @Test
@@ -78,14 +78,14 @@ public class LibraryTest {
             y[i] = new DataPoint(i*i,i);
             z[i] = new DataPoint(i*i*i,i);
         }
-        double[] result = Library.magnitude(x, y, z);
+        double[] result = Core.magnitude(x, y, z);
 
         double[] correctResult = {0, 1.73205080756888, 9.16515138991168, 28.6181760425084, 66.0908465674332};
         assertArrayEquals(result,correctResult,1e-3);
 
         DataPoint[] input = new DataPoint[0];
         double[] emptyresult = {};
-        result = Library.magnitude(input, y, z);
+        result = Core.magnitude(input, y, z);
         assertArrayEquals(result, emptyresult,1e-9);
     }
 
@@ -105,17 +105,17 @@ public class LibraryTest {
 
         double mean = 2.0;
 
-        double[] result = Library.crossing(input, mean);
+        double[] result = Core.crossing(input, mean);
 
         double[] correctResult = {1,3,5,7,8};
         assertArrayEquals(result, correctResult,1e-9);
 
-        result = Library.crossing(input, -10);
+        result = Core.crossing(input, -10);
         double[] emptyresult = {};
         assertArrayEquals(result, emptyresult,1e-9);
 
         input = new DataPoint[0];
-        result = Library.crossing(input, mean);
+        result = Core.crossing(input, mean);
         assertArrayEquals(result, emptyresult,1e-9);
     }
 
@@ -126,13 +126,13 @@ public class LibraryTest {
             input[i] = new DataPoint(i*i,i);
         }
 
-        double[] result = Library.diff(input);
+        double[] result = Core.diff(input);
 
         double[] correctResult = {1,3,5,7,9,11,13,15,17};
         assertArrayEquals(result, correctResult,1e-9);
 
         DataPoint[] zeroinput = new DataPoint[0];
-        result = Library.diff(zeroinput);
+        result = Core.diff(zeroinput);
         assertTrue(result.length == 0);
     }
 
@@ -164,7 +164,7 @@ public class LibraryTest {
                 0.2152, 0.1531, 0.1462, 0.1450, 0.2040, 0.1901, 0.2279, 0.2264, 0.2177, 0.1940,
                 0.1404, 0.1061, 0.1101, 0.1131, 0.1240, 0.1859, 0.2380, 0.2083, 0.205, 0.1351};
             
-        double[] result = Library.applyFilterNormalize(data,filter,90);
+        double[] result = Core.applyFilterNormalize(data, filter, 90);
         assertArrayEquals(correctResult,result,1e-1);
     }
 
@@ -205,7 +205,7 @@ public class LibraryTest {
                 0.0423709220416298, 0.00145628272438133, 0.10423307129968, 0.104080236904837, 0.081273361744522,
                 0.003499419561098};
 
-        double[] result = Library.applySquareFilterNormalize(data,90);
+        double[] result = Core.applySquareFilterNormalize(data, 90);
         assertArrayEquals(correctResult,result,1e-1);
     }
 
@@ -219,7 +219,7 @@ public class LibraryTest {
         int windowLength = 10;
         trueBlackman10 = new double[]{ 0, 0.0509, 0.2580, 0.630, 0.9511, 0.9511, 0.630, 0.2580, 0.0509, 0};
 
-        result = Library.blackman(windowLength);
+        result = Core.blackman(windowLength);
 
         sum = 0.0;
         for(int i=0; i<result.length; i++) {
@@ -229,7 +229,7 @@ public class LibraryTest {
 
         //Test window of length 0
         windowLength = 0;
-        result = Library.blackman(windowLength);
+        result = Core.blackman(windowLength);
         assertArrayEquals(result,new double[0],1e-4);
     }
 
@@ -244,7 +244,7 @@ public class LibraryTest {
         double[] kernel = {1,0,1};
         double[] trueAnswer = {2,4,4,4,2};
 
-        double[] result = Library.conv(signal, kernel);
+        double[] result = Core.conv(signal, kernel);
 
         assertArrayEquals(result,trueAnswer,1e-3);
     }
@@ -274,7 +274,7 @@ public class LibraryTest {
         //correctResult.mintab[0] = new DataPoint(2.9880, 49); //Unknown result here
 
 
-        MaxMin result = Library.localMaxMin(dpInput, 1); //TODO: Debugging yields a failed result right now.
+        MaxMin result = Core.localMaxMin(dpInput, 1); //TODO: Debugging yields a failed result right now.
 
         //TODO: Complete assertions here
     }
@@ -292,7 +292,7 @@ public class LibraryTest {
             inputdp[i] = new DataPoint(inputdata[i],i);
         }
 
-        DataPoint[] result = Library.smooth(inputdp, 5);
+        DataPoint[] result = Core.smooth(inputdp, 5);
         double sum = 0.0;
         for(int i=0; i< result.length; i++) {
             sum += Math.abs(result[i].value-correctResult[i]);
@@ -331,7 +331,7 @@ public class LibraryTest {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2
         };
 
-        int[] result = Library.detect_outlier_v2(inputValue,inputTimestamps);
+        int[] result = Core.detect_outlier_v2(inputValue, inputTimestamps);
 
         assertArrayEquals(correctResult,result);
     }
@@ -363,7 +363,7 @@ public class LibraryTest {
 
         long[] correctResult = new long[]{2, 62, 129, 165};
 
-        long[] result = Library.detect_Rpeak(inputDatapoints, frequency);
+        long[] result = Core.detect_Rpeak(inputDatapoints, frequency);
 
         assertArrayEquals(correctResult,result);
     }
@@ -382,7 +382,7 @@ public class LibraryTest {
 
         double correctResult = 36.25;
 
-        double result = Library.rr_ave_update(inputData,rr_value);
+        double result = Core.rr_ave_update(inputData, rr_value);
 
         assertEquals(correctResult, result, 1e-9);
     }
@@ -415,7 +415,7 @@ public class LibraryTest {
             input[i] = new DataPoint(inputdata[i],i+1);
         }
 
-        Lomb result = Library.lomb(input);
+        Lomb result = Core.lomb(input);
 
         double[] correctResultP = new double[] {
                 4.67921414136144, 4.9918173202647, 5.82786784021648, 5.63086219140335, 3.85843656513102,
@@ -531,9 +531,9 @@ public class LibraryTest {
             input[i] = new DataPoint(inputdata[i],i+1);
         }
 
-        Lomb result = Library.lomb(input);
+        Lomb result = Core.lomb(input);
 
-        double resultLFHF = Library.heartRateLFHF(result.P, result.f, 0.09, 0.15);
+        double resultLFHF = Core.heartRateLFHF(result.P, result.f, 0.09, 0.15);
         assertEquals(2.87724349469217, resultLFHF, 1e-8);
 
 
@@ -567,15 +567,15 @@ public class LibraryTest {
             input[i] = new DataPoint(inputdata[i],i+1);
         }
 
-        Lomb result = Library.lomb(input);
+        Lomb result = Core.lomb(input);
 
-        double result12 = Library.heartRatePower(result.P, result.f, 0.1, 0.2);
+        double result12 = Core.heartRatePower(result.P, result.f, 0.1, 0.2);
         assertEquals(38.1822734085174, result12, 1e-8);
 
-        double result23 = Library.heartRatePower(result.P,result.f,0.2,0.3);
+        double result23 = Core.heartRatePower(result.P, result.f, 0.2, 0.3);
         assertEquals(35.0199378177408, result23, 1e-8);
 
-        double result34 = Library.heartRatePower(result.P,result.f,0.3,0.4);
+        double result34 = Core.heartRatePower(result.P, result.f, 0.3, 0.4);
         assertEquals(22.3384393631384, result34, 1e-8);
 
     }
@@ -858,7 +858,7 @@ public class LibraryTest {
 
         SensorConfiguration sensorConfig = new SensorConfiguration();
         sensorConfig.add("RIP", 64.0 / 3.0, AUTOSENSE.CHEST_RIP);
-        PeakValley result = Library.peakvalley_v2(rip,sensorConfig);
+        PeakValley result = Core.peakvalley_v2(rip, sensorConfig);
 
         int[] resultValley = new int[result.valleyIndex.size()];
         int[] resultPeak = new int[result.peakIndex.size()];        

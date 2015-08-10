@@ -4,10 +4,9 @@ package md2k.mCerebrum.cStress.legacyJava;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import static md2k.mCerebrum.cStress.Library.window;
+import static md2k.mCerebrum.cStress.Library.Core.window;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

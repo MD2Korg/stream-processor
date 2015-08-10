@@ -1,7 +1,7 @@
 package md2k.mCerebrum.cStress.tests;
 
 import junit.framework.TestCase;
-import md2k.mCerebrum.cStress.Features.BinnedStatistics;
+import md2k.mCerebrum.cStress.Statistics.BinnedStatistics;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center

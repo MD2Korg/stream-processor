@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Features;
+package md2k.mCerebrum.cStress.Statistics;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
