@@ -43,7 +43,9 @@ public class BinnedStatistics {
     private double high;
 
     private int numBins;
-
+    private int minValue;
+    private int maxValue;
+    
     private HashMap<Integer,Integer> bins;
     //TODO: Needs a persistence and initialization layer
 
@@ -57,7 +59,8 @@ public class BinnedStatistics {
         this.low = 0;
         this.high = 0;
         this.numBins = maxValue - minValue + 1;
-
+        this.minValue = minValue;
+        this.maxValue = maxValue;
         this.bins = new HashMap<Integer, Integer>();
 
     }
@@ -84,7 +87,7 @@ public class BinnedStatistics {
 
     private void computeMed() {
         int sum = 0;
-        for (int i = 0; i < numBins; i++) {
+        for (int i = minValue; i <= maxValue; i++) {
             if(bins.containsKey(i)) {
                 sum += bins.get(i);
                 if (sum > count / 2) {
@@ -105,13 +108,13 @@ public class BinnedStatistics {
     private void computeMad() {
         HashMap<Integer,Integer> madbins = new HashMap<Integer, Integer>();
 
-        for (int i = 0; i < numBins; i++)
+        for (int i = minValue; i <= maxValue; i++)
             if(bins.containsKey(i)) {
                 int index = Math.abs(i - med);
                 if(!madbins.containsKey(index)) {
                     madbins.put(index,0);
                 }
-                madbins.put(index, bins.get(i));
+                madbins.put(index, madbins.get(i));
             }
 
         int sum = 0;
