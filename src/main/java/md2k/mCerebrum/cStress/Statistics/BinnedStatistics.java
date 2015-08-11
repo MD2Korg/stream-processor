@@ -114,7 +114,7 @@ public class BinnedStatistics {
                 if(!madbins.containsKey(index)) {
                     madbins.put(index,0);
                 }
-                madbins.put(index, madbins.get(i));
+                madbins.put(index, madbins.get(index)+bins.get(i));
             }
 
         int sum = 0;
@@ -141,7 +141,7 @@ public class BinnedStatistics {
 
     public double getMean() {
         double sum = 0;
-        for (int i = 0; i < numBins; i++) {
+        for (int i = minValue; i <= maxValue; i++) {
             if(bins.containsKey(i)) {
                 sum += bins.get(i) * i;
             }
@@ -152,7 +152,7 @@ public class BinnedStatistics {
     public double getStdev() {
         double sum = 0;
         double mean = getMean();
-        for (int i = 0; i < numBins; i++) {
+        for (int i = minValue; i <= maxValue; i++) {
             if(bins.containsKey(i)) {
                 sum += bins.get(i) * ((i - mean) * (i - mean));
             }
@@ -166,7 +166,7 @@ public class BinnedStatistics {
         computeMad();
 
         double sum = 0;
-        for (int i = 0; i < numBins; i++) {
+        for (int i = minValue; i <= maxValue; i++) {
             if(bins.containsKey(i)) {
                 sum += bins.get(i) * ((i > high) ? high : ((i < low) ? low : i ));
             }
@@ -181,7 +181,7 @@ public class BinnedStatistics {
         double winsorizedMean = getWinsorizedMean();
 
         double sum = 0;
-        for (int i = 0; i < numBins; i++) {
+        for (int i = minValue; i <= maxValue; i++) {
             double temp = ((i > high) ? high : ((i < low) ? low : i));
             if(bins.containsKey(i)) {
                 sum += bins.get(i) * (temp - winsorizedMean) * (temp - winsorizedMean);
