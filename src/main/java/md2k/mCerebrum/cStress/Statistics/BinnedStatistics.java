@@ -45,8 +45,8 @@ public class BinnedStatistics {
     private int numBins;
     private int minValue;
     private int maxValue;
-    
-    private HashMap<Integer,Integer> bins;
+
+    private HashMap<Integer, Integer> bins;
     //TODO: Needs a persistence and initialization layer
 
     /**
@@ -77,49 +77,46 @@ public class BinnedStatistics {
     }
 
     public void add(int x) {
-        if(!bins.containsKey(x)) {
-            bins.put(x,0);
+        if (!bins.containsKey(x)) {
+            bins.put(x, 0);
         }
-        bins.put(x,bins.get(x)+1);
+        bins.put(x, bins.get(x) + 1);
         count++;
     }
 
 
     private void computeMed() {
         int sum = 0;
-        for (int i = minValue; i <= maxValue; i++) {
-            if(bins.containsKey(i)) {
-                sum += bins.get(i);
-                if (sum > count / 2) {
+        for (Integer i : bins.keySet()) {
+            sum += bins.get(i);
+            if (sum > count / 2) {
+                this.med = i;
+                break;
+            } else if (sum == count / 2) {
+                if (count % 2 == 0)
+                    this.med = (2 * i + 1) / 2;
+                else
                     this.med = i;
-                    break;
-                } else if (sum == count / 2) {
-                    if (count % 2 == 0)
-                        this.med = (2 * i + 1) / 2;
-                    else
-                        this.med = i;
 
-                    break;
-                }
+                break;
             }
         }
     }
 
     private void computeMad() {
-        HashMap<Integer,Integer> madbins = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> madbins = new HashMap<Integer, Integer>();
 
-        for (int i = minValue; i <= maxValue; i++)
-            if(bins.containsKey(i)) {
-                int index = Math.abs(i - med);
-                if(!madbins.containsKey(index)) {
-                    madbins.put(index,0);
-                }
-                madbins.put(index, madbins.get(index)+bins.get(i));
+        for (Integer i : bins.keySet()) {
+            int index = Math.abs(i - med);
+            if (!madbins.containsKey(index)) {
+                madbins.put(index, 0);
             }
+            madbins.put(index, madbins.get(index) + bins.get(i));
+        }
 
         int sum = 0;
         for (int i = 0; i < numBins - 1; i++) {
-            if(madbins.containsKey(i)) {
+            if (madbins.containsKey(i)) {
                 sum += madbins.get(i);
                 if (sum > count / 2) {
                     mad = i;
@@ -141,10 +138,8 @@ public class BinnedStatistics {
 
     public double getMean() {
         double sum = 0;
-        for (int i = minValue; i <= maxValue; i++) {
-            if(bins.containsKey(i)) {
-                sum += bins.get(i) * i;
-            }
+        for (Integer i : bins.keySet()) {
+            sum += bins.get(i) * i;
         }
         return sum / count;
     }
@@ -152,10 +147,8 @@ public class BinnedStatistics {
     public double getStdev() {
         double sum = 0;
         double mean = getMean();
-        for (int i = minValue; i <= maxValue; i++) {
-            if(bins.containsKey(i)) {
-                sum += bins.get(i) * ((i - mean) * (i - mean));
-            }
+        for (Integer i : bins.keySet()) {
+            sum += bins.get(i) * ((i - mean) * (i - mean));
         }
         return Math.sqrt(sum / (count - 1));
     }
@@ -166,10 +159,8 @@ public class BinnedStatistics {
         computeMad();
 
         double sum = 0;
-        for (int i = minValue; i <= maxValue; i++) {
-            if(bins.containsKey(i)) {
-                sum += bins.get(i) * ((i > high) ? high : ((i < low) ? low : i ));
-            }
+        for (Integer i : bins.keySet()) {
+            sum += bins.get(i) * ((i > high) ? high : ((i < low) ? low : i));
         }
         return sum / count;
     }
@@ -181,11 +172,9 @@ public class BinnedStatistics {
         double winsorizedMean = getWinsorizedMean();
 
         double sum = 0;
-        for (int i = minValue; i <= maxValue; i++) {
+        for (Integer i : bins.keySet()) {
             double temp = ((i > high) ? high : ((i < low) ? low : i));
-            if(bins.containsKey(i)) {
-                sum += bins.get(i) * (temp - winsorizedMean) * (temp - winsorizedMean);
-            }
+            sum += bins.get(i) * (temp - winsorizedMean) * (temp - winsorizedMean);
         }
         return Math.sqrt(sum / (count - 1));
     }

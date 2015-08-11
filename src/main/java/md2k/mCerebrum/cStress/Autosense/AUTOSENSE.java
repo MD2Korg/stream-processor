@@ -68,4 +68,7 @@ public class AUTOSENSE {
     public static final double RESPIRATION_MINIMUM = 8.0;
     public static final int RESPIRATION_MAXIMUM = 65;
     public static final double WINDOW_DIVIDER_FACTOR = 20.0;
+    public static final double STRESS_PROBABILTY_THRESHOLD = 0.339329059788;
+
+    public static final int SAMPLE_LENGTH_SECS = 60;
 }

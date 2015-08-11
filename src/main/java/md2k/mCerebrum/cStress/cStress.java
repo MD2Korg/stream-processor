@@ -164,7 +164,7 @@ public class cStress {
 
         StressProbability stressResult = new StressProbability(-1, 0.0);
 
-        /* Ordered list of features for SVM model
+        /* List of features for SVM model
         
          ECG - RR interval variance
          ECG - RR interval quartile deviation
@@ -281,7 +281,7 @@ public class cStress {
                 ECG_RR_Interval_Heart_Rate,
 
                 RIP_Breath_Rate,
-                RIP_Inspiration_Minute_Volume, //Ventalation
+                RIP_Inspiration_Minute_Volume,
 
                 RIP_Inspiration_Duration_Quartile_Deviation,
                 RIP_Inspiration_Duration_Mean,
@@ -362,9 +362,11 @@ public class cStress {
         //This check must happen before any normalization.  It operates on the RAW signals.
         RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
         ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
+
         if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
             return 0.0; //data quality failure
         }
+
 
         for (DataPoint dp : accelerometerX) {
             AccelXStats.add(dp.value);
@@ -392,11 +394,12 @@ public class cStress {
         try {
             System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
             accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"), MagnitudeStats);
+
             //Passed ECGStats and Activity to ECGFeatures, so that appropriate normalization can be carried out, and if there's no activity, RR intervals can be added to ECGStats
             ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"), ECGStats, accelFeatures.Activity);
             ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig, RIPBinnedStats, RIPStats, accelFeatures.Activity);
 
-            StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, 0.339329059788);
+            StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
             System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
 
             //TODO: Do something with this output
@@ -413,7 +416,7 @@ public class cStress {
 
         for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
             for (int i = 0; i < 5; i++) {
-                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency)); //TODO: Fix this to be something more realistic
+                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency));
                 result.add(dp);
             }
         }
