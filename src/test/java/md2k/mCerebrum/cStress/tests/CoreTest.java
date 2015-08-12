@@ -330,8 +330,8 @@ public class CoreTest {
         for(int i=0; i<inputValues.length; i++) {
             inputDatapoints[i] = new DataPoint(inputValues[i],i);
         }
-
-        long[] correctResult = new long[]{2, 35, 63, 99, 130, 166}; //Verified for this signal through Matlab findpeaks
+        //Matlab findpeaks result: {2, 35, 63, 99, 130, 166}
+        long[] correctResult = new long[]{2, 33, 61, 97, 128, 164}; //Based on this signal processing technique
 
         long[] result = Core.detect_Rpeak(inputDatapoints, frequency);
 
