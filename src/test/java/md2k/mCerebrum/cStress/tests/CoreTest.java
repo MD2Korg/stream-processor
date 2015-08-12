@@ -5,7 +5,6 @@ import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Library.Core;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
-import md2k.mCerebrum.cStress.Structs.MaxMin;
 import md2k.mCerebrum.cStress.Structs.PeakValley;
 import org.junit.After;
 import org.junit.Before;
@@ -62,10 +61,10 @@ public class CoreTest {
     @Test
     public void testNextPower2() throws Exception {
         assertTrue(Core.nextPower2(0)==0);
-        assertTrue(Core.nextPower2(1)==0);
+        assertTrue(Core.nextPower2(1) == 0);
         assertTrue(Core.nextPower2(20)==5);
         assertTrue(Core.nextPower2(255)==8);
-        assertTrue(Core.nextPower2(1000)==10);
+        assertTrue(Core.nextPower2(1000) == 10);
     }
 
     @Test
@@ -249,35 +248,6 @@ public class CoreTest {
         assertArrayEquals(result,trueAnswer,1e-3);
     }
 
-    @Test
-    public void testLocalMaxMin() throws Exception {
-        double[] data = new double[]{
-                0.2077, 0.3012, 0.4709, 0.2305, 0.8443, 0.1948, 0.2259, 0.1707, 0.2277, 0.4357,
-                0.3111, 0.9234, 0.4302, 0.1848, 0.9049, 0.9797, 0.4389, 0.1111, 0.2581, 0.4087,
-                0.5949, 0.2622, 0.6028, 0.7112, 0.2217, 0.1174, 0.2967, 0.3188, 0.4242, 0.5079,
-                0.0855, 0.2625, 0.8010, 0.0292, 0.9289, 0.7303, 0.4886, 0.5785, 0.2373, 2.4588,
-                2.9631, 2.5468, 2.5211, 2.2316, 2.4889, 2.6241, 2.6791, 2.3955, 2.3674, 2.9880,
-                2.0377, 2.8852, 2.9133, 2.7962, 2.0987, 2.2619, 2.3354, 2.6797, 2.1366, 2.7212,
-                0.1068, 0.6538, 0.4942, 0.7791, 0.7150, 0.9037, 0.8909, 0.3342, 0.6987, 0.1978,
-                0.0305, 0.7441, 0.50, 0.4799, 0.9047, 0.6099, 0.6177, 0.8594, 0.8055, 0.5767,
-                0.1829, 0.2399, 0.8865, 0.0287, 0.4899, 0.1679, 0.9787, 0.7127, 0.505, 0.4711,
-                0.0596, 0.6820, 0.0424, 0.0714, 0.5216, 0.0967, 0.8181, 0.8175, 0.7224, 0.1499};
-        DataPoint[] dpInput = new DataPoint[data.length];
-        for(int i=0; i<dpInput.length; i++) {
-            dpInput[i] = new DataPoint(data[i],i);
-        }
-
-        MaxMin correctResult = new MaxMin();
-        correctResult.maxtab = new DataPoint[1];
-        correctResult.mintab = new DataPoint[1];
-        correctResult.maxtab[0] = new DataPoint(2.9880, 49);
-        //correctResult.mintab[0] = new DataPoint(2.9880, 49); //Unknown result here
-
-
-        MaxMin result = Core.localMaxMin(dpInput, 1); //TODO: Debugging yields a failed result right now.
-
-        //TODO: Complete assertions here
-    }
 
     @Test
     public void testSmooth() throws Exception {
@@ -360,8 +330,8 @@ public class CoreTest {
         for(int i=0; i<inputValues.length; i++) {
             inputDatapoints[i] = new DataPoint(inputValues[i],i);
         }
-
-        long[] correctResult = new long[]{2, 62, 129, 165};
+        //Matlab findpeaks result: {2, 35, 63, 99, 130, 166}
+        long[] correctResult = new long[]{2, 33, 61, 97, 128, 164}; //Based on this signal processing technique
 
         long[] result = Core.detect_Rpeak(inputDatapoints, frequency);
 
@@ -870,8 +840,8 @@ public class CoreTest {
             resultPeak[i] = result.peakIndex.get(i);
         }        
         
-        int[] correctValley = new int[] {225, 280, 333, 384, 440};
-        int[] correctPeak = new int[] {257, 311, 364, 420, 470};
+        int[] correctValley = new int[] {38,88,121,174,224};
+        int[] correctPeak = new int[] {59,106,148,197,257};
 
 
         assertArrayEquals(correctValley,resultValley);

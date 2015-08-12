@@ -277,7 +277,6 @@ public class AccelerometerFeatures {
                 statsMagnitude.addValue(d);
                 MagnitudeStats.add(d);
             }
-//        double avgMagnitude = statsMagnitude.getPercentile(50);
             stdMagnitudeArray.add(statsMagnitude.getStandardDeviation());
         }
         StdevMagnitude = new double[stdMagnitudeArray.size()];
