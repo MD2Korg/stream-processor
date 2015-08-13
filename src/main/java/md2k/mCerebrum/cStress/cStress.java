@@ -8,6 +8,7 @@ import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
 import md2k.mCerebrum.cStress.Statistics.RunningStatistics;
 import md2k.mCerebrum.cStress.Statistics.BinnedStatistics;
+import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
@@ -19,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 /**
@@ -56,11 +58,11 @@ public class cStress {
     long windowSize;
 
 
-    ArrayList<AUTOSENSE_PACKET> ECG;
-    ArrayList<AUTOSENSE_PACKET> RIP;
-    ArrayList<AUTOSENSE_PACKET> ACCELX;
-    ArrayList<AUTOSENSE_PACKET> ACCELY;
-    ArrayList<AUTOSENSE_PACKET> ACCELZ;
+    ArrayList<CSVDataPoint> ECG;
+    ArrayList<CSVDataPoint> RIP;
+    ArrayList<CSVDataPoint> ACCELX;
+    ArrayList<CSVDataPoint> ACCELY;
+    ArrayList<CSVDataPoint> ACCELZ;
 
     // Keep track of mean and stdev.  This should be reset at the beginning of each day.
     // An EWMA-based solution may need to be added to seed the new day with appropriate information
@@ -411,65 +413,71 @@ public class cStress {
     }
 
 
-    private DataPoint[] generateDataPointArray(ArrayList<AUTOSENSE_PACKET> data, double frequency) {
+    private DataPoint[] generateDataPointArray(ArrayList<CSVDataPoint> data, double frequency) {
         ArrayList<DataPoint> result = new ArrayList<DataPoint>();
 
-        for (AUTOSENSE_PACKET ap : data) { //Convert packets into datapoint arrays based on sampling frequency
-            for (int i = 0; i < 5; i++) {
-                DataPoint dp = new DataPoint(ap.data[i], ap.timestamp - (long) Math.floor((4 - i) / frequency));
-                result.add(dp);
-            }
+        for (CSVDataPoint ap : data) { //Convert packets into datapoint arrays
+            DataPoint dp = new DataPoint(ap.value, ap.timestamp);
+            result.add(dp);
         }
         DataPoint[] dpArray = new DataPoint[result.size()];
         result.toArray(dpArray);
         return dpArray;
     }
 
-    public void add(AUTOSENSE_PACKET ap) {
+    public void add(CSVDataPoint ap) {
 
         if (this.windowStartTime < 0)
-            this.windowStartTime = ap.timestamp;
+            this.windowStartTime = nextEpochTimestamp(ap.timestamp);
 
         if ((ap.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
             process();
             resetBuffers();
-            this.windowStartTime = ap.timestamp;
+            this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS*1000; //Add 60 seconds to the timestamp
         }
 
-        switch (ap.channelID) {
-            case AUTOSENSE.CHEST_ECG:
-                this.ECG.add(ap);
-                break;
+        if (ap.timestamp >= this.windowStartTime) {
+            switch (ap.channel) {
+                case AUTOSENSE.CHEST_ECG:
+                    this.ECG.add(ap);
+                    break;
 
-            case AUTOSENSE.CHEST_RIP:
-                this.RIP.add(ap);
-                break;
+                case AUTOSENSE.CHEST_RIP:
+                    this.RIP.add(ap);
+                    break;
 
-            case AUTOSENSE.CHEST_ACCEL_X:
-                this.ACCELX.add(ap);
-                break;
+                case AUTOSENSE.CHEST_ACCEL_X:
+                    this.ACCELX.add(ap);
+                    break;
 
-            case AUTOSENSE.CHEST_ACCEL_Y:
-                this.ACCELY.add(ap);
-                break;
+                case AUTOSENSE.CHEST_ACCEL_Y:
+                    this.ACCELY.add(ap);
+                    break;
 
-            case AUTOSENSE.CHEST_ACCEL_Z:
-                this.ACCELZ.add(ap);
-                break;
+                case AUTOSENSE.CHEST_ACCEL_Z:
+                    this.ACCELZ.add(ap);
+                    break;
 
-            default:
-//                System.out.println("NOT INTERESTED: " + ap);
-                break;
+                default:
+                    System.out.println("NOT INTERESTED: " + ap);
+                    break;
 
+            }
         }
     }
 
+    private long nextEpochTimestamp(long timestamp) {
+        long previousMinute = timestamp / (60*1000);
+        Date date = new Date((previousMinute+1)*(60*1000));
+        return date.getTime();
+    }
+
     private void resetBuffers() {
-        this.ECG = new ArrayList<AUTOSENSE_PACKET>();
-        this.RIP = new ArrayList<AUTOSENSE_PACKET>();
-        this.ACCELX = new ArrayList<AUTOSENSE_PACKET>();
-        this.ACCELY = new ArrayList<AUTOSENSE_PACKET>();
-        this.ACCELZ = new ArrayList<AUTOSENSE_PACKET>();
+        this.ECG = new ArrayList<CSVDataPoint>();
+        this.RIP = new ArrayList<CSVDataPoint>();
+        this.ACCELX = new ArrayList<CSVDataPoint>();
+        this.ACCELY = new ArrayList<CSVDataPoint>();
+        this.ACCELZ = new ArrayList<CSVDataPoint>();
     }
 
 

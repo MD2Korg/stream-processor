@@ -1,9 +1,4 @@
-package md2k.mCerebrum;
-
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
-import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
-import md2k.mCerebrum.cStress.cStress;
+package md2k.mCerebrum.cStress.Structs;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -31,24 +26,14 @@ import md2k.mCerebrum.cStress.cStress;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Main {
+public class CSVDataPoint {
+    public double value;
+    public long timestamp;
+    public int channel;
 
-    public static void main(String[] args) {
-
-        CSVParser tp = new CSVParser();
-        tp.importData("rip.csv", AUTOSENSE.CHEST_RIP);
-        tp.importData("ecg.csv",AUTOSENSE.CHEST_ECG);
-        tp.importData("accelx.csv",AUTOSENSE.CHEST_ACCEL_X);
-        tp.importData("accely.csv",AUTOSENSE.CHEST_ACCEL_Y);
-        tp.importData("accelz.csv",AUTOSENSE.CHEST_ACCEL_Z);
-
-        cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
-
-        for(CSVDataPoint ap: tp) {
-            stress.add(ap);
-        }
-
-
-
+    public CSVDataPoint(int channel, long timestamp, double value) {
+        this.channel = channel;
+        this.value = value;
+        this.timestamp = timestamp;
     }
 }
