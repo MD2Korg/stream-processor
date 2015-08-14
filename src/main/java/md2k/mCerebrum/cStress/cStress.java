@@ -316,6 +316,10 @@ public class cStress {
                 RSA_80thPercentile
         };
 
+        for(int i=0; i<featureVector.length; i++) {
+            System.out.print(featureVector[i] + ", ");
+        }
+        System.out.println();
 
         featureVector = normalizeFV(featureVector);
 

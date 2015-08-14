@@ -49,11 +49,19 @@ public class RunningStatistics {
     }
 
     public double getMean() {
-        return mean;
+        if(count < 2) {
+            return 0.0;
+        } else {
+            return mean;
+        }
     }
 
     public double getStdev() {
-        return Math.sqrt(stdev / (count - 1));
+        if(count < 2) {
+            return 0.0;
+        } else {
+            return Math.sqrt(stdev / (count - 1));
+        }
     }
 
 }

@@ -113,6 +113,7 @@ public class RIPFeatures {
             RIPStats[0].add(BreathRate);
             RIPStats[1].add(MinuteVolume);
         }
+
         BreathRate = (BreathRate - RIPStats[0].getMean()) / RIPStats[0].getStdev();
         MinuteVolume = (MinuteVolume - RIPStats[1].getMean()) / RIPStats[1].getStdev();
 
