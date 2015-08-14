@@ -361,54 +361,61 @@ public class cStress {
         DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
-        //This check must happen before any normalization.  It operates on the RAW signals.
-        RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
-        ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
+        System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
+        if (rip.length > 500 && ecg.length > 500 && accelerometerX.length > 300 && accelerometerY.length > 300 && accelerometerZ.length > 300) {
 
-        if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
-            return 0.0; //data quality failure
+            //This check must happen before any normalization.  It operates on the RAW signals.
+            RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
+            ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
+
+            if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
+                return 0.0; //data quality failure
+            }
+
+
+            for (DataPoint dp : accelerometerX) {
+                AccelXStats.add(dp.value);
+            }
+            for (DataPoint dp : accelerometerY) {
+                AccelYStats.add(dp.value);
+            }
+            for (DataPoint dp : accelerometerZ) {
+                AccelZStats.add(dp.value);
+            }
+
+
+            //Normalize
+            for (DataPoint anAccelerometerX : accelerometerX) {
+                anAccelerometerX.value = (anAccelerometerX.value - AccelXStats.getMean()) / (AccelXStats.getStdev());
+            }
+            for (DataPoint anAccelerometerY : accelerometerY) {
+                anAccelerometerY.value = (anAccelerometerY.value - AccelYStats.getMean()) / (AccelYStats.getStdev());
+            }
+            for (DataPoint anAccelerometerZ : accelerometerZ) {
+                anAccelerometerZ.value = (anAccelerometerZ.value - AccelZStats.getMean()) / (AccelZStats.getStdev());
+            }
+
+
+            try {
+
+
+                accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"), MagnitudeStats);
+
+                //Passed ECGStats and Activity to ECGFeatures, so that appropriate normalization can be carried out, and if there's no activity, RR intervals can be added to ECGStats
+                ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"), ECGStats, accelFeatures.Activity);
+                ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig, RIPBinnedStats, RIPStats, accelFeatures.Activity);
+
+                StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
+                System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
+
+                //TODO: Do something with this output
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Not enough data to process");
         }
-
-
-        for (DataPoint dp : accelerometerX) {
-            AccelXStats.add(dp.value);
-        }
-        for (DataPoint dp : accelerometerY) {
-            AccelYStats.add(dp.value);
-        }
-        for (DataPoint dp : accelerometerZ) {
-            AccelZStats.add(dp.value);
-        }
-
-
-        //Normalize
-        for (DataPoint anAccelerometerX : accelerometerX) {
-            anAccelerometerX.value = (anAccelerometerX.value - AccelXStats.getMean()) / (AccelXStats.getStdev());
-        }
-        for (DataPoint anAccelerometerY : accelerometerY) {
-            anAccelerometerY.value = (anAccelerometerY.value - AccelYStats.getMean()) / (AccelYStats.getStdev());
-        }
-        for (DataPoint anAccelerometerZ : accelerometerZ) {
-            anAccelerometerZ.value = (anAccelerometerZ.value - AccelZStats.getMean()) / (AccelZStats.getStdev());
-        }
-
-
-        try {
-            System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
-            accelFeatures = new AccelerometerFeatures(accelerometerX, accelerometerY, accelerometerZ, sensorConfig.getFrequency("ACCELX"), MagnitudeStats);
-
-            //Passed ECGStats and Activity to ECGFeatures, so that appropriate normalization can be carried out, and if there's no activity, RR intervals can be added to ECGStats
-            ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"), ECGStats, accelFeatures.Activity);
-            ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig, RIPBinnedStats, RIPStats, accelFeatures.Activity);
-
-            StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
-            System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
-
-            //TODO: Do something with this output
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         return 0.0;
     }
 

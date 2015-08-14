@@ -641,7 +641,7 @@ public class Core {
         ArrayList<Integer> Rpeak_temp3 = new ArrayList<Integer>();
         Rpeak_temp3.add(Rpeak_temp2.get(0));
 
-        for (int k = 1; k < Rpeak_temp2.size(); k++) {
+        for (int k = 1; k < Rpeak_temp2.size()-1; k++) {
             double maxValue = -1e9;
             int index = 0;
             try {
