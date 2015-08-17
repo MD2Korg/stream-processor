@@ -77,13 +77,13 @@ public class ECGFeatures {
             //Normalize RR intervals using Winsorized mean and stddev
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
-                    RRStats.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000) / (ECGStats.getWinsorizedStdev() / 1000));
+                    RRStats.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000.0) / (ECGStats.getWinsorizedStdev() / 1000.0));
 
                     RRStatsTimestamps.add(rr_timestamp[i]);
                 }
             }
 
-            HeartRate = ((double) RRStats.getN()) / (dp[dp.length - 1].timestamp - dp[0].timestamp);
+            HeartRate = ((double) RRStats.getN()) / ( (dp[dp.length - 1].timestamp - dp[0].timestamp) / 60000.0);
 
             DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];
             for (int i = 0; i < rrDatapoints.length; i++) {
