@@ -270,56 +270,68 @@ public class cStress {
 
 
         double[] featureVector = {
-                ECG_RR_Interval_Variance,
-                ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,
-                ECG_RR_Interval_High_Frequency_Energy,
-                ECG_RR_Interval_Medium_Frequency_Energy,
-                ECG_RR_Interval_Low_Frequency_Energy,
-                ECG_RR_Interval_Mean,
-                ECG_RR_Interval_Median,
-                ECG_RR_Interval_Quartile_Deviation,
-                ECG_RR_Interval_80thPercentile,
-                ECG_RR_Interval_20thPercentile,
-                ECG_RR_Interval_Heart_Rate,
+                ECG_RR_Interval_Variance,                               // 1
+                ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,        // 2
+                ECG_RR_Interval_High_Frequency_Energy,                  // 3
+                ECG_RR_Interval_Medium_Frequency_Energy,                // 4
+                ECG_RR_Interval_Low_Frequency_Energy,                   // 5
+                ECG_RR_Interval_Mean,                                   // 6
+                ECG_RR_Interval_Median,                                 // 7
+                ECG_RR_Interval_Quartile_Deviation,                     // 8
+                ECG_RR_Interval_80thPercentile,                         // 9
+                ECG_RR_Interval_20thPercentile,                         // 10
+                ECG_RR_Interval_Heart_Rate,                             // 11
 
-                RIP_Breath_Rate,
-                RIP_Inspiration_Minute_Volume,
+                RIP_Breath_Rate,                                        // 12
+                RIP_Inspiration_Minute_Volume,                          // 13
 
-                RIP_Inspiration_Duration_Quartile_Deviation,
-                RIP_Inspiration_Duration_Mean,
-                RIP_Inspiration_Duration_Median,
-                RIP_Inspiration_Duration_80thPercentile,
+                RIP_Inspiration_Duration_Quartile_Deviation,            // 14
+                RIP_Inspiration_Duration_Mean,                          // 15
+                RIP_Inspiration_Duration_Median,                        // 16
+                RIP_Inspiration_Duration_80thPercentile,                // 17
 
-                RIP_Expiration_Duration_Quartile_Deviation,
-                RIP_Expiration_Duration_Mean,
-                RIP_Expiration_Duration_Median,
-                RIP_Expiration_Duration_80thPercentile,
+                RIP_Expiration_Duration_Quartile_Deviation,             // 18
+                RIP_Expiration_Duration_Mean,                           // 19
+                RIP_Expiration_Duration_Median,                         // 20
+                RIP_Expiration_Duration_80thPercentile,                 // 21
 
-                RIP_Respiration_Duration_Quartile_Deviation,
-                RIP_Respiration_Duration_Mean,
-                RIP_Respiration_Duration_Median,
-                RIP_Respiration_Duration_80thPercentile,
+                RIP_Respiration_Duration_Quartile_Deviation,            // 22
+                RIP_Respiration_Duration_Mean,                          // 23
+                RIP_Respiration_Duration_Median,                        // 24
+                RIP_Respiration_Duration_80thPercentile,                // 25
 
-                RIP_Inspiration_Expiration_Duration_Quartile_Deviation,
-                RIP_Inspiration_Expiration_Duration_Mean,
-                RIP_Inspiration_Expiration_Duration_Median,
-                RIP_Inspiration_Expiration_Duration_80thPercentile,
+                RIP_Inspiration_Expiration_Duration_Quartile_Deviation, // 26
+                RIP_Inspiration_Expiration_Duration_Mean,               // 27
+                RIP_Inspiration_Expiration_Duration_Median,             // 28
+                RIP_Inspiration_Expiration_Duration_80thPercentile,     // 29
 
-                RIP_Stretch_Duration_Quartile_Deviation,
-                RIP_Stretch_Duration_Mean,
-                RIP_Stretch_Duration_Median,
-                RIP_Stretch_Duration_80thPercentile,
+                RIP_Stretch_Duration_Quartile_Deviation,                // 30
+                RIP_Stretch_Duration_Mean,                              // 31
+                RIP_Stretch_Duration_Median,                            // 32
+                RIP_Stretch_Duration_80thPercentile,                    // 33
 
-                RSA_Quartile_Deviation,
-                RSA_Mean,
-                RSA_Median,
-                RSA_80thPercentile
+                RSA_Quartile_Deviation,                                 // 34
+                RSA_Mean,                                               // 35
+                RSA_Median,                                             // 36
+                RSA_80thPercentile                                      // 37
         };
-
 
         featureVector = normalizeFV(featureVector);
 
-        if (!activityCheck(accelFeatures)) {
+        boolean invalid = false;
+        for(double d: featureVector) {
+            if (Double.isInfinite(d) || Double.isNaN(d)) {
+                invalid = true;
+            }
+        }
+
+        if (!activityCheck(accelFeatures) && !invalid) {
+            System.out.print(new Date(this.windowStartTime).getTime() + ":  ");
+            for(int i=0; i<featureVector.length; i++) {
+                System.out.print(featureVector[i] + ", ");
+            }
+            System.out.println();
+
             //SVM evaluation
             svm_node[] data = new svm_node[featureVector.length];
             for (int i = 0; i < featureVector.length; i++) {
@@ -361,7 +373,7 @@ public class cStress {
         DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
-        System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
+        //System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
         if (rip.length > 500 && ecg.length > 500 && accelerometerX.length > 300 && accelerometerY.length > 300 && accelerometerZ.length > 300) {
 
             //This check must happen before any normalization.  It operates on the RAW signals.
@@ -406,7 +418,7 @@ public class cStress {
                 ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig, RIPBinnedStats, RIPStats, accelFeatures.Activity);
 
                 StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
-                System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
+                //System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
 
                 //TODO: Do something with this output
 
@@ -414,7 +426,7 @@ public class cStress {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Not enough data to process");
+            //System.out.println("Not enough data to process");
         }
         return 0.0;
     }

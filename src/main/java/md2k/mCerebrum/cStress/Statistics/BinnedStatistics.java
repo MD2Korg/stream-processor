@@ -141,7 +141,11 @@ public class BinnedStatistics {
         for (Integer i : bins.keySet()) {
             sum += bins.get(i) * i;
         }
-        return sum / count;
+        if(count < 2) {
+            return 0.0;
+        } else {
+            return sum / count;
+        }
     }
 
     public double getStdev() {
@@ -150,7 +154,11 @@ public class BinnedStatistics {
         for (Integer i : bins.keySet()) {
             sum += bins.get(i) * ((i - mean) * (i - mean));
         }
-        return Math.sqrt(sum / (count - 1));
+        if(count < 2) {
+            return 0.0;
+        } else {
+            return Math.sqrt(sum / (count - 1));
+        }
     }
 
 
@@ -162,7 +170,11 @@ public class BinnedStatistics {
         for (Integer i : bins.keySet()) {
             sum += bins.get(i) * ((i > high) ? high : ((i < low) ? low : i));
         }
-        return sum / count;
+        if(count < 2) {
+            return 0.0;
+        } else {
+            return sum / count;
+        }
     }
 
     public double getWinsorizedStdev() {
@@ -176,7 +188,11 @@ public class BinnedStatistics {
             double temp = ((i > high) ? high : ((i < low) ? low : i));
             sum += bins.get(i) * (temp - winsorizedMean) * (temp - winsorizedMean);
         }
-        return Math.sqrt(sum / (count - 1));
+        if(count < 2) {
+            return 0.0;
+        } else {
+            return Math.sqrt(sum / (count - 1));
+        }
     }
 
 }

@@ -14,6 +14,7 @@ import java.util.Iterator;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * - Ju Gao <gao.363@buckeyemail.osu.edu>
  * - Rummana Bari <rbari@memphis.edu>
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
