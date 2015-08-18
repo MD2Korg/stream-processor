@@ -19,6 +19,7 @@ import md2k.mCerebrum.cStress.legacyJava.RipQualityCalculation;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -316,7 +317,7 @@ public class cStress {
                 RSA_80thPercentile                                      // 37
         };
 
-        featureVector = normalizeFV(featureVector);
+        //featureVector = normalizeFV(featureVector);
 
         boolean invalid = false;
         for(double d: featureVector) {
@@ -328,7 +329,7 @@ public class cStress {
         if (!activityCheck(accelFeatures) && !invalid) {
             System.out.print(new Date(this.windowStartTime).getTime() + ":  ");
             for(int i=0; i<featureVector.length; i++) {
-                System.out.print(featureVector[i] + ", ");
+                System.out.print("(" + (i+1) + ") " + String.format("%15.4f", featureVector[i]) + ",  ");
             }
             System.out.println();
 
