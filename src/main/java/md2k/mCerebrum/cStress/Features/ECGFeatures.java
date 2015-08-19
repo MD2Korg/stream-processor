@@ -38,6 +38,8 @@ import java.util.ArrayList;
 public class ECGFeatures {
 
     public DescriptiveStatistics RRStats;
+    public DescriptiveStatistics RRHeartRateStats;
+    public DescriptiveStatistics RRStatsNormalized;
     public ArrayList<Long> RRStatsTimestamps;
 
     //Data inputs
@@ -72,18 +74,24 @@ public class ECGFeatures {
             }
 
             RRStats = new DescriptiveStatistics();
+            RRHeartRateStats = new DescriptiveStatistics();
+            RRStatsNormalized = new DescriptiveStatistics();
             RRStatsTimestamps = new ArrayList<Long>();
 
             //Normalize RR intervals using Winsorized mean and stddev
             for (int i = 0; i < rr_value.length; i++) {
                 if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
-                    RRStats.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000.0) / (ECGStats.getWinsorizedStdev() / 1000.0));
-
+                    RRStats.addValue(rr_value[i]);
+                    RRHeartRateStats.addValue(60.0/rr_value[i]);
+                    RRStatsNormalized.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000.0) / (ECGStats.getWinsorizedStdev() / 1000.0));
                     RRStatsTimestamps.add(rr_timestamp[i]);
                 }
             }
 
-            HeartRate = ((double) RRStats.getN()) / ( (dp[dp.length - 1].timestamp - dp[0].timestamp) / 60000.0);
+
+
+
+            HeartRate = RRHeartRateStats.getPercentile(50);
 
             DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];
             for (int i = 0; i < rrDatapoints.length; i++) {

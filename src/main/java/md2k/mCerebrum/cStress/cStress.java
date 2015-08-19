@@ -19,6 +19,7 @@ import md2k.mCerebrum.cStress.legacyJava.RipQualityCalculation;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -181,16 +182,16 @@ public class cStress {
          ECG - RR interval heart-rate
          */
 
-        double ECG_RR_Interval_Variance = ecgFeatures.RRStats.getVariance();
-        double ECG_RR_Interval_Quartile_Deviation = (ecgFeatures.RRStats.getPercentile(75) - ecgFeatures.RRStats.getPercentile(25)) / 2.0;
+        double ECG_RR_Interval_Variance = ecgFeatures.RRStatsNormalized.getVariance();
+        double ECG_RR_Interval_Quartile_Deviation = (ecgFeatures.RRStatsNormalized.getPercentile(75) - ecgFeatures.RRStatsNormalized.getPercentile(25)) / 2.0;
         double ECG_RR_Interval_Low_Frequency_Energy = ecgFeatures.getLombLowFrequencyEnergy();
         double ECG_RR_Interval_Medium_Frequency_Energy = ecgFeatures.getLombMediumFrequencyEnergy();
         double ECG_RR_Interval_High_Frequency_Energy = ecgFeatures.getLombHighFrequencyEnergy();
         double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = ecgFeatures.getLombLowHighFrequencyEnergyRatio();
-        double ECG_RR_Interval_Mean = ecgFeatures.RRStats.getMean();
-        double ECG_RR_Interval_Median = ecgFeatures.RRStats.getPercentile(50);
-        double ECG_RR_Interval_80thPercentile = ecgFeatures.RRStats.getPercentile(80);
-        double ECG_RR_Interval_20thPercentile = ecgFeatures.RRStats.getPercentile(20);
+        double ECG_RR_Interval_Mean = ecgFeatures.RRStatsNormalized.getMean();
+        double ECG_RR_Interval_Median = ecgFeatures.RRStatsNormalized.getPercentile(50);
+        double ECG_RR_Interval_80thPercentile = ecgFeatures.RRStatsNormalized.getPercentile(80);
+        double ECG_RR_Interval_20thPercentile = ecgFeatures.RRStatsNormalized.getPercentile(20);
         double ECG_RR_Interval_Heart_Rate = ecgFeatures.getHeartRate();
 
          /*
@@ -199,10 +200,10 @@ public class cStress {
          RIP - Inspiration Duration - median
          RIP - Inspiration Duration - 80th percentile
          */
-        double RIP_Inspiration_Duration_Quartile_Deviation = (ripFeatures.InspDuration.getPercentile(75) - ripFeatures.InspDuration.getPercentile(25)) / 2.0;
-        double RIP_Inspiration_Duration_Mean = ripFeatures.InspDuration.getMean();
-        double RIP_Inspiration_Duration_Median = ripFeatures.InspDuration.getPercentile(50);
-        double RIP_Inspiration_Duration_80thPercentile = ripFeatures.InspDuration.getPercentile(80);
+        double RIP_Inspiration_Duration_Quartile_Deviation = (ripFeatures.InspDurationNormalized.getPercentile(75) - ripFeatures.InspDurationNormalized.getPercentile(25)) / 2.0;
+        double RIP_Inspiration_Duration_Mean = ripFeatures.InspDurationNormalized.getMean();
+        double RIP_Inspiration_Duration_Median = ripFeatures.InspDurationNormalized.getPercentile(50);
+        double RIP_Inspiration_Duration_80thPercentile = ripFeatures.InspDurationNormalized.getPercentile(80);
 
          /*
          RIP - Expiration Duration - quartile deviation
@@ -210,10 +211,10 @@ public class cStress {
          RIP - Expiration Duration - median
          RIP - Expiration Duration - 80th percentile
          */
-        double RIP_Expiration_Duration_Quartile_Deviation = (ripFeatures.ExprDuration.getPercentile(75) - ripFeatures.ExprDuration.getPercentile(25)) / 2.0;
-        double RIP_Expiration_Duration_Mean = ripFeatures.ExprDuration.getMean();
-        double RIP_Expiration_Duration_Median = ripFeatures.ExprDuration.getPercentile(50);
-        double RIP_Expiration_Duration_80thPercentile = ripFeatures.ExprDuration.getPercentile(80);
+        double RIP_Expiration_Duration_Quartile_Deviation = (ripFeatures.ExprDurationNormalized.getPercentile(75) - ripFeatures.ExprDurationNormalized.getPercentile(25)) / 2.0;
+        double RIP_Expiration_Duration_Mean = ripFeatures.ExprDurationNormalized.getMean();
+        double RIP_Expiration_Duration_Median = ripFeatures.ExprDurationNormalized.getPercentile(50);
+        double RIP_Expiration_Duration_80thPercentile = ripFeatures.ExprDurationNormalized.getPercentile(80);
 
          /*
          RIP - Respiration Duration - quartile deviation
@@ -221,10 +222,10 @@ public class cStress {
          RIP - Respiration Duration - median
          RIP - Respiration Duration - 80th percentile
          */
-        double RIP_Respiration_Duration_Quartile_Deviation = (ripFeatures.RespDuration.getPercentile(75) - ripFeatures.RespDuration.getPercentile(25)) / 2.0;
-        double RIP_Respiration_Duration_Mean = ripFeatures.RespDuration.getMean();
-        double RIP_Respiration_Duration_Median = ripFeatures.RespDuration.getPercentile(50);
-        double RIP_Respiration_Duration_80thPercentile = ripFeatures.RespDuration.getPercentile(80);
+        double RIP_Respiration_Duration_Quartile_Deviation = (ripFeatures.RespDurationNormalized.getPercentile(75) - ripFeatures.RespDurationNormalized.getPercentile(25)) / 2.0;
+        double RIP_Respiration_Duration_Mean = ripFeatures.RespDurationNormalized.getMean();
+        double RIP_Respiration_Duration_Median = ripFeatures.RespDurationNormalized.getPercentile(50);
+        double RIP_Respiration_Duration_80thPercentile = ripFeatures.RespDurationNormalized.getPercentile(80);
 
          /*
          RIP - Inspiration-Expiration Duration Ratio - quartile deviation
@@ -243,19 +244,19 @@ public class cStress {
          *RIP - Stretch - median
          RIP - Stretch - 80th percentile
          */
-        double RIP_Stretch_Duration_Quartile_Deviation = (ripFeatures.Stretch.getPercentile(75) - ripFeatures.Stretch.getPercentile(25)) / 2.0;
-        double RIP_Stretch_Duration_Mean = ripFeatures.Stretch.getMean();
-        double RIP_Stretch_Duration_Median = ripFeatures.Stretch.getPercentile(50);
-        double RIP_Stretch_Duration_80thPercentile = ripFeatures.Stretch.getPercentile(80);
+        double RIP_Stretch_Duration_Quartile_Deviation = (ripFeatures.StretchNormalized.getPercentile(75) - ripFeatures.StretchNormalized.getPercentile(25)) / 2.0;
+        double RIP_Stretch_Duration_Mean = ripFeatures.StretchNormalized.getMean();
+        double RIP_Stretch_Duration_Median = ripFeatures.StretchNormalized.getPercentile(50);
+        double RIP_Stretch_Duration_80thPercentile = ripFeatures.StretchNormalized.getPercentile(80);
          /*
          *RIP - Breath-rate
          */
-        double RIP_Breath_Rate = ripFeatures.BreathRate;
+        double RIP_Breath_Rate = ripFeatures.BreathRateNormalized;
 
          /*
          *RIP - Inspiration Minute Volume
          */
-        double RIP_Inspiration_Minute_Volume = ripFeatures.MinuteVolume;
+        double RIP_Inspiration_Minute_Volume = ripFeatures.MinuteVolumeNormalized;
 
          /*
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
@@ -263,10 +264,10 @@ public class cStress {
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
          */
-        double RSA_Quartile_Deviation = (ecgFeatures.RRStats.getPercentile(75) - ecgFeatures.RRStats.getPercentile(25)) / 2.0;
-        double RSA_Mean = ecgFeatures.RRStats.getMean();
-        double RSA_Median = ecgFeatures.RRStats.getPercentile(50);
-        double RSA_80thPercentile = ecgFeatures.RRStats.getPercentile(80);
+        double RSA_Quartile_Deviation = (ecgFeatures.RRStatsNormalized.getPercentile(75) - ecgFeatures.RRStatsNormalized.getPercentile(25)) / 2.0;
+        double RSA_Mean = ecgFeatures.RRStatsNormalized.getMean();
+        double RSA_Median = ecgFeatures.RRStatsNormalized.getPercentile(50);
+        double RSA_80thPercentile = ecgFeatures.RRStatsNormalized.getPercentile(80);
 
 
         double[] featureVector = {
@@ -316,7 +317,7 @@ public class cStress {
                 RSA_80thPercentile                                      // 37
         };
 
-        featureVector = normalizeFV(featureVector);
+        //featureVector = normalizeFV(featureVector);
 
         boolean invalid = false;
         for(double d: featureVector) {
@@ -326,8 +327,9 @@ public class cStress {
         }
 
         if (!activityCheck(accelFeatures) && !invalid) {
-            System.out.print(new Date(this.windowStartTime).getTime() + ":  ");
+            System.out.print(new Date(this.windowStartTime).getTime() + ", ");
             for(int i=0; i<featureVector.length; i++) {
+                //System.out.print("(" + (i+1) + ") " + String.format("%15.4f", featureVector[i]) + ",  ");
                 System.out.print(featureVector[i] + ", ");
             }
             System.out.println();

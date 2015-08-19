@@ -48,12 +48,21 @@ public class RIPFeatures {
     public double MinuteVolume;
     public double BreathRate;
 
+    public double MinuteVolumeNormalized;
+    public double BreathRateNormalized;
+
     public DescriptiveStatistics InspDuration;
     public DescriptiveStatistics ExprDuration;
     public DescriptiveStatistics RespDuration;
     public DescriptiveStatistics Stretch;
     public DescriptiveStatistics IERatio;
     public DescriptiveStatistics RSA;
+
+    public DescriptiveStatistics InspDurationNormalized;
+    public DescriptiveStatistics ExprDurationNormalized;
+    public DescriptiveStatistics RespDurationNormalized;
+    public DescriptiveStatistics StretchNormalized;
+    public DescriptiveStatistics RSANormalized;
 
     private SensorConfiguration sensorConfig;
 
@@ -75,6 +84,12 @@ public class RIPFeatures {
         IERatio = new DescriptiveStatistics();
         RSA = new DescriptiveStatistics();
 
+        InspDurationNormalized = new DescriptiveStatistics();
+        ExprDurationNormalized = new DescriptiveStatistics();
+        RespDurationNormalized = new DescriptiveStatistics();
+        StretchNormalized = new DescriptiveStatistics();
+        RSANormalized = new DescriptiveStatistics();
+
         sensorConfig = sc;
 
 
@@ -92,12 +107,22 @@ public class RIPFeatures {
 
         //Add values, normalized with Winsorized mean and std
         for (int i = 0; i < pvData.valleyIndex.size() - 1; i++) {
-            InspDuration.addValue(((rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].getWinsorizedStdev());
-            ExprDuration.addValue(((rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].getWinsorizedStdev());
-            RespDuration.addValue(((rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].getWinsorizedStdev());
-            Stretch.addValue(((rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value) - RIPBinnedStats[RIPFeatures.FIND_STRETCH].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_STRETCH].getWinsorizedStdev());
+            InspDuration.addValue(rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp);
+            InspDurationNormalized.addValue(((rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].getWinsorizedStdev());
+
+            ExprDuration.addValue(rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp);
+            ExprDurationNormalized.addValue(((rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.peakIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION].getWinsorizedStdev());
+
+            RespDuration.addValue(rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp);
+            RespDurationNormalized.addValue(((rip[pvData.valleyIndex.get(i + 1)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp) - RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION].getWinsorizedStdev());
+
+            Stretch.addValue(rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value);
+            StretchNormalized.addValue(((rip[pvData.peakIndex.get(i)].value - rip[pvData.valleyIndex.get(i)].value) - RIPBinnedStats[RIPFeatures.FIND_STRETCH].getWinsorizedMean()) / RIPBinnedStats[RIPFeatures.FIND_STRETCH].getWinsorizedStdev());
+
             IERatio.addValue(InspDuration.getElement((int) InspDuration.getN() - 1) / ExprDuration.getElement((int) ExprDuration.getN() - 1));
+
             RSA.addValue((rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg) - RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedMean() / 1000.0) / (RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedStdev() / 1000));
+            RSANormalized.addValue(rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg));
         }
 
 
@@ -114,8 +139,8 @@ public class RIPFeatures {
             RIPStats[1].add(MinuteVolume);
         }
 
-        BreathRate = (BreathRate - RIPStats[0].getMean()) / RIPStats[0].getStdev();
-        MinuteVolume = (MinuteVolume - RIPStats[1].getMean()) / RIPStats[1].getStdev();
+        BreathRateNormalized = (BreathRate - RIPStats[0].getMean()) / RIPStats[0].getStdev();
+        MinuteVolumeNormalized = (MinuteVolume - RIPStats[1].getMean()) / RIPStats[1].getStdev();
 
 
     }
