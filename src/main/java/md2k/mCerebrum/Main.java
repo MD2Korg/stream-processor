@@ -36,7 +36,6 @@ public class Main {
     public static void main(String[] args) {
 
         String path = "/Users/hnat/Downloads/csvData/";
-
         String[] p = {"p10","p11","p12","p14","p15","p16"};
 
         for(String person: p) {
