@@ -317,7 +317,7 @@ public class cStress {
                 RSA_80thPercentile                                      // 37
         };
 
-        //featureVector = normalizeFV(featureVector);
+        featureVector = normalizeFV(featureVector);
 
         boolean invalid = false;
         for(double d: featureVector) {
@@ -349,6 +349,12 @@ public class cStress {
                 stressResult.label = AUTOSENSE.STRESSED;
             }
         }
+
+        //Basic Features
+        DataPoint[] af = accelFeatures.rawFeatures();
+        DataPoint[] rr_intervals = ecgFeatures.rawFeatures();
+        DataPoint[] peaks = ripFeatures.rawPeakFeatures();
+        DataPoint[] valleys = ripFeatures.rawValleyFeatures();
 
         return stressResult;
     }

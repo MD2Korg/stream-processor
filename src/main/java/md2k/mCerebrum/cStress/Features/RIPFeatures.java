@@ -14,17 +14,17 @@ import java.util.ArrayList;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- *
+ * <p>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p>
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- *
+ * <p>
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- *
+ * <p>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -66,6 +66,10 @@ public class RIPFeatures {
 
     private SensorConfiguration sensorConfig;
 
+    private DataPoint[] peaks;
+    private DataPoint[] valleys;
+
+
     /**
      * Core Respiration Features
      * Reference: ripFeature_Extraction.m
@@ -95,6 +99,21 @@ public class RIPFeatures {
 
         PeakValley pvData = Core.peakvalley_v2(rip, sensorConfig); //There is no trailing valley in this output.
 
+
+        this.peaks = new DataPoint[pvData.peakIndex.size()];
+        this.valleys = new DataPoint[pvData.valleyIndex.size()];
+
+        for (int i = 0; i < this.peaks.length; i++) {
+            DataPoint dp = new DataPoint(rip[pvData.peakIndex.get(i)].value, rip[pvData.peakIndex.get(i)].timestamp);
+            this.peaks[i] = dp;
+        }
+
+        for (int i = 0; i < this.valleys.length; i++) {
+            DataPoint dp = new DataPoint(rip[pvData.valleyIndex.get(i)].value, rip[pvData.valleyIndex.get(i)].timestamp);
+            this.valleys[i] = dp;
+        }
+
+
         if (!activity) {
             for (int i = 0; i < pvData.valleyIndex.size() - 1; i++) {
                 RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION].add((int) (rip[pvData.peakIndex.get(i)].timestamp - rip[pvData.valleyIndex.get(i)].timestamp));
@@ -121,8 +140,9 @@ public class RIPFeatures {
 
             IERatio.addValue(InspDuration.getElement((int) InspDuration.getN() - 1) / ExprDuration.getElement((int) ExprDuration.getN() - 1));
 
-            RSA.addValue((rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg) - RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedMean() / 1000.0) / (RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedStdev() / 1000));
-            RSANormalized.addValue(rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg));
+            RSA.addValue(rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg));
+            RSANormalized.addValue((rsaCalculateCycle(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i + 1)].timestamp, ecg) - RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedMean() / 1000.0) / (RIPBinnedStats[RIPFeatures.FIND_RSA].getWinsorizedStdev() / 1000));
+
         }
 
 
@@ -144,6 +164,15 @@ public class RIPFeatures {
 
 
     }
+
+    public DataPoint[] rawPeakFeatures() {
+        return this.peaks;
+    }
+
+    public DataPoint[] rawValleyFeatures() {
+        return this.valleys;
+    }
+
 
     private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {
         ArrayList<Integer> cInd = new ArrayList<Integer>();
