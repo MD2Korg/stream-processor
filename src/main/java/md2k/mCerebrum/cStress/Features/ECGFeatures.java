@@ -110,6 +110,16 @@ public class ECGFeatures {
     }
 
 
+    public DataPoint[] rawFeatures() {
+        DataPoint[] result = new DataPoint[this.rr_value.length];
+        for(int i=0; i<this.rr_value.length; i++) {
+            DataPoint dp = new DataPoint(this.rr_value[i],this.rr_timestamp[i]);
+            result[i] = dp;
+        }
+        return result;
+    }
+
+
     /**
      * Compute RR intervals
      *

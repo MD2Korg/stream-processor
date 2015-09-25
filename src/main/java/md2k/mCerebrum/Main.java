@@ -35,20 +35,25 @@ public class Main {
 
     public static void main(String[] args) {
 
-        CSVParser tp = new CSVParser();
-        tp.importData("rip.csv", AUTOSENSE.CHEST_RIP);
-        tp.importData("ecg.csv",AUTOSENSE.CHEST_ECG);
-        tp.importData("accelx.csv",AUTOSENSE.CHEST_ACCEL_X);
-        tp.importData("accely.csv",AUTOSENSE.CHEST_ACCEL_Y);
-        tp.importData("accelz.csv",AUTOSENSE.CHEST_ACCEL_Z);
+        String path = "/Users/hnat/Downloads/csvData/";
 
-        cStress stress = new cStress(60*1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
+        String[] p = {"p10","p11","p12","p14","p15","p16"};
 
-        for(CSVDataPoint ap: tp) {
-            stress.add(ap);
+        for(String person: p) {
+
+            CSVParser tp = new CSVParser();
+            tp.importData(path + person + "_rip.csv", AUTOSENSE.CHEST_RIP);
+            tp.importData(path + person + "_ecg.csv", AUTOSENSE.CHEST_ECG);
+            tp.importData(path + person + "_accelx.csv", AUTOSENSE.CHEST_ACCEL_X);
+            tp.importData(path + person + "_accely.csv", AUTOSENSE.CHEST_ACCEL_Y);
+            tp.importData(path + person + "_accelz.csv", AUTOSENSE.CHEST_ACCEL_Z);
+
+            cStress stress = new cStress(60 * 1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
+
+            for (CSVDataPoint ap : tp) {
+                stress.add(ap);
+            }
+
         }
-
-
-
     }
 }
