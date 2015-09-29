@@ -3,6 +3,7 @@ package md2k.mCerebrum;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
 import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
+import md2k.mCerebrum.cStress.Structs.StressProbability;
 import md2k.mCerebrum.cStress.cStress;
 
 /**
@@ -49,8 +50,12 @@ public class Main {
 
             cStress stress = new cStress(60 * 1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
 
+            StressProbability output;
             for (CSVDataPoint ap : tp) {
-                stress.add(ap);
+                output = stress.add(ap);
+                if(output != null) {
+                    System.out.println(output.label + " " + output.probability);
+                }
             }
 
         }
