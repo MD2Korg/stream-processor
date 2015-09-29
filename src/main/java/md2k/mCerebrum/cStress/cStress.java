@@ -244,10 +244,10 @@ public class cStress {
          *RIP - Stretch - median
          RIP - Stretch - 80th percentile
          */
-        double RIP_Stretch_Duration_Quartile_Deviation = (ripFeatures.StretchNormalized.getPercentile(75) - ripFeatures.StretchNormalized.getPercentile(25)) / 2.0;
-        double RIP_Stretch_Duration_Mean = ripFeatures.StretchNormalized.getMean();
-        double RIP_Stretch_Duration_Median = ripFeatures.StretchNormalized.getPercentile(50);
-        double RIP_Stretch_Duration_80thPercentile = ripFeatures.StretchNormalized.getPercentile(80);
+        double RIP_Stretch_Quartile_Deviation = (ripFeatures.StretchNormalized.getPercentile(75) - ripFeatures.StretchNormalized.getPercentile(25)) / 2.0;
+        double RIP_Stretch_Mean = ripFeatures.StretchNormalized.getMean();
+        double RIP_Stretch_Median = ripFeatures.StretchNormalized.getPercentile(50);
+        double RIP_Stretch_80thPercentile = ripFeatures.StretchNormalized.getPercentile(80);
          /*
          *RIP - Breath-rate
          */
@@ -306,10 +306,10 @@ public class cStress {
                 RIP_Inspiration_Expiration_Duration_Median,             // 28
                 RIP_Inspiration_Expiration_Duration_80thPercentile,     // 29
 
-                RIP_Stretch_Duration_Quartile_Deviation,                // 30
-                RIP_Stretch_Duration_Mean,                              // 31
-                RIP_Stretch_Duration_Median,                            // 32
-                RIP_Stretch_Duration_80thPercentile,                    // 33
+                RIP_Stretch_Quartile_Deviation,                         // 30
+                RIP_Stretch_Mean,                                       // 31
+                RIP_Stretch_Median,                                     // 32
+                RIP_Stretch_80thPercentile,                             // 33
 
                 RSA_Quartile_Deviation,                                 // 34
                 RSA_Mean,                                               // 35
@@ -327,13 +327,6 @@ public class cStress {
         }
 
         if (!activityCheck(accelFeatures) && !invalid) {
-            System.out.print(new Date(this.windowStartTime).getTime() + ", ");
-            for(int i=0; i<featureVector.length; i++) {
-                //System.out.print("(" + (i+1) + ") " + String.format("%15.4f", featureVector[i]) + ",  ");
-                System.out.print(featureVector[i] + ", ");
-            }
-            System.out.println();
-
             //SVM evaluation
             svm_node[] data = new svm_node[featureVector.length];
             for (int i = 0; i < featureVector.length; i++) {
@@ -373,7 +366,9 @@ public class cStress {
     }
 
 
-    public double process() {
+    public StressProbability process() {
+
+        StressProbability probabilityOfStress = null;
 
         DataPoint[] accelerometerX = generateDataPointArray(ACCELX, sensorConfig.getFrequency("ACCELX"));
         DataPoint[] accelerometerY = generateDataPointArray(ACCELY, sensorConfig.getFrequency("ACCELY"));
@@ -381,7 +376,6 @@ public class cStress {
         DataPoint[] ecg = generateDataPointArray(ECG, sensorConfig.getFrequency("ECG"));
         DataPoint[] rip = generateDataPointArray(RIP, sensorConfig.getFrequency("RIP"));
 
-        //System.out.println("INPUT SIZES: " + ecg.length + " " + rip.length + " " + accelerometerX.length + " " + accelerometerY.length + " " + accelerometerZ.length);
         if (rip.length > 500 && ecg.length > 500 && accelerometerX.length > 300 && accelerometerY.length > 300 && accelerometerZ.length > 300) {
 
             //This check must happen before any normalization.  It operates on the RAW signals.
@@ -389,7 +383,7 @@ public class cStress {
             ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
 
             if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
-                return 0.0; //data quality failure
+                return probabilityOfStress; //data quality failure
             }
 
 
@@ -425,10 +419,8 @@ public class cStress {
                 ecgFeatures = new ECGFeatures(ecg, sensorConfig.getFrequency("ECG"), ECGStats, accelFeatures.Activity);
                 ripFeatures = new RIPFeatures(rip, ecgFeatures, sensorConfig, RIPBinnedStats, RIPStats, accelFeatures.Activity);
 
-                StressProbability probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
-                //System.out.println(probabilityOfStress.label + " " + probabilityOfStress.probability);
 
-                //TODO: Do something with this output
+                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -436,7 +428,7 @@ public class cStress {
         } else {
             //System.out.println("Not enough data to process");
         }
-        return 0.0;
+        return probabilityOfStress;
     }
 
 
@@ -452,13 +444,14 @@ public class cStress {
         return dpArray;
     }
 
-    public void add(CSVDataPoint ap) {
+    public StressProbability add(CSVDataPoint ap) {
+        StressProbability result = null;
 
         if (this.windowStartTime < 0)
             this.windowStartTime = nextEpochTimestamp(ap.timestamp);
 
         if ((ap.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
-            process();
+            result = process();
             resetBuffers();
             this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS*1000; //Add 60 seconds to the timestamp
         }
@@ -491,6 +484,8 @@ public class cStress {
 
             }
         }
+
+        return result;
     }
 
     private long nextEpochTimestamp(long timestamp) {
