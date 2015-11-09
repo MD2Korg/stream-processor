@@ -369,63 +369,68 @@ public class Core {
      * @param timestamp RR-interval timestamps
      * @return Outlier array
      */
-    public static int[] detect_outlier_v2(double[] sample, long[] timestamp) {
+    public static String detect_outlier_v2(HashMap<String, DataStream> datastreams) {
         ArrayList<Integer> outlier = new ArrayList<Integer>();
 
-        if (timestamp.length != 0) {
-            ArrayList<Double> valid_rrInterval = new ArrayList<Double>();
-            ArrayList<Long> valid_timestamp = new ArrayList<Long>();
-            DescriptiveStatistics valid_rrInterval_stats = new DescriptiveStatistics();
-            for (int i = 0; i < sample.length; i++) {
-                if (sample[i] > 0.3 && sample[i] < 2.0) {
-                    valid_rrInterval.add(sample[i]);
-                    valid_rrInterval_stats.addValue(sample[i]);
-                    valid_timestamp.add(timestamp[i]);
+        DataStream ds = datastreams.get("org.md2k.cstress.data.ecg.rr_value");
+
+        if (ds.data.size() != 0) {
+
+            if (!datastreams.containsKey("org.md2k.cstress.data.ecg.valid_rr_interval")) {
+                datastreams.put("org.md2k.cstress.data.ecg.valid_rr_interval", new DataStream("ECG-valid-rr_interval"));
+            }
+            for (int i = 0; i < ds.data.size(); i++) {
+                if (ds.data.get(i).value > 0.3 && ds.data.get(i).value < 2.0) {
+                    datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").add(ds.data.get(i));
                 }
             }
-            DescriptiveStatistics diff_rrInterval = new DescriptiveStatistics();
-            for (int i = 1; i < valid_rrInterval.size(); i++) {
-                diff_rrInterval.addValue(Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i - 1)));
+
+            if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr_value.diff")) {
+                datastreams.put("org.md2k.cstress.data.ecg.rr_value.diff", new DataStream("ECG-rr_value-diff"));
             }
-            double MED = AUTOSENSE.MED_CONSTANT * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25));
-            double MAD = (valid_rrInterval_stats.getPercentile(50) - AUTOSENSE.MAD_CONSTANT * 0.5 * (diff_rrInterval.getPercentile(75) - diff_rrInterval.getPercentile(25))) / 3.0;
+            for (int i = 1; i < datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.size(); i++) {
+                datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).timestamp, Math.abs(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i - 1).value)));
+            }
+
+            double MED = AUTOSENSE.MED_CONSTANT * 0.5 * ( datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(75) -  datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(25));
+            double MAD = (datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").descriptiveStats.getPercentile(50) - AUTOSENSE.MAD_CONSTANT * 0.5 * ( datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(75) -  datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(25))) / 3.0;
             double CBD = (MED + MAD) / 2.0;
             if (CBD < AUTOSENSE.CBD_THRESHOLD) {
                 CBD = AUTOSENSE.CBD_THRESHOLD;
             }
 
-            for (double aSample : sample) {
+            for (DataPoint aSample : ds.data) {
                 outlier.add(AUTOSENSE.QUALITY_BAD);
             }
             outlier.set(0, AUTOSENSE.QUALITY_GOOD);
-            double standard_rrInterval = valid_rrInterval.get(0);
+            double standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(0).value;
             boolean prev_beat_bad = false;
 
-            for (int i = 1; i < valid_rrInterval.size() - 1; i++) {
-                double ref = valid_rrInterval.get(i);
+            for (int i = 1; i < datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.size() - 1; i++) {
+                double ref = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value;
                 if (ref > AUTOSENSE.REF_MINIMUM && ref < AUTOSENSE.REF_MAXIMUM) {
-                    double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rrInterval.get(i));
-                    double beat_diff_pre = Math.abs(valid_rrInterval.get(i - 1) - valid_rrInterval.get(i));
-                    double beat_diff_post = Math.abs(valid_rrInterval.get(i) - valid_rrInterval.get(i + 1));
+                    double beat_diff_prevGood = Math.abs(standard_rrInterval - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value);
+                    double beat_diff_pre = Math.abs(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i - 1).value - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value);
+                    double beat_diff_post = Math.abs(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i + 1).value);
 
                     if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
-                        for (int j = 0; j < timestamp.length; j++) {
-                            if (timestamp[j] == valid_timestamp.get(i)) {
+                        for (int j = 0; j < ds.data.size(); j++) {
+                            if (ds.data.get(j).timestamp == datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).timestamp) {
                                 outlier.set(j, AUTOSENSE.QUALITY_GOOD);
                             }
                         }
                         prev_beat_bad = false;
-                        standard_rrInterval = valid_rrInterval.get(i);
+                        standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value;
                     } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
                         prev_beat_bad = true;
                     } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
-                        for (int j = 0; j < timestamp.length; j++) {
-                            if (timestamp[j] == valid_timestamp.get(i)) {
+                        for (int j = 0; j < ds.data.size(); j++) {
+                            if (ds.data.get(j).timestamp == datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).timestamp) {
                                 outlier.set(j, AUTOSENSE.QUALITY_GOOD);
                             }
                         }
                         prev_beat_bad = false;
-                        standard_rrInterval = valid_rrInterval.get(i);
+                        standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value;
                     } else if (!prev_beat_bad && beat_diff_pre > CBD) {
                         prev_beat_bad = true;
                     }
@@ -435,11 +440,14 @@ public class Core {
 
         }
 
-        int[] result = new int[outlier.size()];
-        for (int i = 0; i < outlier.size(); i++) {
-            result[i] = outlier.get(i);
+        if (!datastreams.containsKey("org.md2k.cstress.data.ecg.outlier")) {
+            datastreams.put("org.md2k.cstress.data.ecg.outlier", new DataStream("ECG-rr-outlier"));
         }
-        return result;
+        for (int i = 0; i < outlier.size(); i++) {
+            datastreams.get("org.md2k.cstress.data.ecg.outlier").add(new DataPoint(ds.data.get(i).timestamp, outlier.get(i)));
+        }
+
+        return "org.md2k.cstress.data.ecg.outlier";
     }
 
 
