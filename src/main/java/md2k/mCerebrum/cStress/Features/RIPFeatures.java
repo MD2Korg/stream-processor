@@ -104,12 +104,12 @@ public class RIPFeatures {
         this.valleys = new DataPoint[pvData.valleyIndex.size()];
 
         for (int i = 0; i < this.peaks.length; i++) {
-            DataPoint dp = new DataPoint(rip[pvData.peakIndex.get(i)].value, rip[pvData.peakIndex.get(i)].timestamp);
+            DataPoint dp = new DataPoint(rip[pvData.peakIndex.get(i)].timestamp, rip[pvData.peakIndex.get(i)].value);
             this.peaks[i] = dp;
         }
 
         for (int i = 0; i < this.valleys.length; i++) {
-            DataPoint dp = new DataPoint(rip[pvData.valleyIndex.get(i)].value, rip[pvData.valleyIndex.get(i)].timestamp);
+            DataPoint dp = new DataPoint(rip[pvData.valleyIndex.get(i)].timestamp, rip[pvData.valleyIndex.get(i)].value);
             this.valleys[i] = dp;
         }
 
@@ -175,29 +175,30 @@ public class RIPFeatures {
 
 
     private double rsaCalculateCycle(long starttime, long endtime, ECGFeatures ecg) {
-        ArrayList<Integer> cInd = new ArrayList<Integer>();
-        for (int i = 0; i < ecg.RRStatsTimestamps.size(); i++) {
-            if (ecg.RRStatsTimestamps.get(i) >= starttime && ecg.RRStatsTimestamps.get(i) < endtime) {
-                cInd.add(i);
-            }
-        }
-        double max = 0.0;
-        double min = 0.0;
-
-        if (cInd.size() != 0) {
-            max = ecg.RRStats.getElement(cInd.get(0));
-            min = ecg.RRStats.getElement(cInd.get(0));
-
-            for (int i = 0; i < cInd.size(); i++) {
-                if (ecg.RRStats.getElement(i) > max) {
-                    max = ecg.RRStats.getElement(i);
-                }
-                if (ecg.RRStats.getElement(i) < min) {
-                    min = ecg.RRStats.getElement(i);
-                }
-            }
-        }
-        return max - min;
+//        ArrayList<Integer> cInd = new ArrayList<Integer>();
+//        for (int i = 0; i < ecg.RRStatsTimestamps.size(); i++) {
+//            if (ecg.RRStatsTimestamps.get(i) >= starttime && ecg.RRStatsTimestamps.get(i) < endtime) {
+//                cInd.add(i);
+//            }
+//        }
+//        double max = 0.0;
+//        double min = 0.0;
+//
+//        if (cInd.size() != 0) {
+//            max = ecg.RRStats.getElement(cInd.get(0));
+//            min = ecg.RRStats.getElement(cInd.get(0));
+//
+//            for (int i = 0; i < cInd.size(); i++) {
+//                if (ecg.RRStats.getElement(i) > max) {
+//                    max = ecg.RRStats.getElement(i);
+//                }
+//                if (ecg.RRStats.getElement(i) < min) {
+//                    min = ecg.RRStats.getElement(i);
+//                }
+//            }
+//        }
+//        return max - min;
+        return 0.0;
     }
 
 

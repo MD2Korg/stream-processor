@@ -1,8 +1,8 @@
 package md2k.mCerebrum;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
 import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
+import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.StressProbability;
 import md2k.mCerebrum.cStress.cStress;
 
@@ -52,7 +52,8 @@ public class Main {
 
             StressProbability output;
             for (CSVDataPoint ap : tp) {
-                output = stress.add(ap);
+                DataPoint dp = new DataPoint(ap.timestamp, ap.value);
+                output = stress.add(ap.channel,dp);
                 if(output != null) {
                     System.out.println(output.label + " " + output.probability);
                 }

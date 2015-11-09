@@ -147,26 +147,26 @@ public class ECGQualityCalculation {
         return AUTOSENSE.QUALITY_GOOD;
     }
 
-    public boolean computeQuality(DataPoint[] ecg, int windowSize, double threshold) {
-
-        ArrayList<DataPoint[]> windowedECG = window(ecg, windowSize);
-
-        int resultCount = 0;
-
-        for(DataPoint[] dpA: windowedECG) {
-            int[] data = new int[dpA.length];
-            int i=0;
-            for(DataPoint s: dpA) {
-                data[i++] = (int) s.value;
-            }
-            if (data.length > 0 && currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
-                resultCount++;
-            }
-        }
-
-        return ((resultCount/windowedECG.size()) > threshold);
-
-    }
+//    public boolean computeQuality(DataPoint[] ecg, int windowSize, double threshold) {
+//
+//        ArrayList<DataPoint[]> windowedECG = window(ecg, windowSize);
+//
+//        int resultCount = 0;
+//
+//        for(DataPoint[] dpA: windowedECG) {
+//            int[] data = new int[dpA.length];
+//            int i=0;
+//            for(DataPoint s: dpA) {
+//                data[i++] = (int) s.value;
+//            }
+//            if (data.length > 0 && currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
+//                resultCount++;
+//            }
+//        }
+//
+//        return ((resultCount/windowedECG.size()) > threshold);
+//
+//    }
 
 }
 
