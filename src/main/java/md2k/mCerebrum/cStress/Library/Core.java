@@ -983,7 +983,7 @@ public class Core {
             }
         }
 
-        //Intercepts UIDI = InterceptOutlierDetectorRIPLamia(upInterceptIndex, downInterceptIndex, sample, (int) (AUTOSENSE.SAMPLE_LENGTH_SECS*1000), sc);
+        String UIDI = InterceptOutlierDetectorRIPLamia( datastreams, (int) (AUTOSENSE.SAMPLE_LENGTH_SECS*1000));
 
 //        int[] UI = UIDI.UI;
 //        int[] DI = UIDI.DI;
@@ -1106,162 +1106,102 @@ public class Core {
      * @param windowLength
      * @return
      */
-    public static Intercepts InterceptOutlierDetectorRIPLamia(ArrayList<Integer> upInterceptIndex, ArrayList<Integer> downInterceptIndex, DataPoint[] sample, int windowLength, SensorConfiguration sc) {
-        Intercepts result = new Intercepts();
+    public static String InterceptOutlierDetectorRIPLamia(HashMap<String, DataStream> datastreams, int windowLength) {
+        String result = "";
 
-        int minimumLength = Math.min(upInterceptIndex.size(), downInterceptIndex.size());
+        DataStream upIntercepts = datastreams.get("org.md2k.cstress.data.rip.upIntercepts");
+        DataStream downIntercepts = datastreams.get("org.md2k.cstress.data.rip.downIntercepts");
 
-        ArrayList<Integer> D = new ArrayList<Integer>();
-        ArrayList<Integer> U = new ArrayList<Integer>();
-        for(int i=0; i<minimumLength; i++) {
-            U.add(upInterceptIndex.get(i));
-            D.add(downInterceptIndex.get(i));
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.upIntercepts.filtered")) {
+            datastreams.put("org.md2k.cstress.data.rip.upIntercepts.filtered", new DataStream("RIP-upIntercepts-filtered"));
+        }
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.downIntercepts.filtered")) {
+            datastreams.put("org.md2k.cstress.data.rip.downIntercepts.filtered", new DataStream("RIP-downIntercepts-filtered"));
         }
 
-        ArrayList<Integer> UI = new ArrayList<Integer>();
-        ArrayList<Integer> DI = new ArrayList<Integer>();
+        DataStream upInterceptsFiltered = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered");
+        DataStream downInterceptsFiltered = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered");
 
-        int i = 0;
-        int j = 0;
-        while(i < U.size()-2) {
-            if (j > (D.size()-1)) {
-                break;
-            }
+        int upPointer = 0;
+        int downPointer = 0;
+        boolean updownstate = true; //True check for up intercept
+        downInterceptsFiltered.add(downIntercepts.data.get(downPointer)); //Initialize with starting point
 
-            while(j < D.size()-1) {
-               if(U.get(0) < D.get(0)) {
-                   if (i == U.size() || j == D.size()) {
-                       break;
-                   }
-
-                   if (U.get(i) < D.get(j) && D.get(j) < U.get(i+1)) {
-                       UI.add(U.get(i));
-                       ArrayList<Integer> ind = new ArrayList<Integer>();
-                       for (Integer aD : D) {
-                           if ((aD > D.get(j)) && (aD < U.get(i+1))) {
-                               ind.add(aD);
-                           }
-                       }
-                       if (ind.size() == 0) {
-                           DI.add(D.get(j));
-                           j++;
-                       } else {
-                           DI.add(ind.get(ind.size()-1));
-                           j = ind.get(ind.size()-1)+1;
-                       }
-                       i++;
-                   } else if (U.get(i) < D.get(j) && D.get(j) > U.get(i+1)) {
-                       DI.add(D.get(i));
-                       ArrayList<Integer> ind = new ArrayList<Integer>();
-                       for (Integer aU : U) {
-                           if ((aU > U.get(i)) && (aU < D.get(j))) {
-                               ind.add(aU);
-                           }
-                       }
-                       if (ind.size() == 0) {
-                           UI.add(U.get(i));
-                           i++;
-                       } else {
-                           UI.add(ind.get(ind.size()-1));
-                           i = ind.get(ind.size()-1)+1;
-                       }
-                       j++;
-                   }
-               } else if (D.get(0) < U.get(0)) {
-                   if (i == D.size() || j == U.size()) {
-                       break;
-                   }
-
-                   if (D.get(i) < U.get(j) && U.get(j) < D.get(i+1)) {
-                       DI.add(D.get(i));
-                       ArrayList<Integer> ind = new ArrayList<Integer>();
-                       for (Integer aU : U) {
-                           if ((aU > U.get(j)) && (aU < D.get(i+1))) {
-                               ind.add(aU);
-                           }
-                       }
-                       if (ind.size() == 0) {
-                           UI.add(U.get(j));
-                           j++;
-                       } else {
-                           UI.add(ind.get(ind.size()-1));
-                           j = ind.get(ind.size()-1)+1;
-                       }
-                       i++;
-                   } else if (D.get(i) < U.get(j) && U.get(j) > D.get(i+1)) {
-                       UI.add(U.get(i));
-                       ArrayList<Integer> ind = new ArrayList<Integer>();
-                       for (Integer aD : D) {
-                           if ((aD > D.get(i)) && (aD < U.get(j))) {
-                               ind.add(aD);
-                           }
-                       }
-                       if (ind.size() == 0) {
-                           DI.add(D.get(i));
-                           i++;
-                       } else {
-                           DI.add(ind.get(ind.size()-1));
-                           i = ind.get(ind.size()-1)+1;
-                       }
-                       j++;
-                   }
-               }
+        while(downPointer != downIntercepts.data.size() && upPointer != upIntercepts.data.size()) {
+            if (updownstate) { //Check for up intercept
+                if (downIntercepts.data.get(downPointer).timestamp < upIntercepts.data.get(upPointer).timestamp) {
+                    //Replace down intercept
+                    downInterceptsFiltered.data.get(downInterceptsFiltered.data.size()-1).timestamp = downIntercepts.data.get(downPointer).timestamp;
+                    downInterceptsFiltered.data.get(downInterceptsFiltered.data.size()-1).value = downIntercepts.data.get(downPointer).value;
+                    downPointer++;
+                } else {
+                    //Found up intercept
+                    upInterceptsFiltered.add(upIntercepts.data.get(upPointer));
+                    upPointer++;
+                    updownstate = false;
+                }
+            } else { //Check for down intercept
+                if (downIntercepts.data.get(downPointer).timestamp > upIntercepts.data.get(upPointer).timestamp) {
+                    //Replace up intercept
+                    upInterceptsFiltered.data.get(upInterceptsFiltered.data.size()-1).timestamp = upIntercepts.data.get(upPointer).timestamp;
+                    upInterceptsFiltered.data.get(upInterceptsFiltered.data.size()-1).value = upIntercepts.data.get(upPointer).value;
+                    upPointer++;
+                } else {
+                    //Found down intercept
+                    downInterceptsFiltered.add(downIntercepts.data.get(downPointer));
+                    downPointer++;
+                    updownstate = true;
+                }
             }
         }
 
-        if (UI.size() ==0 && DI.size() == 0) {
-            return result;
-        }
-        if (UI.get(0) < DI.get(0)) {
-            UI.remove(0);
-        }
+        //TODO: is this still needed?
+//        double fr;
+//        for(int ii=0; ii<DI.size()-1; ii++) {
+//            fr = (double)windowLength / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
+//            if (fr >= AUTOSENSE.RESPIRATION_MINIMUM && fr <= AUTOSENSE.RESPIRATION_MAXIMUM) {
+//                DownIntercept.add(DI.get(ii));
+//                UpIntercept.add(UI.get(ii));
+//            }
+//        }
 
-        minimumLength = Math.min(UI.size(),DI.size());
-        while(UI.size() > minimumLength) {
-            UI.remove(UI.size()-1);
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec")) {
+            datastreams.put("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec", new DataStream("RIP-upIntercepts-filtered-1sec"));
         }
-        while(DI.size() > minimumLength) {
-            DI.remove(DI.size()-1);
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec")) {
+            datastreams.put("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec", new DataStream("RIP-downIntercepts-filtered-1sec"));
         }
+        DataStream upInterceptsFiltered1sec = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec");
+        DataStream downInterceptsFiltered1sec = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec");
 
 
-        ArrayList<Integer> DownIntercept = new ArrayList<Integer>();
-        ArrayList<Integer> UpIntercept = new ArrayList<Integer>();
-        double fr;
-        for(int ii=0; ii<DI.size()-1; ii++) {
-            fr = (double)windowLength / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
-            if (fr >= AUTOSENSE.RESPIRATION_MINIMUM && fr <= AUTOSENSE.RESPIRATION_MAXIMUM) {
-                DownIntercept.add(DI.get(ii));
-                UpIntercept.add(UI.get(ii));
+        for(int i=1; i<downInterceptsFiltered.data.size(); i++) {
+            if( (downInterceptsFiltered.data.get(i).timestamp - downInterceptsFiltered.data.get(i-1).timestamp) > 1000.0) {
+                downInterceptsFiltered1sec.add(downInterceptsFiltered.data.get(i-1));
+                upInterceptsFiltered1sec.add(upInterceptsFiltered.data.get(i-1));
             }
         }
+        downInterceptsFiltered1sec.add(downInterceptsFiltered.data.get(downInterceptsFiltered.data.size()-1));
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec.t20")) {
+            datastreams.put("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec.t20", new DataStream("RIP-upIntercepts-filtered-1sec-t20"));
+        }
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec.t20")) {
+            datastreams.put("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec.t20", new DataStream("RIP-downIntercepts-filtered-1sec-t20"));
+        }
+        DataStream upInterceptsFiltered1sect20 = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec.t20");
+        DataStream downInterceptsFiltered1sect20 = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec.t20");
 
 
-        ArrayList<Integer> DownIntercept2 = new ArrayList<Integer>();
-        ArrayList<Integer> UpIntercept2 = new ArrayList<Integer>();
-        double equivalentSamplePoints = AUTOSENSE.WINDOW_LENGTH_SECS/ AUTOSENSE.WINDOW_DIVIDER_FACTOR * sc.getFrequency("RIP");
-        double upToDownDistance;
-        for(int ii=0; ii<DownIntercept.size()-1; ii++) {
-            upToDownDistance = DownIntercept.get(ii+1)-UpIntercept.get(ii)+1;
-            if(upToDownDistance > equivalentSamplePoints) {
-                UpIntercept2.add(UpIntercept.get(ii));
-                DownIntercept2.add(DownIntercept.get(ii));
+        downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(0));
+        for(int i=0; i<upInterceptsFiltered1sec.data.size(); i++) {
+            if( (downInterceptsFiltered1sec.data.get(i+1).timestamp - upInterceptsFiltered1sec.data.get(i).timestamp) > (2.0/20.0)) {
+                downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(i+1));
+                upInterceptsFiltered1sect20.add(upInterceptsFiltered.data.get(i));
             }
         }
-
-        if(DownIntercept2.size() > 0) {
-            DownIntercept2.remove(DownIntercept2.size() - 1);
-        }
-
-
-        result.UI = new int[UpIntercept2.size()];
-        result.DI = new int[UpIntercept2.size()-1];
-        for(int ii=0; ii<UpIntercept2.size(); ii++) {
-            result.UI[ii] = UpIntercept2.get(ii);
-            if(ii < UpIntercept2.size()-1) {
-                result.DI[ii] = DownIntercept2.get(ii);
-            }
-        }
+        downInterceptsFiltered1sect20.data.remove(downInterceptsFiltered1sect20.data.size()-1); //Not necessary to keep
 
         return result;
     }

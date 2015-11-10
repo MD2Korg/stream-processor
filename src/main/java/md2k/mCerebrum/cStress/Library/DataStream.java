@@ -83,7 +83,7 @@ public class DataStream {
     }
 
     public void add(DataPoint dp) {
-        data.add(dp);
+        data.add(new DataPoint(dp));
         stats.addValue(dp.value);
         descriptiveStats.addValue(dp.value);
     }
