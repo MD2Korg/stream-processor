@@ -166,25 +166,25 @@ public class RipQualityCalculation {
         return AUTOSENSE.QUALITY_GOOD;
     }
 
-    public boolean computeQuality(DataPoint[] rip, int windowSize, double threshold) {
-
-        ArrayList<DataPoint[]> windowedRIP = window(rip, windowSize);
-
-        double resultCount = 0;
-
-        for(DataPoint[] dpA: windowedRIP) {
-            int[] data = new int[dpA.length];
-            int i=0;
-            for(DataPoint s: dpA) {
-                data[i++] = (int) s.value;
-            }
-            if (data.length > 0 && currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
-                resultCount++;
-            }
-        }
-
-        return ((resultCount/windowedRIP.size()) > threshold);
-
-    }
+//    public boolean computeQuality(DataPoint[] rip, int windowSize, double threshold) {
+//
+//        ArrayList<DataPoint[]> windowedRIP = window(rip, windowSize);
+//
+//        double resultCount = 0;
+//
+//        for(DataPoint[] dpA: windowedRIP) {
+//            int[] data = new int[dpA.length];
+//            int i=0;
+//            for(DataPoint s: dpA) {
+//                data[i++] = (int) s.value;
+//            }
+//            if (data.length > 0 && currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
+//                resultCount++;
+//            }
+//        }
+//
+//        return ((resultCount/windowedRIP.size()) > threshold);
+//
+//    }
 }
 

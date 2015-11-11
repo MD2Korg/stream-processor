@@ -1,11 +1,13 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Library.Core;
+import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Statistics.RunningStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -37,74 +39,75 @@ import java.util.ArrayList;
 public class AccelerometerFeatures {
     public static final double ACTIVITY_THRESHOLD = 0.35;
     public boolean Activity;
+    private int windowSize = 10*1000;
 
-    public double[] StdevMagnitude;
-    private long[] rawTimestamps;
-    private double[] rawstdMagnitudeArray;
 
-    /** Accelerometer Feature Computation
-     * Reference: accelerometerfeature_extraction.m
-     * @param segx
-     * @param segy
-     * @param segz
-     * @param samplingFreq
-     */
-    public AccelerometerFeatures(DataPoint[] segx, DataPoint[] segy, DataPoint[] segz, double samplingFreq, RunningStatistics MagnitudeStats) {
-        int windowSize = 10*1000;
+    public AccelerometerFeatures(HashMap<String, DataStream> datastreams) {
 
-        ArrayList<DataPoint[]> segxWindowed = Core.window(segx, windowSize);
-        ArrayList<DataPoint[]> segyWindowed = Core.window(segy, windowSize);
-        ArrayList<DataPoint[]> segzWindowed = Core.window(segz, windowSize);
-        long[] timestampArray = new long[segxWindowed.size()];
 
-        ArrayList<Double> stdMagnitudeArray = new ArrayList<Double>();
+        //Compute normalized accelerometer values
+        if (!datastreams.containsKey("org.md2k.cstress.data.accelx.normalized")) {
+            datastreams.put("org.md2k.cstress.data.accelx.normalized", new DataStream("Normalized Accelerometer X"));
+        }
+        DataStream accelx = datastreams.get("org.md2k.cstress.data.accelx");
+        for (DataPoint dp: accelx.data) {
+            datastreams.get("org.md2k.cstress.data.accelx.normalized").add(new DataPoint(dp.timestamp,(dp.value - accelx.stats.getMean()) / accelx.stats.getStandardDeviation()));
+        }
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.accely.normalized")) {
+            datastreams.put("org.md2k.cstress.data.accely.normalized", new DataStream("Normalized Accelerometer Y"));
+        }
+        DataStream accely = datastreams.get("org.md2k.cstress.data.accely");
+        for (DataPoint dp: accely.data) {
+            datastreams.get("org.md2k.cstress.data.accely.normalized").add(new DataPoint(dp.timestamp,(dp.value - accely.stats.getMean()) / accely.stats.getStandardDeviation()));
+        }
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.accelz.normalized")) {
+            datastreams.put("org.md2k.cstress.data.accelz.normalized", new DataStream("Normalized Accelerometer Z"));
+        }
+        DataStream accelz = datastreams.get("org.md2k.cstress.data.accelz");
+        for (DataPoint dp: accelz.data) {
+            datastreams.get("org.md2k.cstress.data.accelz.normalized").add(new DataPoint(dp.timestamp,(dp.value - accelz.stats.getMean()) / accelz.stats.getStandardDeviation()));
+        }
+
+        //Window accel data streams
+        ArrayList<DataPoint[]> segxWindowed = Core.window(datastreams.get("org.md2k.cstress.data.accelx").data, windowSize); //TODO: Convert this to a 3-axis data stream instead of separate ones
+        ArrayList<DataPoint[]> segyWindowed = Core.window(datastreams.get("org.md2k.cstress.data.accely").data, windowSize);
+        ArrayList<DataPoint[]> segzWindowed = Core.window(datastreams.get("org.md2k.cstress.data.accelz").data, windowSize);
+
+        //Compute magnitude and stdev from windowed datastreams
+        if (!datastreams.containsKey("org.md2k.cstress.data.accel.magnitude")) {
+            datastreams.put("org.md2k.cstress.data.accel.magnitude", new DataStream("Accelerometer Magnitude"));
+        }
+        if (!datastreams.containsKey("org.md2k.cstress.data.accel.windowed.magnitude.stdev")) {
+            datastreams.put("org.md2k.cstress.data.accel.windowed.magnitude.stdev", new DataStream("Accelerometer Stdev Magnitude Windowed "));
+        }
         for(int i=0; i<segxWindowed.size(); i++) {
-
             DataPoint[] wx = segxWindowed.get(i);
             DataPoint[] wy = segyWindowed.get(i);
             DataPoint[] wz = segzWindowed.get(i);
-
-
             double[] magnitude = Core.magnitude(wx, wy, wz);
-
-            DescriptiveStatistics statsMagnitude = new DescriptiveStatistics();
-            for (double d : magnitude) {
-                statsMagnitude.addValue(d);
-                MagnitudeStats.add(d);
+            for (int j=0; j<magnitude.length; j++) {
+                datastreams.get("org.md2k.cstress.data.accel.magnitude").add(new DataPoint(wx[j].timestamp, magnitude[j]));
             }
-            stdMagnitudeArray.add(statsMagnitude.getStandardDeviation());
-            timestampArray[i] = wx[0].timestamp;
+            DescriptiveStatistics sd = new DescriptiveStatistics(magnitude);
+
+            if(wx.length > 0) {
+                datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev").add(new DataPoint(wx[0].timestamp, sd.getStandardDeviation()));
+            }
         }
-        StdevMagnitude = new double[stdMagnitudeArray.size()];
-        for(int i=0; i<StdevMagnitude.length; i++) {
-            StdevMagnitude[i] = stdMagnitudeArray.get(i);
-        }
 
-        this.rawTimestamps = timestampArray;
-        this.rawstdMagnitudeArray = StdevMagnitude;
 
-        this.Activity = activityAnalysis(this.StdevMagnitude, MagnitudeStats); //From Autosense Matlab code
-
-    }
-
-    public DataPoint[] rawFeatures() {
-        DataPoint[] result = new DataPoint[this.rawstdMagnitudeArray.length];
-        for(int i=0; i<this.rawstdMagnitudeArray.length; i++) {
-            DataPoint dp = new DataPoint(this.rawstdMagnitudeArray[i],this.rawTimestamps[i]);
-            result[i] = dp;
-        }
-        return result;
-    }
-
-    public boolean activityAnalysis(double[] accelFeature, RunningStatistics magnitudeStats) {
-
-        double lowlimit = magnitudeStats.getMean() - 3.0 * magnitudeStats.getStdev(); //Using this instead of percentile01
-        double highlimit = magnitudeStats.getMean() + 3.0 * magnitudeStats.getStdev(); //Using this instead of percentile99
+        //Compute Activity from datastreams
+        double lowlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").descriptiveStats.getPercentile(1);
+        double highlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").descriptiveStats.getPercentile(99);
         double range = highlimit-lowlimit;
 
-        boolean[] activityOrNot = new boolean[accelFeature.length];
-        for(int i=0; i<accelFeature.length; i++) {
-            activityOrNot[i] = accelFeature[i] > (lowlimit + ACTIVITY_THRESHOLD * range);
+        DataStream stdmag = datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
+
+        boolean[] activityOrNot = new boolean[stdmag.data.size()];
+        for(int i=0; i<stdmag.data.size(); i++) {
+            activityOrNot[i] = stdmag.data.get(i).value > (lowlimit + ACTIVITY_THRESHOLD * range);
         }
 
         int minActive = 0;
@@ -113,8 +116,16 @@ public class AccelerometerFeatures {
                 minActive += 1;
             }
         }
-        return minActive > (accelFeature.length/2);
+        int active = 0;
+        if (minActive > (stdmag.data.size()/2)) {
+            active = 1;
+        }
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.accel.activity")) {
+            datastreams.put("org.md2k.cstress.data.accel.activity", new DataStream("Accelerometer Activity"));
+        }
+        datastreams.get("org.md2k.cstress.data.accel.activity").add(new DataPoint(datastreams.get("org.md2k.cstress.data.accelx").data.get(0).timestamp, active));
+
+
     }
-
-
 }

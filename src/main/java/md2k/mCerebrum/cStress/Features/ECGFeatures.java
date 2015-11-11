@@ -2,12 +2,14 @@ package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Library.Core;
+import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Statistics.BinnedStatistics;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -37,163 +39,103 @@ import java.util.ArrayList;
  */
 public class ECGFeatures {
 
-    public DescriptiveStatistics RRStats;
-    public DescriptiveStatistics RRHeartRateStats;
-    public DescriptiveStatistics RRStatsNormalized;
-    public ArrayList<Long> RRStatsTimestamps;
+    public ECGFeatures(HashMap<String, DataStream> datastreams) {
 
-    //Data inputs
-    private final DataPoint[] datapoints;
-    private final double frequency;
+        //Compute RR Intervals
+        String result = computeRR(datastreams);
+        if (result.matches("org.md2k.success")) {
 
-    //Feature storage
-    private double[] rr_value = new double[0];
-    private long[] rr_timestamp = new long[0];
-    private long[] rr_index = new long[0];
-    private int[] rr_outlier = new int[0];
-
-    private double HeartRate;
-    private double LombLowFrequencyEnergy;
-    private double LombMediumFrequencyEnergy;
-    private double LombHighFrequencyEnergy;
-    private double LombLowHighFrequencyEnergyRatio;
-
-    public ECGFeatures(DataPoint[] dp, double freq, BinnedStatistics ECGStats, boolean activity) {
-
-        datapoints = dp;
-        frequency = freq;
-
-        if (computeRR()) {
-
+            double activity = datastreams.get("org.md2k.cstress.data.accel.activity").data.get(0).value;
             //Decide if we should add the RR intervals from this minute to the running stats
-            if (!activity) {
-                for (int i = 0; i < rr_value.length; i++) {
-                    if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD)
-                        ECGStats.add((int) (rr_value[i] * 1000));
+            if (activity == 0.0) {
+
+                if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr")) {
+                    datastreams.put("org.md2k.cstress.data.ecg.rr", new DataStream("ECG-rr"));
+                }
+                if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr.heartrate")) {
+                    datastreams.put("org.md2k.cstress.data.ecg.rr.heartrate", new DataStream("ECG-rr-heartrate"));
+                }
+                for (int i = 0; i < datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.size(); i++) {
+                    if (datastreams.get("org.md2k.cstress.data.ecg.outlier").data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
+                        datastreams.get("org.md2k.cstress.data.ecg.rr").add(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(i));
+                        DataPoint hr = new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(i).timestamp, 60.0 / datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(i).value);
+                        datastreams.get("org.md2k.cstress.data.ecg.rr.heartrate").add(hr);
+                    }
+                }
+
+                DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.get("org.md2k.cstress.data.ecg.rr").data.size()];
+                for (int i = 0; i < rrDatapoints.length; i++) {
+                    rrDatapoints[i] = new DataPoint(i, datastreams.get("org.md2k.cstress.data.ecg.rr").data.get(i).value);
+                }
+
+                if(rrDatapoints.length > 0) {
+                    Lomb HRLomb = Core.lomb(rrDatapoints);
+
+                    if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio")) {
+                        datastreams.put("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio", new DataStream("ECG-rr-LowHighFrequencyEnergyRatio"));
+                    }
+                    if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy")) {
+                        datastreams.put("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy", new DataStream("ECG-rr-LombLowFrequencyEnergy"));
+                    }
+                    if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy")) {
+                        datastreams.put("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy", new DataStream("ECG-rr-LombMediumFrequencyEnergy"));
+                    }
+                    if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy")) {
+                        datastreams.put("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy", new DataStream("ECG-rr-LombHighFrequencyEnergy"));
+                    }
+
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4)));
                 }
             }
-
-            RRStats = new DescriptiveStatistics();
-            RRHeartRateStats = new DescriptiveStatistics();
-            RRStatsNormalized = new DescriptiveStatistics();
-            RRStatsTimestamps = new ArrayList<Long>();
-
-            //Normalize RR intervals using Winsorized mean and stddev
-            for (int i = 0; i < rr_value.length; i++) {
-                if (rr_outlier[i] == AUTOSENSE.QUALITY_GOOD) {
-                    RRStats.addValue(rr_value[i]);
-                    RRHeartRateStats.addValue(60.0/rr_value[i]);
-                    RRStatsNormalized.addValue((rr_value[i] - ECGStats.getWinsorizedMean() / 1000.0) / (ECGStats.getWinsorizedStdev() / 1000.0));
-                    RRStatsTimestamps.add(rr_timestamp[i]);
-                }
-            }
-
-
-
-
-            HeartRate = RRHeartRateStats.getPercentile(50);
-
-            DataPoint[] rrDatapoints = new DataPoint[(int) RRStats.getN()];
-            for (int i = 0; i < rrDatapoints.length; i++) {
-                rrDatapoints[i] = new DataPoint(RRStats.getElement(i), i);
-            }
-
-
-            Lomb HRLomb = Core.lomb(rrDatapoints);
-
-            LombLowHighFrequencyEnergyRatio = Core.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-            LombLowFrequencyEnergy = Core.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-            LombMediumFrequencyEnergy = Core.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
-            LombHighFrequencyEnergy = Core.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
-
         }
     }
-
-
-    public DataPoint[] rawFeatures() {
-        DataPoint[] result = new DataPoint[this.rr_value.length];
-        for(int i=0; i<this.rr_value.length; i++) {
-            DataPoint dp = new DataPoint(this.rr_value[i],this.rr_timestamp[i]);
-            result[i] = dp;
-        }
-        return result;
-    }
-
 
     /**
      * Compute RR intervals
-     *
-     * @return True if successful, False if there is not enough data
      */
-    private boolean computeRR() {
-        long[] Rpeak_index = Core.detect_Rpeak(datapoints, frequency);
+    private String computeRR(HashMap<String, DataStream> datastreams) {
 
-        long[] pkT = new long[Rpeak_index.length];
-        for (int i = 0; i < Rpeak_index.length; i++) {
-            pkT[i] = datapoints[(int) Rpeak_index[i]].timestamp;
+        String rpeaks = Core.detect_Rpeak(datastreams);
+
+        if(datastreams.get(rpeaks).data.size() < 2 ) {
+            System.err.println("Not enough peaks, aborting computation");
+            return "org.md2k.error";
         }
 
-        if (pkT.length < 2) {
-            System.out.println("Not enough peaks, aborting computation");
-            return false;
+        if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr_value")) {
+            datastreams.put("org.md2k.cstress.data.ecg.rr_value", new DataStream("ECG-rr_value"));
         }
 
-        rr_value = new double[pkT.length - 1];
-        rr_timestamp = new long[pkT.length - 1];
-
-
-        for (int i = 1; i < pkT.length; i++) {
-            rr_value[i - 1] = (double) (pkT[i] - pkT[i - 1]) / 1000.0;
-            rr_timestamp[i - 1] = pkT[i - 1];
-
+        DataStream rpeaks_temp = datastreams.get("org.md2k.cstress.data.ecg.peaks.rpeaks");
+        for (int i = 0; i < rpeaks_temp.data.size()-1; i++) {
+            datastreams.get("org.md2k.cstress.data.ecg.rr_value").add(new DataPoint (rpeaks_temp.data.get(i).timestamp, (rpeaks_temp.data.get(i+1).timestamp - rpeaks_temp.data.get(i).timestamp) / 1000.0));
         }
 
-        rr_index = new long[pkT.length];
-        System.arraycopy(pkT, 0, rr_index, 0, pkT.length);
-
-        rr_outlier = Core.detect_outlier_v2(rr_value, rr_timestamp);
-
-        DescriptiveStatistics valueStats = new DescriptiveStatistics();
-        for (int i = 0; i < rr_value.length; i++) {
-            if (rr_outlier[i] == 0) {
-                valueStats.addValue(rr_value[i]);
+        String rr_outlier = Core.detect_outlier_v2(datastreams);
+        if (!datastreams.containsKey("org.md2k.cstress.data.ecg.rr_value.filtered")) {
+            datastreams.put("org.md2k.cstress.data.ecg.rr_value.filtered", new DataStream("ECG-rr_value-filtered"));
+        }
+        for(int i=0; i< datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.size(); i++) {
+            if(datastreams.get(rr_outlier).data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
+                datastreams.get("org.md2k.cstress.data.ecg.rr_value.filtered").add(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(i));
             }
         }
 
-        double mu = valueStats.getMean();
-        double sigma = valueStats.getStandardDeviation();
-
-        for (int i = 0; i < rr_outlier.length; i++) {
-            if (rr_outlier[i] == 0) {
-                if (Math.abs(rr_value[i] - mu) > (3.0 * sigma)) {
-                    rr_outlier[i] = AUTOSENSE.QUALITY_NOISE;
+        double mu = datastreams.get("org.md2k.cstress.data.ecg.rr_value.filtered").stats.getMean();
+        double sigma = datastreams.get("org.md2k.cstress.data.ecg.rr_value.filtered").stats.getStandardDeviation();
+        for (int i = 0; i < datastreams.get(rr_outlier).data.size(); i++) {
+            if (datastreams.get(rr_outlier).data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
+                if (Math.abs(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(i).value - mu) > (3.0 * sigma)) {
+                    datastreams.get(rr_outlier).data.get(i).value = AUTOSENSE.QUALITY_NOISE;
                 } else {
-                    rr_outlier[i] = AUTOSENSE.QUALITY_GOOD;
+                    datastreams.get(rr_outlier).data.get(i).value = AUTOSENSE.QUALITY_GOOD;
                 }
             }
         }
 
-        return true;
-    }
-
-
-    public double getHeartRate() {
-        return HeartRate;
-    }
-
-    public double getLombLowFrequencyEnergy() {
-        return LombLowFrequencyEnergy;
-    }
-
-    public double getLombMediumFrequencyEnergy() {
-        return LombMediumFrequencyEnergy;
-    }
-
-    public double getLombHighFrequencyEnergy() {
-        return LombHighFrequencyEnergy;
-    }
-
-    public double getLombLowHighFrequencyEnergyRatio() {
-        return LombLowHighFrequencyEnergyRatio;
+        return "org.md2k.success";
     }
 }

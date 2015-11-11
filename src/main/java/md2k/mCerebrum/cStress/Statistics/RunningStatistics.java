@@ -30,6 +30,7 @@ public class RunningStatistics {
     private double mean;
     private double stdev;
     private long count;
+    private double delta;
 
     //TODO: Needs a persistence and initialization layer
 
@@ -44,21 +45,18 @@ public class RunningStatistics {
 
     public void add(double x) {
         count += 1;
-        mean += (x - mean) / count;
-        stdev += (x - mean) * (x - mean);
+        delta = x - mean;
+        mean += delta / count;
+        stdev += delta * (x - mean);
     }
 
     public double getMean() {
-        if(count < 2) {
-            return 0.0;
-        } else {
-            return mean;
-        }
+        return mean;
     }
 
     public double getStdev() {
         if(count < 2) {
-            return 0.0;
+            return Double.NaN;
         } else {
             return Math.sqrt(stdev / (count - 1));
         }

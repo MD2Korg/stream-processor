@@ -30,8 +30,16 @@ public class DataPoint {
     public double value;
     public long timestamp;
 
-    public DataPoint(double value, long timestamp) {
+    public DataPoint(long timestamp, double value) {
         this.value = value;
         this.timestamp = timestamp;
+    }
+    public DataPoint(DataPoint other) {
+        this.value = other.value;
+        this.timestamp = other.timestamp;
+    }
+
+    public String toString() {
+        return "DP:(" + this.timestamp + "," + this.value + ")";
     }
 }
