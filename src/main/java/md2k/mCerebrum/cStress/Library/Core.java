@@ -1,14 +1,16 @@
 package md2k.mCerebrum.cStress.Library;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Structs.*;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
+import javax.xml.crypto.Data;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -117,15 +119,11 @@ public class Core {
      * @param dp
      * @return
      */
-    public static double[] diff(DataPoint[] dp) {
-        double[] result;
-        if (dp.length == 0) {
-            result = new double[0];
-        } else {
-            result = new double[dp.length - 1];
-
-            for (int i = 1; i < dp.length; i++) {
-                result[i - 1] = dp[i].value - dp[i - 1].value;
+    public static ArrayList<DataPoint> diff(ArrayList<DataPoint> dp) {
+        ArrayList<DataPoint> result = new ArrayList<DataPoint>();
+        if (dp.size() != 0) {
+            for (int i = 0; i < dp.size()-1; i++) {
+                result.add( new DataPoint(dp.get(i).timestamp, dp.get(i+1).value - dp.get(i).value) );
             }
         }
         return result;
@@ -736,10 +734,10 @@ public class Core {
             int windowStart = 0;
             int windowStop = peaks.data.size();
             for(int i=0; i<peaks.data.size(); i++) {
-                if (peaks.data.get(i).timestamp < peaktime - (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR)) {
+                if (peaks.data.get(i).timestamp < (peaktime - (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR))) {
                     windowStart = i;
                 }
-                if (peaks.data.get(i).timestamp > peaktime + (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR)) {
+                if (peaks.data.get(i).timestamp > (peaktime + (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR))) {
                     windowStop = i;
                     break;
                 }
@@ -749,10 +747,10 @@ public class Core {
             int index = 0;
             DataPoint maxDP = new DataPoint(0,0.0);
             try {
-                for (int j = windowStart; j < windowStop; j++) {
+                for (int j = windowStart+1; j < windowStop; j++) {
                     if (peaks.data.get(j).value > maxValue) {
                         maxValue = peaks.data.get(j).value;
-                        maxDP = peaks.data.get(j);
+                        maxDP = new DataPoint(peaks.data.get(j));
                     }
                 }
             } catch (Exception e) {
@@ -983,131 +981,6 @@ public class Core {
             }
         }
 
-        String UIDI = InterceptOutlierDetectorRIPLamia( datastreams, (int) (AUTOSENSE.SAMPLE_LENGTH_SECS*1000));
-
-//        int[] UI = UIDI.UI;
-//        int[] DI = UIDI.DI;
-//
-//        ArrayList<Integer> peakIndex = new ArrayList<Integer>();
-//        ArrayList<Integer> valleyIndex = new ArrayList<Integer>();
-//
-//        for (int i = 0; i < DI.length-1; i++) {
-//
-//            int peakindex = 0;
-//            double peakValue = -1e9;
-//            for (int j = UI[i]; j < DI[i + 1]; j++) {
-//                if (sample[j].value > peakValue) {
-//                    peakindex = j;
-//                    peakValue = sample[j].value;
-//                }
-//            }
-//            peakIndex.add(peakindex);
-//
-//            DataPoint[] temp = new DataPoint[UI[i] - DI[i]];
-//            System.arraycopy(sample, DI[i], temp, 0, UI[i] - DI[i]);
-//
-//            double vlValueMinimum = 1e9;
-//            int vlValueIndex = -999999;
-//            for(int j=0; j<temp.length; j++) {
-//                if(vlValueMinimum > temp[j].value) {
-//                    vlValueMinimum = temp[j].value;
-//                    vlValueIndex = j;
-//                }
-//            }
-//            if (vlValueIndex == -999999) {
-//                continue;
-//            }
-//            valleyIndex.add(DI[i] + vlValueIndex - 1);
-//
-//        }
-//
-//        double[] inspirationAmplitude = new double[valleyIndex.size()];
-//        double[] expirationAmplitude;
-//
-//        double meanInspirationAmplitude = 0.0;
-//        double meanExpirationAmplitude;
-//
-//        for (int i = 0; i < valleyIndex.size() - 1; i++) {
-//            inspirationAmplitude[i] = sample[peakIndex.get(i)].value - sample[valleyIndex.get(i)].value;
-//
-//            meanInspirationAmplitude += inspirationAmplitude[i];
-//        }
-//        meanInspirationAmplitude /= (valleyIndex.size() - 1);
-//
-//        ArrayList<Integer> finalPeakIndex = new ArrayList<Integer>();
-//        ArrayList<Integer> finalValleyIndex = new ArrayList<Integer>();
-//
-//        for (int i = 0; i < inspirationAmplitude.length; i++) {
-//            if (inspirationAmplitude[i] > AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanInspirationAmplitude) {
-//                finalPeakIndex.add(peakIndex.get(i));
-//                finalValleyIndex.add(valleyIndex.get(i));
-//            }
-//        }
-//
-//        PeakValley result = new PeakValley();
-//
-//        if (finalValleyIndex.size() > 0) {
-//            expirationAmplitude = new double[finalValleyIndex.size() - 1];
-//            meanExpirationAmplitude = 0.0;
-//            for (int i = 0; i < finalValleyIndex.size() - 1; i++) {
-//                expirationAmplitude[i] = Math.abs(sample[finalValleyIndex.get(i + 1)].value - sample[finalPeakIndex.get(i)].value);
-//                meanExpirationAmplitude += expirationAmplitude[i];
-//            }
-//            meanExpirationAmplitude /= (finalValleyIndex.size() - 1);
-//
-//
-//            ArrayList<Integer> resultPeakIndex = new ArrayList<Integer>();
-//            ArrayList<Integer> resultValleyIndex = new ArrayList<Integer>();
-//
-//            resultValleyIndex.add(finalValleyIndex.get(0));
-//
-//            for (int i = 0; i < expirationAmplitude.length; i++) {
-//                if (expirationAmplitude[i] > AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanExpirationAmplitude) {
-//                    resultValleyIndex.add(finalValleyIndex.get(i + 1));
-//                    resultPeakIndex.add(finalPeakIndex.get(i));
-//                }
-//            }
-//            resultPeakIndex.add(finalPeakIndex.get(finalPeakIndex.size() - 1));
-//
-//            result.valleyIndex = resultValleyIndex;
-//            result.peakIndex = resultPeakIndex;
-//        }
-        return "org.";
-    }
-
-//    /**
-//     * Moving Average Curve
-//     * @param sample
-//     * @param windowLength
-//     * @return
-//     */
-//    public static ArrayList<DataPoint> mac(ArrayList<DataPoint> sample, int windowLength) {
-//
-//        ArrayList<DataPoint> result = new ArrayList<DataPoint>();
-//
-//        for(int i=windowLength;i < sample.size()-windowLength; i++) {
-//            result.add( new DataPoint(0, 0.0) );
-//            for(int j=-windowLength; j<windowLength; j++) {
-//                result.get(i-windowLength).value += sample.get(i+j).value;
-//            }
-//            result.get(i-windowLength).value /= (2.0*windowLength); //Compute mean
-//            result.get(i-windowLength).timestamp = sample.get(i+windowLength).timestamp;
-//
-//        }
-//        return result;
-//    }
-
-    /**
-     * Intercept Outlier Detector
-     * Reference: Intercept_outlier_detector_RIP_lamia.m
-     * @param upInterceptIndex
-     * @param downInterceptIndex
-     * @param sample
-     * @param windowLength
-     * @return
-     */
-    public static String InterceptOutlierDetectorRIPLamia(HashMap<String, DataStream> datastreams, int windowLength) {
-        String result = "";
 
         DataStream upIntercepts = datastreams.get("org.md2k.cstress.data.rip.upIntercepts");
         DataStream downIntercepts = datastreams.get("org.md2k.cstress.data.rip.downIntercepts");
@@ -1156,15 +1029,6 @@ public class Core {
             }
         }
 
-        //TODO: is this still needed?
-//        double fr;
-//        for(int ii=0; ii<DI.size()-1; ii++) {
-//            fr = (double)windowLength / (sample[DI.get(ii+1)].timestamp - sample[DI.get(ii)].timestamp);
-//            if (fr >= AUTOSENSE.RESPIRATION_MINIMUM && fr <= AUTOSENSE.RESPIRATION_MAXIMUM) {
-//                DownIntercept.add(DI.get(ii));
-//                UpIntercept.add(UI.get(ii));
-//            }
-//        }
 
         if (!datastreams.containsKey("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec")) {
             datastreams.put("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec", new DataStream("RIP-upIntercepts-filtered-1sec"));
@@ -1201,8 +1065,179 @@ public class Core {
                 upInterceptsFiltered1sect20.add(upInterceptsFiltered.data.get(i));
             }
         }
-        downInterceptsFiltered1sect20.data.remove(downInterceptsFiltered1sect20.data.size()-1); //Not necessary to keep
 
+
+
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.peaks")) {
+            datastreams.put("org.md2k.cstress.data.rip.peaks", new DataStream("RIP-peaks"));
+        }
+        for(int i=0; i<upInterceptsFiltered1sect20.data.size()-1; i++) {
+            DataPoint peak = Core.findPeak(upInterceptsFiltered1sect20.data.get(i), downInterceptsFiltered1sect20.data.get(i+1), rip_smooth);
+            if (peak.timestamp != 0) {
+                datastreams.get("org.md2k.cstress.data.rip.peaks").add(peak);
+            }
+        }
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.valleys")) {
+            datastreams.put("org.md2k.cstress.data.rip.valleys", new DataStream("RIP-valleys"));
+        }
+        for(int i=0; i<downInterceptsFiltered1sect20.data.size()-1; i++) { //Don't check the last down intercept
+            DataPoint valley = Core.findValley(downInterceptsFiltered1sect20.data.get(i), upInterceptsFiltered1sect20.data.get(i), rip_smooth);
+            if (valley.timestamp != 0) {
+                datastreams.get("org.md2k.cstress.data.rip.valleys").add(valley);
+            }
+        }
+
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.inspirationAmplitude")) {
+            datastreams.put("org.md2k.cstress.data.rip.inspirationAmplitude", new DataStream("RIP-inspirationAmplitude"));
+        }
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.expirationAmplitude")) {
+            datastreams.put("org.md2k.cstress.data.rip.expirationAmplitude", new DataStream("RIP-expirationAmplitude"));
+        }
+
+        SummaryStatistics inspirationAmplitude = new SummaryStatistics();
+        SummaryStatistics expirationAmplitude = new SummaryStatistics();
+        
+        DataStream valleys = datastreams.get("org.md2k.cstress.data.rip.valleys");
+        DataStream peaks = datastreams.get("org.md2k.cstress.data.rip.peaks");
+
+        for(int i=0; i<valleys.data.size()-1; i++) {
+            double inspAmp = (peaks.data.get(i).value - valleys.data.get(i).value);
+            datastreams.get("org.md2k.cstress.data.rip.inspirationAmplitude").add(new DataPoint(valleys.data.get(i).timestamp, inspAmp));
+            inspirationAmplitude.addValue(inspAmp);
+        }
+        double meanInspirationAmplitude = inspirationAmplitude.getMean();
+
+        for(int i=0; i<peaks.data.size(); i++) {
+            double expAmp = (peaks.data.get(i).value - valleys.data.get(i+1).value);
+            datastreams.get("org.md2k.cstress.data.rip.expirationAmplitude").add(new DataPoint(peaks.data.get(i).timestamp, expAmp));
+            expirationAmplitude.addValue(expAmp);
+        }
+        double meanExpirationAmplitude = expirationAmplitude.getMean();
+
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.respirationDuration")) {
+            datastreams.put("org.md2k.cstress.data.rip.respirationDuration", new DataStream("RIP-respirationDuration"));
+        }
+        for(int i=0; i<valleys.data.size()-1; i++) {
+            datastreams.get("org.md2k.cstress.data.rip.respirationDuration").add(new DataPoint(valleys.data.get(i).timestamp, valleys.data.get(i+1).timestamp-valleys.data.get(i).timestamp));
+        }
+
+
+
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.peaks.filtered")) {
+            datastreams.put("org.md2k.cstress.data.rip.peaks.filtered", new DataStream("RIP-peaks-filtered"));
+        }
+        if (!datastreams.containsKey("org.md2k.cstress.data.rip.valleys.filtered")) {
+            datastreams.put("org.md2k.cstress.data.rip.valleys.filtered", new DataStream("RIP-valleys-filtered"));
+        }
+        
+        for(int i=0; i<valleys.data.size()-1; i++) {
+            double duration = datastreams.get("org.md2k.cstress.data.rip.respirationDuration").data.get(i).value / 1000.0;
+            if( duration > 1.0 && duration < 12.0 ) { //Passes length test
+                if (datastreams.get("org.md2k.cstress.data.rip.inspirationAmplitude").data.get(i).value > (AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanInspirationAmplitude)) { //Passes amplitude test
+                    datastreams.get("org.md2k.cstress.data.rip.valleys.filtered").add(datastreams.get("org.md2k.cstress.data.rip.valleys").data.get(i));
+                    datastreams.get("org.md2k.cstress.data.rip.peaks.filtered").add(datastreams.get("org.md2k.cstress.data.rip.peaks").data.get(i));
+                }
+            }
+        }
+        datastreams.get("org.md2k.cstress.data.rip.valleys.filtered").add(datastreams.get("org.md2k.cstress.data.rip.valleys").data.get(datastreams.get("org.md2k.cstress.data.rip.valleys").data.size()-1)); //Add last valley that was skipped by loop
+
+        return "";
+    }
+
+    private static DataPoint findValley(DataPoint downIntercept, DataPoint upIntercept, DataStream data) {
+        DataPoint result = new DataPoint(upIntercept);
+
+        ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
+        for(int i=0; i<data.data.size(); i++) { //Identify potential data points
+            if(downIntercept.timestamp < data.data.get(i).timestamp && data.data.get(i).timestamp < upIntercept.timestamp) {
+                temp.add(data.data.get(i));
+            }
+        }
+        if (temp.size() > 0) {
+            ArrayList<DataPoint> diff = Core.diff(temp);
+            boolean positiveSlope = false;
+            if (diff.get(0).value > 0) {
+                positiveSlope = true;
+            }
+
+            ArrayList<Integer> localMinCandidates = new ArrayList<Integer>();
+            for (int i = 1; i < diff.size(); i++) {
+                if (positiveSlope) {
+                    if (diff.get(i).value < 0) {
+                        //Local Max
+                        positiveSlope = false;
+                    }
+                } else {
+                    if (diff.get(i).value > 0) {
+                        //Local Min
+                        localMinCandidates.add(i);
+                        positiveSlope = true;
+                    }
+                }
+            }
+
+            int maximumSlopeLength = 0;
+            for (Integer i : localMinCandidates) {
+                int tempLength = 0;
+                for (int j = i; j < diff.size(); j++) {
+                    if (diff.get(j).value > 0) {
+                        tempLength++;
+                    } else {
+                        break;
+                    }
+                }
+                if (tempLength > maximumSlopeLength) {
+                    maximumSlopeLength = tempLength;
+                    result = temp.get(i);
+                }
+            }
+        }
         return result;
     }
+
+
+    public static DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataStream data) {
+
+        ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
+        for(int i=0; i<data.data.size(); i++) { //Identify potential data points
+            if(upIntercept.timestamp < data.data.get(i).timestamp && data.data.get(i).timestamp < downIntercept.timestamp) {
+                temp.add(data.data.get(i));
+            }
+        }
+        DataPoint max = temp.get(0);
+        for(int i=0; i<temp.size(); i++) {
+            if(temp.get(i).value > max.value) {
+                max = temp.get(i);
+            }
+        }
+
+        return max;
+    }
+
+//    /**
+//     * Moving Average Curve
+//     * @param sample
+//     * @param windowLength
+//     * @return
+//     */
+//    public static ArrayList<DataPoint> mac(ArrayList<DataPoint> sample, int windowLength) {
+//
+//        ArrayList<DataPoint> result = new ArrayList<DataPoint>();
+//
+//        for(int i=windowLength;i < sample.size()-windowLength; i++) {
+//            result.add( new DataPoint(0, 0.0) );
+//            for(int j=-windowLength; j<windowLength; j++) {
+//                result.get(i-windowLength).value += sample.get(i+j).value;
+//            }
+//            result.get(i-windowLength).value /= (2.0*windowLength); //Compute mean
+//            result.get(i-windowLength).timestamp = sample.get(i+windowLength).timestamp;
+//
+//        }
+//        return result;
+//    }
+
 }

@@ -407,7 +407,6 @@ public class cStress {
 
             AccelerometerFeatures af = new AccelerometerFeatures(datastreams);
             ECGFeatures ef = new ECGFeatures(datastreams);
-
             RIPFeatures rf = new RIPFeatures(datastreams);
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);

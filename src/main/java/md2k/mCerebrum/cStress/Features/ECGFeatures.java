@@ -39,21 +39,6 @@ import java.util.HashMap;
  */
 public class ECGFeatures {
 
-//    public DescriptiveStatistics RRStats;
-//    public DescriptiveStatistics RRHeartRateStats;
-//    public DescriptiveStatistics RRStatsNormalized;
-//    public ArrayList<Long> RRStatsTimestamps;
-
-//    //Data inputs
-//    private final DataPoint[] datapoints;
-//    private final double frequency;
-//
-//    private double HeartRate;
-//    private double LombLowFrequencyEnergy;
-//    private double LombMediumFrequencyEnergy;
-//    private double LombHighFrequencyEnergy;
-//    private double LombLowHighFrequencyEnergyRatio;
-
     public ECGFeatures(HashMap<String, DataStream> datastreams) {
 
         //Compute RR Intervals
@@ -76,7 +61,6 @@ public class ECGFeatures {
                     datastreams.get("org.md2k.cstress.data.ecg.rr.heartrate").add(hr);
                 }
             }
-            //HeartRate = datastreams.get("org.md2k.cstress.data.ecg.rr.heartrate").descriptiveStats.getPercentile(50);
 
             DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.get("org.md2k.cstress.data.ecg.rr").data.size()];
             for (int i = 0; i < rrDatapoints.length; i++) {
@@ -151,25 +135,4 @@ public class ECGFeatures {
 
         return datastreams;
     }
-
-
-//    public double getHeartRate() {
-//        return HeartRate;
-//    }
-//
-//    public double getLombLowFrequencyEnergy() {
-//        return LombLowFrequencyEnergy;
-//    }
-//
-//    public double getLombMediumFrequencyEnergy() {
-//        return LombMediumFrequencyEnergy;
-//    }
-//
-//    public double getLombHighFrequencyEnergy() {
-//        return LombHighFrequencyEnergy;
-//    }
-//
-//    public double getLombLowHighFrequencyEnergyRatio() {
-//        return LombLowHighFrequencyEnergyRatio;
-//    }
 }
