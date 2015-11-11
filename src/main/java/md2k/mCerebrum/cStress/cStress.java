@@ -27,17 +27,17 @@ import java.util.HashMap;
  * - Timothy Hnat <twhnat@memphis.edu>
  * - Karen Hovsepian <karoaper@gmail.com>
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p/>
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- *
+ * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- *
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -55,7 +55,7 @@ public class cStress {
     long windowStartTime = -1;
 
     long windowSize;
-
+    private String participant;
 
     private HashMap<String, DataStream> datastreams = new HashMap<String, DataStream>();
 
@@ -82,9 +82,9 @@ public class cStress {
 //    private double[] featureVectorMean;
 //    private double[] featureVectorStd;
 
-    public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile) {
+    public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile, String participant) {
         this.windowSize = windowSize;
-
+        this.participant = participant;
 
         DataStream ECG = new DataStream("ECG");
         DataStream RIP = new DataStream("RIP");
@@ -110,34 +110,14 @@ public class cStress {
         ACCELZ.metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
 
-        datastreams.put("org.md2k.cstress.data.ecg",ECG);
-        datastreams.put("org.md2k.cstress.data.rip",RIP);
-        datastreams.put("org.md2k.cstress.data.accelx",ACCELX);
-        datastreams.put("org.md2k.cstress.data.accely",ACCELY);
-        datastreams.put("org.md2k.cstress.data.accelz",ACCELZ);
+        datastreams.put("org.md2k.cstress.data.ecg", ECG);
+        datastreams.put("org.md2k.cstress.data.rip", RIP);
+        datastreams.put("org.md2k.cstress.data.accelx", ACCELX);
+        datastreams.put("org.md2k.cstress.data.accely", ACCELY);
+        datastreams.put("org.md2k.cstress.data.accelz", ACCELZ);
 
 
         resetDataStreams();
-
-
-        //this.ECGStats = new BinnedStatistics(800, 2000);
-//        this.RIPBinnedStats = new BinnedStatistics[RIPFeatures.NUM_BASE_FEATURES];
-//        this.RIPBinnedStats[RIPFeatures.FIND_EXPR_DURATION] = new BinnedStatistics(500, 12000);
-//        this.RIPBinnedStats[RIPFeatures.FIND_INSP_DURATION] = new BinnedStatistics(500, 12000);
-//        this.RIPBinnedStats[RIPFeatures.FIND_RESP_DURATION] = new BinnedStatistics(500, 12000);
-//        this.RIPBinnedStats[RIPFeatures.FIND_STRETCH] = new BinnedStatistics(0, 5000);
-//        this.RIPBinnedStats[RIPFeatures.FIND_RSA] = new BinnedStatistics(0, 4200);
-//        this.RIPStats[0] = new RunningStatistics();
-//        this.RIPStats[1] = new RunningStatistics();
-
-//        this.ECGStats = new RunningStatistics();
-//        this.RIPStats = new RunningStatistics();
-//
-//        this.AccelXStats = new RunningStatistics();
-//        this.AccelYStats = new RunningStatistics();
-//        this.AccelZStats = new RunningStatistics();
-//        this.MagnitudeStats = new RunningStatistics();
-
 
 
 //        try {
@@ -388,7 +368,7 @@ public class cStress {
 
         StressProbability probabilityOfStress = null;
 
-        if (    datastreams.get("org.md2k.cstress.data.ecg").data.size() > 500 &&
+        if (datastreams.get("org.md2k.cstress.data.ecg").data.size() > 500 &&
                 datastreams.get("org.md2k.cstress.data.rip").data.size() > 500 &&
                 datastreams.get("org.md2k.cstress.data.accelx").data.size() > 300 &&
                 datastreams.get("org.md2k.cstress.data.accely").data.size() > 300 &&
@@ -418,7 +398,6 @@ public class cStress {
     }
 
 
-
     public StressProbability add(int channel, DataPoint dp) {
         StressProbability result = null;
 
@@ -428,7 +407,7 @@ public class cStress {
         if ((dp.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
             result = process();
             resetDataStreams();
-            this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS*1000; //Add 60 seconds to the timestamp
+            this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS * 1000; //Add 60 seconds to the timestamp
         }
 
         if (dp.timestamp >= this.windowStartTime) {
@@ -463,13 +442,14 @@ public class cStress {
     }
 
     private long nextEpochTimestamp(long timestamp) {
-        long previousMinute = timestamp / (60*1000);
-        Date date = new Date((previousMinute+1)*(60*1000));
+        long previousMinute = timestamp / (60 * 1000);
+        Date date = new Date((previousMinute + 1) * (60 * 1000));
         return date.getTime();
     }
 
     private void resetDataStreams() {
-        for(String dsname: datastreams.keySet()) {
+        for (String dsname : datastreams.keySet()) {
+            datastreams.get(dsname).persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/" + dsname + ".csv");
             datastreams.get(dsname).reset(); //Reset all data, maintain statistics
         }
     }

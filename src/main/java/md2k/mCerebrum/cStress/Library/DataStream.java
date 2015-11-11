@@ -5,6 +5,7 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -70,6 +71,18 @@ public class DataStream {
 
     public void setPreservedLastInsert(boolean state) {
         preserve = state;
+    }
+
+    public void persist(String filename) {
+        try {
+            Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
+            for(DataPoint dp: this.data) {
+                writer.write(dp.timestamp + ", " + dp.value + "\n");
+            }
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void reset() {

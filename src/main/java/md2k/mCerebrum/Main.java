@@ -10,17 +10,17 @@ import md2k.mCerebrum.cStress.cStress;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- *
+ * <p/>
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * <p/>
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
+ * list of conditions and the following disclaimer.
+ * <p/>
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * <p/>
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -39,8 +39,8 @@ public class Main {
         String path = "/Users/hnat/Downloads/processedrawdata/SI";
 
 
-        for(int i = 1; i < 25; i++) {
-            String person = String.format("%02d",i);
+        for (int i = 1; i < 25; i++) {
+            String person = String.format("%02d", i);
             CSVParser tp = new CSVParser();
             tp.importData(path + person + "/rip.txt", AUTOSENSE.CHEST_RIP);
             tp.importData(path + person + "/ecg.txt", AUTOSENSE.CHEST_ECG);
@@ -48,13 +48,13 @@ public class Main {
             tp.importData(path + person + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
             tp.importData(path + person + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
-            cStress stress = new cStress(60 * 1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat");
+            cStress stress = new cStress(60 * 1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat", "SI" + person);
 
             StressProbability output;
             for (CSVDataPoint ap : tp) {
                 DataPoint dp = new DataPoint(ap.timestamp, ap.value);
-                output = stress.add(ap.channel,dp);
-                if(output != null) {
+                output = stress.add(ap.channel, dp);
+                if (output != null) {
                     System.out.println(output.label + " " + output.probability);
                 }
             }
