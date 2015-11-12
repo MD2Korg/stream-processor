@@ -1,11 +1,8 @@
 package md2k.mCerebrum.cStress.tests;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Library.Core;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
-import md2k.mCerebrum.cStress.Structs.PeakValley;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

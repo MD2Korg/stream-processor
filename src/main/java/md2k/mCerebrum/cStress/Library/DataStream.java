@@ -101,4 +101,7 @@ public class DataStream {
         descriptiveStats.addValue(dp.value);
     }
 
+    public String getName() {
+        return (String) metadata.get("name");
+    }
 }

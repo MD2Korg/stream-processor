@@ -1,12 +1,10 @@
 package md2k.mCerebrum.cStress;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.SensorConfiguration;
 import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
-import md2k.mCerebrum.cStress.Library.DataStream;
-import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
+import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
@@ -14,12 +12,7 @@ import md2k.mCerebrum.cStress.Structs.StressProbability;
 import md2k.mCerebrum.cStress.legacyJava.ECGQualityCalculation;
 import md2k.mCerebrum.cStress.legacyJava.RipQualityCalculation;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 
 /**
@@ -57,65 +50,28 @@ public class cStress {
     long windowSize;
     private String participant;
 
-    private HashMap<String, DataStream> datastreams = new HashMap<String, DataStream>();
+    private DataStreams datastreams = new DataStreams();
 
-
-    // Keep track of mean and stdev.  This should be reset at the beginning of each day.
-    // An EWMA-based solution may need to be added to seed the new day with appropriate information
-//    BinnedStatistics ECGStats;
-//    BinnedStatistics[] RIPBinnedStats;
-//    RunningStatistics[] RIPStats;
-
-//    RunningStatistics AccelXStats;
-//    RunningStatistics AccelYStats;
-//    RunningStatistics AccelZStats;
-//    RunningStatistics MagnitudeStats;
-
-    SensorConfiguration sensorConfig;
-
-    //Feature Computation Classes
-//    AccelerometerFeatures accelFeatures;
-//    ECGFeatures ecgFeatures;
-//    RIPFeatures ripFeatures;
-
-//    private svm_model Model;
-//    private double[] featureVectorMean;
-//    private double[] featureVectorStd;
 
     public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile, String participant) {
         this.windowSize = windowSize;
         this.participant = participant;
 
-        DataStream ECG = new DataStream("ECG");
-        DataStream RIP = new DataStream("RIP");
-        DataStream ACCELX = new DataStream("ACCELX");
-        DataStream ACCELY = new DataStream("ACCELY");
-        DataStream ACCELZ = new DataStream("ACCELZ");
-
         //Configure Data Streams
+        datastreams.get("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
+        datastreams.get("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
 
-        ECG.metadata.put("frequency", 64.0);
-        ECG.metadata.put("channelID", AUTOSENSE.CHEST_ECG);
+        datastreams.get("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
+        datastreams.get("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
 
-        RIP.metadata.put("frequency", 64.0 / 3.0);
-        RIP.metadata.put("channelID", AUTOSENSE.CHEST_RIP);
+        datastreams.get("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.get("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        ACCELX.metadata.put("frequency", 64.0 / 6.0);
-        ACCELX.metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.get("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.get("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        ACCELY.metadata.put("frequency", 64.0 / 6.0);
-        ACCELY.metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
-
-        ACCELZ.metadata.put("frequency", 64.0 / 6.0);
-        ACCELZ.metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
-
-
-        datastreams.put("org.md2k.cstress.data.ecg", ECG);
-        datastreams.put("org.md2k.cstress.data.rip", RIP);
-        datastreams.put("org.md2k.cstress.data.accelx", ACCELX);
-        datastreams.put("org.md2k.cstress.data.accely", ACCELY);
-        datastreams.put("org.md2k.cstress.data.accelz", ACCELZ);
-
+        datastreams.get("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.get("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
         resetDataStreams();
 
@@ -391,6 +347,7 @@ public class cStress {
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
+            System.out.println("Interation");
         } else {
             System.out.println("Not enough data to process");
         }
@@ -448,10 +405,8 @@ public class cStress {
     }
 
     private void resetDataStreams() {
-        for (String dsname : datastreams.keySet()) {
-            datastreams.get(dsname).persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/" + dsname + ".csv");
-            datastreams.get(dsname).reset(); //Reset all data, maintain statistics
-        }
+        datastreams.persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/");
+        datastreams.reset();
     }
 
 
