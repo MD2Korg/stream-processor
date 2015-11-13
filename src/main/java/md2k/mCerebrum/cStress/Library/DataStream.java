@@ -89,9 +89,13 @@ public class DataStream {
         if(!preserve) {
             data.clear();
         } else {
-            DataPoint temp = data.get(data.size()-1);
-            data.clear();
-            data.add(temp);
+            if (data.size() > 0) {
+                DataPoint temp = data.get(data.size() - 1);
+                data.clear();
+                data.add(temp);
+            } else {
+                data.clear();
+            }
         }
     }
 

@@ -39,7 +39,7 @@ public class Main {
         String path = "/Users/hnat/Downloads/processedrawdata/SI";
 
 
-        for (int i = 1; i < 25; i++) {
+        for (int i = 1; i < 2; i++) {
             String person = String.format("%02d", i);
             CSVParser tp = new CSVParser();
             tp.importData(path + person + "/rip.txt", AUTOSENSE.CHEST_RIP);

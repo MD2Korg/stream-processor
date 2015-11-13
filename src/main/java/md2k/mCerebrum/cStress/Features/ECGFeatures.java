@@ -342,119 +342,123 @@ public class ECGFeatures {
     }
 
     private void filterPeaks(DataStream rrAverage, DataStream temp1, DataStream peaks, DataStream ECG) {
-        // If CURRENTPEAK > THR_SIG, that location is identified as a ìQRS complex
-        // candidateî and the signal level (SIG_LEV) is updated:
-        // SIG _ LEV = 0.125 ◊CURRENTPEAK + 0.875◊ SIG _ LEV
-        // If THR_NOISE < CURRENTPEAK < THR_SIG, then that location is identified as a
-        // ìnoise peakî and the noise level (NOISE_LEV) is updated:
-        // NOISE _ LEV = 0.125◊CURRENTPEAK + 0.875◊ NOISE _ LEV
-        // Based on new estimates of the signal and noise levels (SIG_LEV and NOISE_LEV,
-        // respectively) at that point in the ECG, the thresholds are adjusted as follows:
-        // THR _ SIG = NOISE _ LEV + 0.25 ◊ (SIG _ LEV ? NOISE _ LEV )
-        // THR _ NOISE = 0.5◊ (THR _ SIG)
+        try {
+            // If CURRENTPEAK > THR_SIG, that location is identified as a ìQRS complex
+            // candidateî and the signal level (SIG_LEV) is updated:
+            // SIG _ LEV = 0.125 ◊CURRENTPEAK + 0.875◊ SIG _ LEV
+            // If THR_NOISE < CURRENTPEAK < THR_SIG, then that location is identified as a
+            // ìnoise peakî and the noise level (NOISE_LEV) is updated:
+            // NOISE _ LEV = 0.125◊CURRENTPEAK + 0.875◊ NOISE _ LEV
+            // Based on new estimates of the signal and noise levels (SIG_LEV and NOISE_LEV,
+            // respectively) at that point in the ECG, the thresholds are adjusted as follows:
+            // THR _ SIG = NOISE _ LEV + 0.25 ◊ (SIG _ LEV ? NOISE _ LEV )
+            // THR _ NOISE = 0.5◊ (THR _ SIG)
 
-        double thr1 = AUTOSENSE.THR1_INIT;
-        double thr2 = 0.5 * thr1;
-        double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
-        double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
+            double thr1 = AUTOSENSE.THR1_INIT;
+            double thr2 = 0.5 * thr1;
+            double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
+            double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
 
-        DataPoint rr_ave;
+            DataPoint rr_ave;
 
-        if (rrAverage.statsSize() == 0) {
-            rrAverage.setPreservedLastInsert(true);
-            double rr_avg = 0.0;
-            for (int i1 = 1; i1 < peaks.data.size(); i1++) {
-                rr_avg += peaks.data.get(i1).value - peaks.data.get(i1 - 1).value;
-            }
-            rr_avg /= (peaks.data.size() - 1);
-            rr_ave = new DataPoint(ECG.data.get(0).timestamp, rr_avg);
-            rrAverage.add(rr_ave);
-        }
-        rr_ave = rrAverage.data.get(rrAverage.data.size() - 1);
-
-
-        int c1 = 0;
-        ArrayList<Integer> c2 = new ArrayList<Integer>();
-
-        ArrayList<DataPoint> Rpeak_temp1 = temp1.data;
-
-
-        for (int i1 = 0; i1 < peaks.data.size(); i1++) {
-            if (Rpeak_temp1.size() == 0) {
-                if (peaks.data.get(i1).value > thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
-                    if (Rpeak_temp1.size() <= c1) {
-                        Rpeak_temp1.add(new DataPoint(0, 0.0));
-                    }
-                    Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
-                    if (c2.size() <= c1) {
-                        c2.add(0);
-                    }
-                    c2.set(c1, i1);
-                    c1 += 1;
-                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+            if (rrAverage.statsSize() == 0) {
+                rrAverage.setPreservedLastInsert(true);
+                double rr_avg = 0.0;
+                for (int i1 = 1; i1 < peaks.data.size(); i1++) {
+                    rr_avg += peaks.data.get(i1).value - peaks.data.get(i1 - 1).value;
                 }
+                rr_avg /= (peaks.data.size() - 1);
+                rr_ave = new DataPoint(ECG.data.get(0).timestamp, rr_avg);
+                rrAverage.add(rr_ave);
+            }
+            rr_ave = rrAverage.data.get(rrAverage.data.size() - 1);
 
-                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
-                thr2 = 0.5 * thr1; //TODO: Candidate for datastream
 
-                rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
-            } else {
-                if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
-                    ArrayList<Double> searchback_array_inrange = new ArrayList<Double>();
-                    ArrayList<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
+            int c1 = 0;
+            ArrayList<Integer> c2 = new ArrayList<Integer>();
 
-                    for (int j = c2.get(c1 - 1) + 1; j < i1 - 1; j++) {
-                        if (peaks.data.get(i1).value < 3.0 * sig_lev && peaks.data.get(i1).value > thr2) {
-                            searchback_array_inrange.add(peaks.data.get(i1).value);
-                            searchback_array_inrange_index.add(j - c2.get(c1 - 1));
+            ArrayList<DataPoint> Rpeak_temp1 = temp1.data;
+
+
+            for (int i1 = 0; i1 < peaks.data.size(); i1++) {
+                if (Rpeak_temp1.size() == 0) {
+                    if (peaks.data.get(i1).value > thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                        if (Rpeak_temp1.size() <= c1) {
+                            Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
+                        Rpeak_temp1.set(c1, peaks.data.get(i1));
+                        sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                        if (c2.size() <= c1) {
+                            c2.add(0);
+                        }
+                        c2.set(c1, i1);
+                        c1 += 1;
+                    } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
+                        noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                     }
 
-                    if (searchback_array_inrange.size() > 0) {
-                        double searchback_max = searchback_array_inrange.get(0);
-                        int searchback_max_index = 0;
-                        for (int j = 0; j < searchback_array_inrange.size(); j++) {
-                            if (searchback_array_inrange.get(j) > searchback_max) {
-                                searchback_max = searchback_array_inrange.get(i1);
-                                searchback_max_index = j;
+                    thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
+                    thr2 = 0.5 * thr1; //TODO: Candidate for datastream
+
+                    rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
+                } else {
+                    if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
+                        ArrayList<Double> searchback_array_inrange = new ArrayList<Double>();
+                        ArrayList<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
+
+                        for (int j = c2.get(c1 - 1) + 1; j < i1 - 1; j++) {
+                            if (peaks.data.get(i1).value < 3.0 * sig_lev && peaks.data.get(i1).value > thr2) {
+                                searchback_array_inrange.add(peaks.data.get(i1).value);
+                                searchback_array_inrange_index.add(j - c2.get(c1 - 1));
                             }
                         }
+
+                        if (searchback_array_inrange.size() > 0) {
+                            double searchback_max = searchback_array_inrange.get(0);
+                            int searchback_max_index = 0;
+                            for (int j = 0; j < searchback_array_inrange.size(); j++) {
+                                if (searchback_array_inrange.get(j) > searchback_max) {
+                                    searchback_max = searchback_array_inrange.get(i1);
+                                    searchback_max_index = j;
+                                }
+                            }
+                            if (Rpeak_temp1.size() >= c1) {
+                                Rpeak_temp1.add(new DataPoint(0, 0.0));
+                            }
+                            Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
+                            sig_lev = Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                            if (c1 >= c2.size()) {
+                                c2.add(0);
+                            }
+                            c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
+                            i1 = c2.get(c1 - 1) + 1;
+                            c1 += 1;
+                            thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                            thr2 = 0.5 * thr1;
+                            rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
+                            continue;
+                        }
+                    } else if (peaks.data.get(i1).value >= thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
                         if (Rpeak_temp1.size() >= c1) {
                             Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
-                        Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                        sig_lev = Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
-                        if (c1 >= c2.size()) {
+                        Rpeak_temp1.set(c1, peaks.data.get(i1));
+                        sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                        if (c2.size() <= c1) {
                             c2.add(0);
                         }
-                        c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
-                        i1 = c2.get(c1 - 1) + 1;
+                        c2.set(c1, i1);
                         c1 += 1;
-                        thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                        thr2 = 0.5 * thr1;
-                        rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
-                        continue;
+                    } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
+                        noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                     }
-                } else if (peaks.data.get(i1).value >= thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
-                    if (Rpeak_temp1.size() >= c1) {
-                        Rpeak_temp1.add(new DataPoint(0, 0.0));
-                    }
-                    Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
-                    if (c2.size() <= c1) {
-                        c2.add(0);
-                    }
-                    c2.set(c1, i1);
-                    c1 += 1;
-                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                    thr2 = 0.5 * thr1;
+                    rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
                 }
-                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                thr2 = 0.5 * thr1;
-                rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
             }
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 

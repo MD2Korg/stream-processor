@@ -322,13 +322,7 @@ public class cStress {
 
         StressProbability probabilityOfStress = null;
 
-        if (datastreams.get("org.md2k.cstress.data.ecg").data.size() > 500 &&
-                datastreams.get("org.md2k.cstress.data.rip").data.size() > 500 &&
-                datastreams.get("org.md2k.cstress.data.accelx").data.size() > 300 &&
-                datastreams.get("org.md2k.cstress.data.accely").data.size() > 300 &&
-                datastreams.get("org.md2k.cstress.data.accelz").data.size() > 300) {
-
-            //TODO: This should be moved outside of the stress applications to intercept data before arriving here
+        //TODO: This should be moved outside of the stress applications to intercept data before arriving here
 //            //This check must happen before any normalization.  It operates on the RAW signals.
 //            RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
 //            ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
@@ -339,15 +333,12 @@ public class cStress {
 //
 //
 
-            AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
-            ECGFeatures ef = new ECGFeatures(datastreams);
-            RIPFeatures rf = new RIPFeatures(datastreams);
+        AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
+        ECGFeatures ef = new ECGFeatures(datastreams);
+        RIPFeatures rf = new RIPFeatures(datastreams);
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
-        } else {
-            System.out.println("Not enough data to process: " + participant);
-        }
         return probabilityOfStress;
     }
 
