@@ -1,8 +1,7 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.Library.Core;
-import md2k.mCerebrum.cStress.Library.DataStream;
-import md2k.mCerebrum.cStress.Library.DataStreams;
+import md2k.mCerebrum.cStress.Library.*;
+import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -41,21 +40,21 @@ public class AccelerometerFeatures {
         //Compute normalized accelerometer values
         DataStream accelx = datastreams.get("org.md2k.cstress.data.accelx");
         DataStream accelxNormalized = datastreams.get("org.md2k.cstress.data.accelx.normalized");
-        Core.normalize(accelxNormalized, accelx);
+        Smoothing.normalize(accelxNormalized, accelx);
 
         DataStream accely = datastreams.get("org.md2k.cstress.data.accely");
         DataStream accelyNormalized = datastreams.get("org.md2k.cstress.data.accely.normalized");
-        Core.normalize(accelyNormalized, accely);
+        Smoothing.normalize(accelyNormalized, accely);
 
         DataStream accelz = datastreams.get("org.md2k.cstress.data.accelz");
         DataStream accelzNormalized = datastreams.get("org.md2k.cstress.data.accelz.normalized");
-        Core.normalize(accelzNormalized, accelz);
+        Smoothing.normalize(accelzNormalized, accelz);
 
 
         //Window accel data streams
-        ArrayList<DataPoint[]> segxWindowed = Core.window(datastreams.get("org.md2k.cstress.data.accelx").data, windowSize);
-        ArrayList<DataPoint[]> segyWindowed = Core.window(datastreams.get("org.md2k.cstress.data.accely").data, windowSize);
-        ArrayList<DataPoint[]> segzWindowed = Core.window(datastreams.get("org.md2k.cstress.data.accelz").data, windowSize);
+        ArrayList<DataPoint[]> segxWindowed = Time.window(datastreams.get("org.md2k.cstress.data.accelx").data, windowSize);
+        ArrayList<DataPoint[]> segyWindowed = Time.window(datastreams.get("org.md2k.cstress.data.accely").data, windowSize);
+        ArrayList<DataPoint[]> segzWindowed = Time.window(datastreams.get("org.md2k.cstress.data.accelz").data, windowSize);
 
         try {
             //Compute magnitude and stdev from windowed datastreams
@@ -63,7 +62,7 @@ public class AccelerometerFeatures {
                 DataPoint[] wx = segxWindowed.get(i);
                 DataPoint[] wy = segyWindowed.get(i);
                 DataPoint[] wz = segzWindowed.get(i);
-                double[] magnitude = Core.magnitude(wx, wy, wz);
+                double[] magnitude = Vector.magnitude(wx, wy, wz);
                 for (int j = 0; j < magnitude.length; j++) {
                     datastreams.get("org.md2k.cstress.data.accel.magnitude").add(new DataPoint(wx[j].timestamp, magnitude[j]));
                 }

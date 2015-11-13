@@ -1,14 +1,11 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Library.Core;
-import md2k.mCerebrum.cStress.Library.DataStream;
-import md2k.mCerebrum.cStress.Library.DataStreams;
+import md2k.mCerebrum.cStress.Library.*;
+import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.apache.commons.math3.util.Pair;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 
 /**
@@ -48,11 +45,11 @@ public class RIPFeatures {
 
         DataStream rip = datastreams.get("org.md2k.cstress.data.rip");
         DataStream rip_smooth = datastreams.get("org.md2k.cstress.data.rip.smooth");
-        Core.smooth(rip_smooth, rip, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
+        Smoothing.smooth(rip_smooth, rip, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
 
         int windowLength = (int) Math.round(AUTOSENSE.WINDOW_LENGTH_SECS * (Double) datastreams.get("org.md2k.cstress.data.rip").metadata.get("frequency"));
         DataStream rip_mac = datastreams.get("org.md2k.cstress.data.rip.mac");
-        Core.smooth(rip_mac, rip_smooth, windowLength); //TWH: Replaced MAC with Smooth after discussion on 11/9/2015
+        Smoothing.smooth(rip_mac, rip_smooth, windowLength); //TWH: Replaced MAC with Smooth after discussion on 11/9/2015
 
         DataStream upIntercepts = datastreams.get("org.md2k.cstress.data.rip.upIntercepts");
         DataStream downIntercepts = datastreams.get("org.md2k.cstress.data.rip.downIntercepts");
@@ -120,7 +117,7 @@ public class RIPFeatures {
                 }
                 //minuteVentilation *= (valleys.data.size()-1); //TODO: Check with experts that this should not be there
 
-                datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation").add(new DataPoint(datastreams.get("org.md2k.cstress.data.rip").data.get(datastreams.get("org.md2k.cstress.data.rip").data.size() - 1).timestamp, minuteVentalation));
+                datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation").add(new DataPoint(datastreams.get("org.md2k.cstress.data.rip").data.get(datastreams.get("org.md2k.cstress.data.rip").data.size() - 1).timestamp, minuteVentilation));
             }
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
@@ -320,7 +317,7 @@ public class RIPFeatures {
             }
         }
         if (temp.size() > 1) {
-            ArrayList<DataPoint> diff = Core.diff(temp);
+            ArrayList<DataPoint> diff = Vector.diff(temp);
             boolean positiveSlope = false;
             if (diff.get(0).value > 0) {
                 positiveSlope = true;

@@ -1,11 +1,15 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Library.Core;
 import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
+import md2k.mCerebrum.cStress.Library.SignalProcessing.AutoSense;
+import md2k.mCerebrum.cStress.Library.SignalProcessing.ECG;
+import md2k.mCerebrum.cStress.Library.SignalProcessing.Filter;
+import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.Lomb;
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,8 +46,8 @@ public class ECGFeatures {
 
         //Compute RR Intervals
 
-        DataStream ECG = datastreams.get("org.md2k.cstress.data.ecg");
-        double frequency = (Double) ECG.metadata.get("frequency");
+        DataStream ECGstream = datastreams.get("org.md2k.cstress.data.ecg");
+        double frequency = (Double) ECGstream.metadata.get("frequency");
 
         //Ohio State Algorithm
         int window_l = (int) Math.ceil(frequency / 5.0);
@@ -57,19 +61,19 @@ public class ECGFeatures {
 
         DataStream y2 = datastreams.get("org.md2k.cstress.data.ecg.y2");
         DataStream y2normalized =  datastreams.get("org.md2k.cstress.data.ecg.y2-normalized");
-        Core.applyFilterNormalize(ECG, y2, y2normalized, Core.firls(fl, F, A, w), 90);
+        AutoSense.applyFilterNormalize(ECGstream, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
 
         DataStream y3 = datastreams.get("org.md2k.cstress.data.ecg.y3");
         DataStream y3normalized =  datastreams.get("org.md2k.cstress.data.ecg.y3-normalized");
-        Core.applyFilterNormalize(y2normalized, y3, y3normalized, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
+        AutoSense.applyFilterNormalize(y2normalized, y3, y3normalized, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
 
         DataStream y4 = datastreams.get("org.md2k.cstress.data.ecg.y4");
         DataStream y4normalized =  datastreams.get("org.md2k.cstress.data.ecg.y4-normalized");
-        Core.applySquareFilterNormalize(y3normalized, y4, y4normalized, 90);
+        AutoSense.applySquareFilterNormalize(y3normalized, y4, y4normalized, 90);
 
         DataStream y5 = datastreams.get("org.md2k.cstress.data.ecg.y5");
         DataStream y5normalized =  datastreams.get("org.md2k.cstress.data.ecg.y5-normalized");
-        Core.applyFilterNormalize(y4normalized, y5, y5normalized, Core.blackman(window_l), 90);
+        AutoSense.applyFilterNormalize(y4normalized, y5, y5normalized, Filter.blackman(window_l), 90);
 
 
         DataStream peaks = datastreams.get("org.md2k.cstress.data.ecg.peaks");
@@ -77,7 +81,7 @@ public class ECGFeatures {
 
         DataStream rr_ave = datastreams.get("org.md2k.cstress.data.ecg.rr_ave");
         DataStream Rpeak_temp1 = datastreams.get("org.md2k.cstress.data.ecg.peaks.temp1");
-        filterPeaks(rr_ave, Rpeak_temp1, peaks, ECG);
+        filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream);
 
         DataStream Rpeak_temp2 = datastreams.get("org.md2k.cstress.data.ecg.peaks.temp2");
         filterPeaksTemp2(Rpeak_temp2,Rpeak_temp1, frequency);
@@ -116,12 +120,12 @@ public class ECGFeatures {
                 }
 
                 if(rrDatapoints.length > 0) {
-                    Lomb HRLomb = Core.lomb(rrDatapoints);
+                    Lomb HRLomb = ECG.lomb(rrDatapoints);
 
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15)));
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2)));
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3)));
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, Core.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3)));
+                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4)));
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -382,14 +386,14 @@ public class ECGFeatures {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = Core.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
                 } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = Core.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                 }
 
                 thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
@@ -421,7 +425,7 @@ public class ECGFeatures {
                             Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
                         Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                        sig_lev = Core.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                        sig_lev = Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                         if (c1 >= c2.size()) {
                             c2.add(0);
                         }
@@ -438,14 +442,14 @@ public class ECGFeatures {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = Core.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
                 } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = Core.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                 }
                 thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
                 thr2 = 0.5 * thr1;
