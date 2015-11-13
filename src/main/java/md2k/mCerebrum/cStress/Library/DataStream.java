@@ -40,8 +40,8 @@ public class DataStream {
     public HashMap<String,Object> metadata;
     public ArrayList<DataPoint> data;
 
-    public SummaryStatistics stats;
-    public DescriptiveStatistics descriptiveStats;
+    private SummaryStatistics stats;
+    private DescriptiveStatistics descriptiveStats;
 
     public boolean preserve;
 
@@ -103,5 +103,21 @@ public class DataStream {
 
     public String getName() {
         return (String) metadata.get("name");
+    }
+
+    public double getPercentile(int i) {
+        return descriptiveStats.getPercentile(i);
+    }
+
+    public double getMean() {
+        return stats.getMean();
+    }
+
+    public double getStandardDeviation() {
+        return stats.getStandardDeviation();
+    }
+
+    public long statsSize() {
+        return stats.getN();
     }
 }

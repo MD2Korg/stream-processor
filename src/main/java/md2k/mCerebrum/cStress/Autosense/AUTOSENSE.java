@@ -74,4 +74,6 @@ public class AUTOSENSE {
 
     public static final int SAMPLE_LENGTH_SECS = 60;
 
+    public static final double ACTIVITY_THRESHOLD = 0.35;
+    public static final int ACCEL_WINDOW_SIZE = 10000;
 }

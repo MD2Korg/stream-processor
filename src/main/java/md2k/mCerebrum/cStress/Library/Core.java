@@ -145,7 +145,7 @@ public class Core {
         }
         //Normalized based on percentiles
         for (int i = 0; i < sample.length; i++) {
-            outputNormalized.add(new DataPoint(output.data.get(i).timestamp, output.data.get(i).value / output.descriptiveStats.getPercentile(normalizePercentile)));
+            outputNormalized.add(new DataPoint(output.data.get(i).timestamp, output.data.get(i).value / output.getPercentile(normalizePercentile)));
         }
     }
 
@@ -156,7 +156,7 @@ public class Core {
         }
         //Normalized based on percentiles
         for (int i = 0; i < output.data.size(); i++) {
-            outputNormalized.add(new DataPoint(output.data.get(i).timestamp, output.data.get(i).value / output.descriptiveStats.getPercentile(normalizePercentile)));
+            outputNormalized.add(new DataPoint(output.data.get(i).timestamp, output.data.get(i).value / output.getPercentile(normalizePercentile)));
         }
     }
 
@@ -295,34 +295,30 @@ public class Core {
      * @param n
      * @return
      */
-    public static ArrayList<DataPoint> smooth(ArrayList<DataPoint> rip, int n) {
-        ArrayList<DataPoint> result = new ArrayList<DataPoint>();
-
+    public static void smooth(DataStream output, DataStream input, int n) {
         int windowSize = 1;
         double sum;
-        for (int i = 0; i < rip.size(); i++) {
+        for (int i = 0; i < input.data.size(); i++) {
             sum = 0.0;
             int startingPoint;
-            if ((rip.size() - i + 1) < n) {
-                startingPoint = rip.size() - windowSize;
+            if ((input.data.size() - i + 1) < n) {
+                startingPoint = input.data.size() - windowSize;
             } else {
                 startingPoint = (int) Math.max(Math.floor(i - n / 2), 0);
             }
             for (int j = startingPoint; j < startingPoint + windowSize; j++) {
-                sum += rip.get(j).value;
+                sum += input.data.get(j).value;
             }
             sum /= (double) windowSize;
 
-            result.add(new DataPoint(rip.get(i).timestamp, sum));
+            output.add(new DataPoint(input.data.get(i).timestamp, sum));
 
-            if (windowSize < n && (rip.size() - i) > n) { //Increase windowSize until n
+            if (windowSize < n && (input.data.size() - i) > n) { //Increase windowSize until n
                 windowSize += 2;
-            } else if ((rip.size() - i + 1) < n) {
+            } else if ((input.data.size() - i + 1) < n) {
                 windowSize -= 2;
             }
         }
-
-        return result;
     }
 
 
@@ -342,115 +338,30 @@ public class Core {
     public static ArrayList<DataPoint[]> window(ArrayList<DataPoint> data, int size) {
         ArrayList<DataPoint[]> result = new ArrayList<DataPoint[]>();
 
-        long startTime = nextEpochTimestamp(data.get(0).timestamp) - 60 * 1000; //Get next minute window and subtract a minute to arrive at the appropriate startTime
-        ArrayList<DataPoint> tempArray = new ArrayList<DataPoint>();
-        DataPoint[] temp;
-        for (DataPoint dp : data) {
-            if (dp.timestamp < startTime + size) {
-                tempArray.add(dp);
-            } else {
-                temp = new DataPoint[tempArray.size()];
-                for (int i = 0; i < temp.length; i++) {
-                    temp[i] = tempArray.get(i);
-                }
-                result.add(temp);
-                tempArray = new ArrayList<DataPoint>();
-                startTime += size;
-            }
-        }
-        temp = new DataPoint[tempArray.size()];
-        for (int i = 0; i < temp.length; i++) {
-            temp[i] = tempArray.get(i);
-        }
-        result.add(temp);
-
-        return result;
-    }
-
-    /**
-     * Outlier detection for RR-interval data
-     * Reference: detect_outlier_v2.m
-     *
-     * @param sample    RR-interval values
-     * @param timestamp RR-interval timestamps
-     * @return Outlier array
-     */
-    public static String detect_outlier_v2(DataStreams datastreams) {
-        ArrayList<Integer> outlier = new ArrayList<Integer>();
-
-        DataStream ds = datastreams.get("org.md2k.cstress.data.ecg.rr_value");
-
-        if (ds.data.size() != 0) {
-
-            for (int i = 0; i < ds.data.size(); i++) {
-                if (ds.data.get(i).value > 0.3 && ds.data.get(i).value < 2.0) {
-                    datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").add(ds.data.get(i));
-                }
-            }
-
-            for (int i = 1; i < datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.size(); i++) {
-                datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).timestamp, Math.abs(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i - 1).value)));
-            }
-
-            double MED = AUTOSENSE.MED_CONSTANT * 0.5 * (datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(75) - datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(25));
-            double MAD = (datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").descriptiveStats.getPercentile(50) - AUTOSENSE.MAD_CONSTANT * 0.5 * (datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(75) - datastreams.get("org.md2k.cstress.data.ecg.rr_value.diff").descriptiveStats.getPercentile(25))) / 3.0;
-            double CBD = (MED + MAD) / 2.0;
-            if (CBD < AUTOSENSE.CBD_THRESHOLD) {
-                CBD = AUTOSENSE.CBD_THRESHOLD;
-            }
-
-            for (DataPoint aSample : ds.data) {
-                outlier.add(AUTOSENSE.QUALITY_BAD);
-            }
-            outlier.set(0, AUTOSENSE.QUALITY_GOOD);
-
-            double standard_rrInterval;
-            if (datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.size() > 0) {
-                standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(0).value;
-            } else {
-                standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").stats.getMean();
-            }
-            boolean prev_beat_bad = false;
-
-            for (int i = 1; i < datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.size() - 1; i++) {
-                double ref = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value;
-                if (ref > AUTOSENSE.REF_MINIMUM && ref < AUTOSENSE.REF_MAXIMUM) {
-                    double beat_diff_prevGood = Math.abs(standard_rrInterval - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value);
-                    double beat_diff_pre = Math.abs(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i - 1).value - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value);
-                    double beat_diff_post = Math.abs(datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value - datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i + 1).value);
-
-                    if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
-                        for (int j = 0; j < ds.data.size(); j++) {
-                            if (ds.data.get(j).timestamp == datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).timestamp) {
-                                outlier.set(j, AUTOSENSE.QUALITY_GOOD);
-                            }
-                        }
-                        prev_beat_bad = false;
-                        standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value;
-                    } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
-                        prev_beat_bad = true;
-                    } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
-                        for (int j = 0; j < ds.data.size(); j++) {
-                            if (ds.data.get(j).timestamp == datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).timestamp) {
-                                outlier.set(j, AUTOSENSE.QUALITY_GOOD);
-                            }
-                        }
-                        prev_beat_bad = false;
-                        standard_rrInterval = datastreams.get("org.md2k.cstress.data.ecg.valid_rr_interval").data.get(i).value;
-                    } else if (!prev_beat_bad && beat_diff_pre > CBD) {
-                        prev_beat_bad = true;
+        if(data.size() > 0) {
+            long startTime = nextEpochTimestamp(data.get(0).timestamp) - 60 * 1000; //Get next minute window and subtract a minute to arrive at the appropriate startTime
+            ArrayList<DataPoint> tempArray = new ArrayList<DataPoint>();
+            DataPoint[] temp;
+            for (DataPoint dp : data) {
+                if (dp.timestamp < startTime + size) {
+                    tempArray.add(dp);
+                } else {
+                    temp = new DataPoint[tempArray.size()];
+                    for (int i = 0; i < temp.length; i++) {
+                        temp[i] = tempArray.get(i);
                     }
-
+                    result.add(temp);
+                    tempArray = new ArrayList<DataPoint>();
+                    startTime += size;
                 }
             }
-
+            temp = new DataPoint[tempArray.size()];
+            for (int i = 0; i < temp.length; i++) {
+                temp[i] = tempArray.get(i);
+            }
+            result.add(temp);
         }
-
-        for (int i = 0; i < outlier.size(); i++) {
-            datastreams.get("org.md2k.cstress.data.ecg.outlier").add(new DataPoint(ds.data.get(i).timestamp, outlier.get(i)));
-        }
-
-        return "org.md2k.cstress.data.ecg.outlier";
+        return result;
     }
 
 
@@ -612,6 +523,12 @@ public class Core {
         }
 
         return result;
+    }
+
+    public static void normalize(DataStream output, DataStream input) {
+        for (DataPoint dp: input.data) {
+            output.add(new DataPoint(dp.timestamp,(dp.value - input.getMean()) / input.getStandardDeviation()));
+        }
     }
 
 

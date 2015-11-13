@@ -9,8 +9,6 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
 import md2k.mCerebrum.cStress.Structs.StressProbability;
-import md2k.mCerebrum.cStress.legacyJava.ECGQualityCalculation;
-import md2k.mCerebrum.cStress.legacyJava.RipQualityCalculation;
 
 import java.util.Date;
 
@@ -341,15 +339,14 @@ public class cStress {
 //
 //
 
-            AccelerometerFeatures af = new AccelerometerFeatures(datastreams);
+            AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
             ECGFeatures ef = new ECGFeatures(datastreams);
             RIPFeatures rf = new RIPFeatures(datastreams);
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
-            System.out.println("Interation");
         } else {
-            System.out.println("Not enough data to process");
+            System.out.println("Not enough data to process: " + participant);
         }
         return probabilityOfStress;
     }
