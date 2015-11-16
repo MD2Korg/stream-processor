@@ -4,11 +4,16 @@ import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
+import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
+import md2k.mCerebrum.cStress.Library.FeatureVector;
 import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import libsvm.*;
 import md2k.mCerebrum.cStress.Structs.StressProbability;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.Date;
 
@@ -119,155 +124,8 @@ public class cStress {
 //
 //        StressProbability stressResult = new StressProbability(-1, 0.0);
 //
-//        /* List of features for SVM model
-//
-//         ECG - RR interval variance
-//         ECG - RR interval quartile deviation
-//         ECG - RR interval low frequency energy
-//         ECG - RR interval medium frequency energy
-//         *ECG - RR interval high frequency energy
-//         *ECG - RR interval low-high frequency energy ratio
-//         *ECG - RR interval mean
-//         ECG - RR interval median
-//         *ECG - RR interval 80th percentile
-//         ECG - RR interval 20th percentile
-//         ECG - RR interval heart-rate
-//         */
-//
-//        double ECG_RR_Interval_Variance = ecgFeatures.RRStatsNormalized.getVariance();
-//        double ECG_RR_Interval_Quartile_Deviation = (ecgFeatures.RRStatsNormalized.getPercentile(75) - ecgFeatures.RRStatsNormalized.getPercentile(25)) / 2.0;
-//        double ECG_RR_Interval_Low_Frequency_Energy = ecgFeatures.getLombLowFrequencyEnergy();
-//        double ECG_RR_Interval_Medium_Frequency_Energy = ecgFeatures.getLombMediumFrequencyEnergy();
-//        double ECG_RR_Interval_High_Frequency_Energy = ecgFeatures.getLombHighFrequencyEnergy();
-//        double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = ecgFeatures.getLombLowHighFrequencyEnergyRatio();
-//        double ECG_RR_Interval_Mean = ecgFeatures.RRStatsNormalized.getMean();
-//        double ECG_RR_Interval_Median = ecgFeatures.RRStatsNormalized.getPercentile(50);
-//        double ECG_RR_Interval_80thPercentile = ecgFeatures.RRStatsNormalized.getPercentile(80);
-//        double ECG_RR_Interval_20thPercentile = ecgFeatures.RRStatsNormalized.getPercentile(20);
-//        double ECG_RR_Interval_Heart_Rate = ecgFeatures.getHeartRate();
-//
-//         /*
-//         RIP - Inspiration Duration - quartile deviation
-//         RIP - Inspiration Duration - mean
-//         RIP - Inspiration Duration - median
-//         RIP - Inspiration Duration - 80th percentile
-//         */
-//        double RIP_Inspiration_Duration_Quartile_Deviation = (ripFeatures.InspDurationNormalized.getPercentile(75) - ripFeatures.InspDurationNormalized.getPercentile(25)) / 2.0;
-//        double RIP_Inspiration_Duration_Mean = ripFeatures.InspDurationNormalized.getMean();
-//        double RIP_Inspiration_Duration_Median = ripFeatures.InspDurationNormalized.getPercentile(50);
-//        double RIP_Inspiration_Duration_80thPercentile = ripFeatures.InspDurationNormalized.getPercentile(80);
-//
-//         /*
-//         RIP - Expiration Duration - quartile deviation
-//         RIP - Expiration Duration - mean
-//         RIP - Expiration Duration - median
-//         RIP - Expiration Duration - 80th percentile
-//         */
-//        double RIP_Expiration_Duration_Quartile_Deviation = (ripFeatures.ExprDurationNormalized.getPercentile(75) - ripFeatures.ExprDurationNormalized.getPercentile(25)) / 2.0;
-//        double RIP_Expiration_Duration_Mean = ripFeatures.ExprDurationNormalized.getMean();
-//        double RIP_Expiration_Duration_Median = ripFeatures.ExprDurationNormalized.getPercentile(50);
-//        double RIP_Expiration_Duration_80thPercentile = ripFeatures.ExprDurationNormalized.getPercentile(80);
-//
-//         /*
-//         RIP - Respiration Duration - quartile deviation
-//         RIP - Respiration Duration - mean
-//         RIP - Respiration Duration - median
-//         RIP - Respiration Duration - 80th percentile
-//         */
-//        double RIP_Respiration_Duration_Quartile_Deviation = (ripFeatures.RespDurationNormalized.getPercentile(75) - ripFeatures.RespDurationNormalized.getPercentile(25)) / 2.0;
-//        double RIP_Respiration_Duration_Mean = ripFeatures.RespDurationNormalized.getMean();
-//        double RIP_Respiration_Duration_Median = ripFeatures.RespDurationNormalized.getPercentile(50);
-//        double RIP_Respiration_Duration_80thPercentile = ripFeatures.RespDurationNormalized.getPercentile(80);
-//
-//         /*
-//         RIP - Inspiration-Expiration Duration Ratio - quartile deviation
-//         *RIP - Inspiration-Expiration Duration Ratio - mean
-//         RIP - Inspiration-Expiration Duration Ratio - median
-//         RIP - Inspiration-Expiration Duration Ratio - 80th percentile
-//         */
-//        double RIP_Inspiration_Expiration_Duration_Quartile_Deviation = (ripFeatures.IERatio.getPercentile(75) - ripFeatures.IERatio.getPercentile(25)) / 2.0;
-//        double RIP_Inspiration_Expiration_Duration_Mean = ripFeatures.IERatio.getMean();
-//        double RIP_Inspiration_Expiration_Duration_Median = ripFeatures.IERatio.getPercentile(50);
-//        double RIP_Inspiration_Expiration_Duration_80thPercentile = ripFeatures.IERatio.getPercentile(80);
-//
-//         /*
-//         RIP - Stretch - quartile deviation
-//         RIP - Stretch - mean
-//         *RIP - Stretch - median
-//         RIP - Stretch - 80th percentile
-//         */
-//        double RIP_Stretch_Quartile_Deviation = (ripFeatures.StretchNormalized.getPercentile(75) - ripFeatures.StretchNormalized.getPercentile(25)) / 2.0;
-//        double RIP_Stretch_Mean = ripFeatures.StretchNormalized.getMean();
-//        double RIP_Stretch_Median = ripFeatures.StretchNormalized.getPercentile(50);
-//        double RIP_Stretch_80thPercentile = ripFeatures.StretchNormalized.getPercentile(80);
-//         /*
-//         *RIP - Breath-rate
-//         */
-//        double RIP_Breath_Rate = ripFeatures.BreathRateNormalized;
-//
-//         /*
-//         *RIP - Inspiration Minute Volume
-//         */
-//        double RIP_Inspiration_Minute_Volume = ripFeatures.MinuteVolumeNormalized;
-//
-//         /*
-//         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
-//         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - mean
-//         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
-//         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
-//         */
-//        double RSA_Quartile_Deviation = (ecgFeatures.RRStatsNormalized.getPercentile(75) - ecgFeatures.RRStatsNormalized.getPercentile(25)) / 2.0;
-//        double RSA_Mean = ecgFeatures.RRStatsNormalized.getMean();
-//        double RSA_Median = ecgFeatures.RRStatsNormalized.getPercentile(50);
-//        double RSA_80thPercentile = ecgFeatures.RRStatsNormalized.getPercentile(80);
-//
-//
-//        double[] featureVector = {
-//                ECG_RR_Interval_Variance,                               // 1
-//                ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,        // 2
-//                ECG_RR_Interval_High_Frequency_Energy,                  // 3
-//                ECG_RR_Interval_Medium_Frequency_Energy,                // 4
-//                ECG_RR_Interval_Low_Frequency_Energy,                   // 5
-//                ECG_RR_Interval_Mean,                                   // 6
-//                ECG_RR_Interval_Median,                                 // 7
-//                ECG_RR_Interval_Quartile_Deviation,                     // 8
-//                ECG_RR_Interval_80thPercentile,                         // 9
-//                ECG_RR_Interval_20thPercentile,                         // 10
-//                ECG_RR_Interval_Heart_Rate,                             // 11
-//
-//                RIP_Breath_Rate,                                        // 12
-//                RIP_Inspiration_Minute_Volume,                          // 13
-//
-//                RIP_Inspiration_Duration_Quartile_Deviation,            // 14
-//                RIP_Inspiration_Duration_Mean,                          // 15
-//                RIP_Inspiration_Duration_Median,                        // 16
-//                RIP_Inspiration_Duration_80thPercentile,                // 17
-//
-//                RIP_Expiration_Duration_Quartile_Deviation,             // 18
-//                RIP_Expiration_Duration_Mean,                           // 19
-//                RIP_Expiration_Duration_Median,                         // 20
-//                RIP_Expiration_Duration_80thPercentile,                 // 21
-//
-//                RIP_Respiration_Duration_Quartile_Deviation,            // 22
-//                RIP_Respiration_Duration_Mean,                          // 23
-//                RIP_Respiration_Duration_Median,                        // 24
-//                RIP_Respiration_Duration_80thPercentile,                // 25
-//
-//                RIP_Inspiration_Expiration_Duration_Quartile_Deviation, // 26
-//                RIP_Inspiration_Expiration_Duration_Mean,               // 27
-//                RIP_Inspiration_Expiration_Duration_Median,             // 28
-//                RIP_Inspiration_Expiration_Duration_80thPercentile,     // 29
-//
-//                RIP_Stretch_Quartile_Deviation,                         // 30
-//                RIP_Stretch_Mean,                                       // 31
-//                RIP_Stretch_Median,                                     // 32
-//                RIP_Stretch_80thPercentile,                             // 33
-//
-//                RSA_Quartile_Deviation,                                 // 34
-//                RSA_Mean,                                               // 35
-//                RSA_Median,                                             // 36
-//                RSA_80thPercentile                                      // 37
-//        };
+
+
 //
 //        featureVector = normalizeFV(featureVector);
 //
@@ -337,9 +195,202 @@ public class cStress {
         ECGFeatures ef = new ECGFeatures(datastreams);
         RIPFeatures rf = new RIPFeatures(datastreams);
 
+        FeatureVector fv = computeStressFeatures(datastreams);
+
+        if (fv != null) {
+            System.out.print(fv.timestamp);
+            for(double d: fv.data) {
+                System.out.print(", " + d);
+            }
+            System.out.println();
+        }
+
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
         return probabilityOfStress;
+    }
+
+    private FeatureVector computeStressFeatures(DataStreams datastreams) {
+
+        try {
+        /* List of features for SVM model
+
+         ECG - RR interval variance
+         ECG - RR interval quartile deviation
+         ECG - RR interval low frequency energy
+         ECG - RR interval medium frequency energy
+         *ECG - RR interval high frequency energy
+         *ECG - RR interval low-high frequency energy ratio
+         *ECG - RR interval mean
+         ECG - RR interval median
+         *ECG - RR interval 80th percentile
+         ECG - RR interval 20th percentile
+         ECG - RR interval heart-rate
+         */
+
+            DescriptiveStatistics RRint = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.ecg.rr_value").getValues());
+            double ECG_RR_Interval_Variance = RRint.getVariance();
+            double ECG_RR_Interval_Quartile_Deviation = (RRint.getPercentile(75) - RRint.getPercentile(25)) / 2.0; //TODO: Ask Karen about this computation
+
+            double ECG_RR_Interval_Low_Frequency_Energy = datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy").data.get(0).value;
+            double ECG_RR_Interval_Medium_Frequency_Energy = datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy").data.get(0).value;
+            double ECG_RR_Interval_High_Frequency_Energy = datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy").data.get(0).value;
+            double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio").data.get(0).value;
+
+            double ECG_RR_Interval_Mean = RRint.getMean();
+            double ECG_RR_Interval_Median = RRint.getPercentile(50);
+            double ECG_RR_Interval_80thPercentile = RRint.getPercentile(80);
+            double ECG_RR_Interval_20thPercentile = RRint.getPercentile(20);
+
+            DescriptiveStatistics heartrate = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.ecg.rr.heartrate").getValues());
+            double ECG_RR_Interval_Heart_Rate = heartrate.getMean();
+
+         /*
+         RIP - Inspiration Duration - quartile deviation
+         RIP - Inspiration Duration - mean
+         RIP - Inspiration Duration - median
+         RIP - Inspiration Duration - 80th percentile
+         */
+
+            DescriptiveStatistics InspDuration = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.rip.inspduration").getValues());
+
+            double RIP_Inspiration_Duration_Quartile_Deviation = (InspDuration.getPercentile(75) - InspDuration.getPercentile(25)) / 2.0;
+            double RIP_Inspiration_Duration_Mean = InspDuration.getMean();
+            double RIP_Inspiration_Duration_Median = InspDuration.getPercentile(50);
+            double RIP_Inspiration_Duration_80thPercentile = InspDuration.getPercentile(80);
+
+         /*
+         RIP - Expiration Duration - quartile deviation
+         RIP - Expiration Duration - mean
+         RIP - Expiration Duration - median
+         RIP - Expiration Duration - 80th percentile
+         */
+
+            DescriptiveStatistics ExprDuration = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.rip.exprduration").getValues());
+
+            double RIP_Expiration_Duration_Quartile_Deviation = (ExprDuration.getPercentile(75) - ExprDuration.getPercentile(25)) / 2.0;
+            double RIP_Expiration_Duration_Mean = ExprDuration.getMean();
+            double RIP_Expiration_Duration_Median = ExprDuration.getPercentile(50);
+            double RIP_Expiration_Duration_80thPercentile = ExprDuration.getPercentile(80);
+         /*
+         RIP - Respiration Duration - quartile deviation
+         RIP - Respiration Duration - mean
+         RIP - Respiration Duration - median
+         RIP - Respiration Duration - 80th percentile
+         */
+
+            DescriptiveStatistics RespDuration = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.rip.respduration").getValues());
+
+            double RIP_Respiration_Duration_Quartile_Deviation = (RespDuration.getPercentile(75) - RespDuration.getPercentile(25)) / 2.0;
+            double RIP_Respiration_Duration_Mean = RespDuration.getMean();
+            double RIP_Respiration_Duration_Median = RespDuration.getPercentile(50);
+            double RIP_Respiration_Duration_80thPercentile = RespDuration.getPercentile(80);
+        
+         /*
+         RIP - Inspiration-Expiration Duration Ratio - quartile deviation
+         *RIP - Inspiration-Expiration Duration Ratio - mean
+         RIP - Inspiration-Expiration Duration Ratio - median
+         RIP - Inspiration-Expiration Duration Ratio - 80th percentile
+         */
+            DescriptiveStatistics InspExprDuration = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.rip.IERatio").getValues());
+
+            double RIP_Inspiration_Expiration_Duration_Quartile_Deviation = (InspExprDuration.getPercentile(75) - InspExprDuration.getPercentile(25)) / 2.0;
+            double RIP_Inspiration_Expiration_Duration_Mean = InspExprDuration.getMean();
+            double RIP_Inspiration_Expiration_Duration_Median = InspExprDuration.getPercentile(50);
+            double RIP_Inspiration_Expiration_Duration_80thPercentile = InspExprDuration.getPercentile(80);
+
+         /*
+         RIP - Stretch - quartile deviation
+         RIP - Stretch - mean
+         *RIP - Stretch - median
+         RIP - Stretch - 80th percentile
+         */
+            DescriptiveStatistics Stretch = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.rip.stretch").getValues());
+
+            double RIP_Stretch_Quartile_Deviation = (Stretch.getPercentile(75) - Stretch.getPercentile(25)) / 2.0;
+            double RIP_Stretch_Mean = Stretch.getMean();
+            double RIP_Stretch_Median = Stretch.getPercentile(50);
+            double RIP_Stretch_80thPercentile = Stretch.getPercentile(80);
+         /*
+         *RIP - Breath-rate
+         */
+            double RIP_Breath_Rate = datastreams.get("org.md2k.cstress.data.rip.BreathRate").data.get(0).value;
+
+         /*
+         *RIP - Inspiration Minute Volume
+         */
+            double RIP_Inspiration_Minute_Ventilation = datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation").data.get(0).value;
+
+         /*
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - mean
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
+         */
+
+            DescriptiveStatistics RSA = new DescriptiveStatistics(datastreams.get("org.md2k.cstress.data.rip.RSA").getValues());
+
+            double RSA_Quartile_Deviation = (RSA.getPercentile(75) - RSA.getPercentile(25)) / 2.0;
+            double RSA_Mean = RSA.getMean();
+            double RSA_Median = RSA.getPercentile(50);
+            double RSA_80thPercentile = RSA.getPercentile(80);
+
+
+            double[] featureVector = {
+                    ECG_RR_Interval_Variance,                               // 1
+                    ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,        // 2
+                    ECG_RR_Interval_High_Frequency_Energy,                  // 3
+                    ECG_RR_Interval_Medium_Frequency_Energy,                // 4
+                    ECG_RR_Interval_Low_Frequency_Energy,                   // 5
+                    ECG_RR_Interval_Mean,                                   // 6
+                    ECG_RR_Interval_Median,                                 // 7
+                    ECG_RR_Interval_Quartile_Deviation,                     // 8
+                    ECG_RR_Interval_80thPercentile,                         // 9
+                    ECG_RR_Interval_20thPercentile,                         // 10
+                    ECG_RR_Interval_Heart_Rate,                             // 11
+
+                    RIP_Breath_Rate,                                        // 12
+                    RIP_Inspiration_Minute_Ventilation,                          // 13
+
+                    RIP_Inspiration_Duration_Quartile_Deviation,            // 14
+                    RIP_Inspiration_Duration_Mean,                          // 15
+                    RIP_Inspiration_Duration_Median,                        // 16
+                    RIP_Inspiration_Duration_80thPercentile,                // 17
+
+                    RIP_Expiration_Duration_Quartile_Deviation,             // 18
+                    RIP_Expiration_Duration_Mean,                           // 19
+                    RIP_Expiration_Duration_Median,                         // 20
+                    RIP_Expiration_Duration_80thPercentile,                 // 21
+
+                    RIP_Respiration_Duration_Quartile_Deviation,            // 22
+                    RIP_Respiration_Duration_Mean,                          // 23
+                    RIP_Respiration_Duration_Median,                        // 24
+                    RIP_Respiration_Duration_80thPercentile,                // 25
+
+                    RIP_Inspiration_Expiration_Duration_Quartile_Deviation, // 26
+                    RIP_Inspiration_Expiration_Duration_Mean,               // 27
+                    RIP_Inspiration_Expiration_Duration_Median,             // 28
+                    RIP_Inspiration_Expiration_Duration_80thPercentile,     // 29
+
+                    RIP_Stretch_Quartile_Deviation,                         // 30
+                    RIP_Stretch_Mean,                                       // 31
+                    RIP_Stretch_Median,                                     // 32
+                    RIP_Stretch_80thPercentile,                             // 33
+
+                    RSA_Quartile_Deviation,                                 // 34
+                    RSA_Mean,                                               // 35
+                    RSA_Median,                                             // 36
+                    RSA_80thPercentile                                      // 37
+            };
+
+            FeatureVector fv = new FeatureVector(windowStartTime, featureVector);
+            return fv;
+        } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+
+
+        return null;
     }
 
 

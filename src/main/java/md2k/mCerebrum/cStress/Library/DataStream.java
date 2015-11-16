@@ -124,4 +124,12 @@ public class DataStream {
     public long statsSize() {
         return stats.getN();
     }
+
+    public double[] getValues() {
+        double result[] = new double[data.size()];
+        for(int i=0; i<data.size(); i++)
+            result[i] = data.get(i).value;
+        return result;
+    }
+
 }
