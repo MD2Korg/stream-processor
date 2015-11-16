@@ -335,7 +335,6 @@ public class cStress {
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-
             double[] featureVector = {
                     ECG_RR_Interval_Variance,                               // 1
                     ECG_RR_Interval_Low_High_Frequency_Energy_Ratio,        // 2
