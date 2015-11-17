@@ -198,11 +198,7 @@ public class cStress {
         FeatureVector fv = computeStressFeatures(datastreams);
 
         if (fv != null) {
-            System.out.print(fv.timestamp);
-            for(double d: fv.data) {
-                System.out.print(", " + d);
-            }
-            System.out.println();
+            fv.persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/org.md2k.cstress.fv.csv");
         }
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);

@@ -1,5 +1,11 @@
 package md2k.mCerebrum.cStress.Library;
 
+import md2k.mCerebrum.cStress.Structs.DataPoint;
+
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 
 /**
@@ -38,5 +44,19 @@ public class FeatureVector {
             data.add(di);
         }
         timestamp = ts;
+    }
+
+    public void persist(String filename) {
+        try {
+            Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
+            writer.write(Long.toString(timestamp));
+            for(double dp: this.data) {
+                writer.write(", " + dp);
+            }
+            writer.write("\n");
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
