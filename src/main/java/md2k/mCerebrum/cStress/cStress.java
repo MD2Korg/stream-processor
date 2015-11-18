@@ -12,8 +12,6 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 import libsvm.*;
 import md2k.mCerebrum.cStress.Structs.StressProbability;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.Date;
 
