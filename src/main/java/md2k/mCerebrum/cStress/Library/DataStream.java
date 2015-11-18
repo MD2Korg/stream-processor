@@ -40,8 +40,8 @@ public class DataStream {
     public HashMap<String,Object> metadata;
     public ArrayList<DataPoint> data;
 
-    private SummaryStatistics stats;
-    private DescriptiveStatistics descriptiveStats;
+    public SummaryStatistics stats;
+    public DescriptiveStatistics descriptiveStats;
 
     public boolean preserve;
 
@@ -132,4 +132,10 @@ public class DataStream {
         return result;
     }
 
+    public double[] getNormalizedValues() {
+        double result[] = new double[data.size()];
+        for(int i=0; i<data.size(); i++)
+            result[i] = (data.get(i).value - stats.getMean()) / stats.getStandardDeviation();
+        return result;
+    }
 }
