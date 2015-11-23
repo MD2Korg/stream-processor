@@ -26,7 +26,7 @@ package md2k.mCerebrum.cStress.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CSVDataPoint {
+public class CSVDataPoint implements Comparable{
     public double value;
     public long timestamp;
     public int channel;
@@ -36,4 +36,17 @@ public class CSVDataPoint {
         this.value = value;
         this.timestamp = timestamp;
     }
+
+    @Override
+    public int compareTo(Object obj) {
+        CSVDataPoint o = (CSVDataPoint) obj;
+        if (this.value == o.value && this.timestamp == o.timestamp && this.channel == o.channel) {
+            return 0; //They are the same
+        } else if (this.timestamp < o.timestamp) {
+            return -1; //"this" is before "o"
+        } else {
+            return 1; //"this" is after "o"
+        }
+    }
+
 }

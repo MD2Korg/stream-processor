@@ -386,8 +386,19 @@ public class cStress {
                     RSA_80thPercentile                                      // 37
             };
 
-            FeatureVector fv = new FeatureVector(windowStartTime, featureVector);
-            return fv;
+
+            boolean valid = true;
+            for(int i=0; i<featureVector.length; i++) {
+                if (Double.isNaN(featureVector[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if(valid) {
+                FeatureVector fv = new FeatureVector(windowStartTime, featureVector);
+                return fv;
+            }
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
         }

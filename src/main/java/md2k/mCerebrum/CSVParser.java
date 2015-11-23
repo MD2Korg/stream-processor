@@ -6,9 +6,7 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -38,11 +36,11 @@ import java.util.TreeMap;
  */
 public class CSVParser implements Iterable<CSVDataPoint> {
 
-    private final TreeMap<Long, CSVDataPoint> data;
+    private final ArrayList<CSVDataPoint> data;
 
 
     public CSVParser() {
-        this.data = new TreeMap<Long, CSVDataPoint>();
+        this.data = new ArrayList<CSVDataPoint>();
     }
 
     public void importData(String filename, int channel) {
@@ -63,7 +61,7 @@ public class CSVParser implements Iterable<CSVDataPoint> {
                 data = (int) Double.parseDouble(tokens[0]);
 
                 tempPacket = new CSVDataPoint(channel, timestamp, data);
-                this.data.put(tempPacket.timestamp, tempPacket);
+                this.data.add(tempPacket);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -71,8 +69,12 @@ public class CSVParser implements Iterable<CSVDataPoint> {
     }
 
 
+    public void sort() {
+        Collections.sort(this.data);
+    }
+
     @Override
     public Iterator<CSVDataPoint> iterator() {
-        return this.data.values().iterator();
+        return this.data.iterator();
     }
 }

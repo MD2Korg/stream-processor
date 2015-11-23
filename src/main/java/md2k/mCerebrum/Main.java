@@ -39,7 +39,7 @@ public class Main {
         String path = "/Users/hnat/Downloads/processedrawdata/SI";
 
 
-        for (int i = 1; i < 25; i++) {
+        for (int i = 1; i < 23; i++) {
             String person = String.format("%02d", i);
             CSVParser tp = new CSVParser();
             tp.importData(path + person + "/rip.txt", AUTOSENSE.CHEST_RIP);
@@ -47,6 +47,8 @@ public class Main {
             tp.importData(path + person + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
             tp.importData(path + person + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
             tp.importData(path + person + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
+
+            tp.sort();
 
             cStress stress = new cStress(60 * 1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat", "SI" + person);
 
