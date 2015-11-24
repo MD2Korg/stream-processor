@@ -122,10 +122,23 @@ public class ECGFeatures {
                 if(rrDatapoints.length > 0) {
                     Lomb HRLomb = ECG.lomb(rrDatapoints);
 
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15)));
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2)));
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3)));
-                    datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4)));
+                    double lfhf = ECG.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+                    double lf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+                    double mf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
+                    double hf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
+
+                    if (!Double.isInfinite(lfhf) && !Double.isNaN(lfhf)) {
+                        datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, lfhf));
+                    }
+                    if (!Double.isInfinite(lf) && !Double.isNaN(lf)) {
+                        datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, lf));
+                    }
+                    if (!Double.isInfinite(mf) && !Double.isNaN(mf)) {
+                        datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, mf));
+                    }
+                    if (!Double.isInfinite(hf) && !Double.isNaN(hf)) {
+                        datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy").add(new DataPoint(datastreams.get("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, hf));
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {

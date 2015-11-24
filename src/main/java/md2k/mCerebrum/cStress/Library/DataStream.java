@@ -100,7 +100,7 @@ public class DataStream {
     }
 
     public void add(DataPoint dp) {
-        if (!Double.isNaN(dp.value)) {
+        if (!Double.isNaN(dp.value) && !Double.isInfinite(dp.value)) {
             data.add(new DataPoint(dp));
             stats.addValue(dp.value);
             descriptiveStats.addValue(dp.value);
