@@ -50,13 +50,15 @@ public class cStress {
 
     long windowSize;
     private String participant;
+    private String path;
 
     private DataStreams datastreams = new DataStreams();
 
 
-    public cStress(long windowSize, String svmModelFile, String featureVectorParameterFile, String participant) {
+    public cStress(long windowSize, String path, String participant) {
         this.windowSize = windowSize;
         this.participant = participant;
+        this.path = path;
 
         //Configure Data Streams
         datastreams.get("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
@@ -196,7 +198,7 @@ public class cStress {
         FeatureVector fv = computeStressFeatures(datastreams);
 
         if (fv != null) {
-            fv.persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/org.md2k.cstress.fv.csv");
+            fv.persist(path + participant + "/org.md2k.cstress.fv.csv");
         }
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
@@ -458,7 +460,7 @@ public class cStress {
     }
 
     private void resetDataStreams() {
-        datastreams.persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/");
+        datastreams.persist(path + participant + "/");
         datastreams.reset();
     }
 

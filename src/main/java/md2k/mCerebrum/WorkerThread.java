@@ -6,10 +6,6 @@ import md2k.mCerebrum.cStress.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Structs.StressProbability;
 import md2k.mCerebrum.cStress.cStress;
 
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -36,24 +32,38 @@ import java.util.concurrent.Executors;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Main {
+public class WorkerThread implements Runnable {
 
-    public static void main(String[] args) {
+    private String path;
+    private String id;
 
-        String path = args[0];
 
+    public WorkerThread(String path, String id) {
+        this.path = path;
+        this.id = id;
+    }
 
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+    @Override
+    public void run() {
 
-        for (int i = 1; i < 23; i++) {
-            String person = "SI"+String.format("%02d", i);
-            Runnable worker = new WorkerThread(path, person);
-            executor.execute(worker);
+        CSVParser tp = new CSVParser();
+        tp.importData(path + id + "/rip.txt", AUTOSENSE.CHEST_RIP);
+        tp.importData(path + id + "/ecg.txt", AUTOSENSE.CHEST_ECG);
+        tp.importData(path + id + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
+        tp.importData(path + id + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
+        tp.importData(path + id + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
+
+        tp.sort();
+
+        cStress stress = new cStress(60 * 1000, path, id);
+
+        StressProbability output;
+        for (CSVDataPoint ap : tp) {
+            DataPoint dp = new DataPoint(ap.timestamp, ap.value);
+            output = stress.add(ap.channel, dp);
+            if (output != null) {
+                System.out.println(output.label + " " + output.probability);
+            }
         }
-        executor.shutdown();
-        while(!executor.isTerminated()) {
-
-        }
-        System.out.println("Finished all threads");
     }
 }
