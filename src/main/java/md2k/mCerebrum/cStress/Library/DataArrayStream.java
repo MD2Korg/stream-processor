@@ -65,7 +65,7 @@ public class DataArrayStream {
         try {
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
             for(DataPointArray dp: this.data) {
-                writer.write(dp.timestamp);
+                writer.write("" + dp.timestamp);
                 for (Double d: dp.value) {
                     writer.write("," + d);
                 }
