@@ -1,12 +1,5 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Structs.StressProbability;
-import md2k.mCerebrum.cStress.cStress;
-
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

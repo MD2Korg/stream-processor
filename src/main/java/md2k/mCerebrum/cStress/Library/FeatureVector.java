@@ -1,7 +1,5 @@
 package md2k.mCerebrum.cStress.Library;
 
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;

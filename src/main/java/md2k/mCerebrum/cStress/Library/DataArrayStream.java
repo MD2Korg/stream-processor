@@ -1,9 +1,7 @@
 package md2k.mCerebrum.cStress.Library;
 
 
-import md2k.mCerebrum.cStress.Structs.DataPointArray;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import md2k.mCerebrum.cStress.Library.Structs.DataPointArray;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;

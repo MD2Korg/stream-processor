@@ -7,8 +7,8 @@ import md2k.mCerebrum.cStress.Library.SignalProcessing.AutoSense;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.ECG;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Filter;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Structs.Lomb;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.Lomb;
 
 
 import java.util.ArrayList;

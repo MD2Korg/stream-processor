@@ -7,10 +7,9 @@ import md2k.mCerebrum.cStress.Features.RIPFeatures;
 import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.FeatureVector;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
-import libsvm.*;
-import md2k.mCerebrum.cStress.Structs.StressProbability;
+import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.Date;

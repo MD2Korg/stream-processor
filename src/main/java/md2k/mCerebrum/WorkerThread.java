@@ -1,9 +1,9 @@
 package md2k.mCerebrum;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Structs.StressProbability;
+import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
 import md2k.mCerebrum.cStress.cStress;
 
 /**

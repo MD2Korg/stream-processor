@@ -1,8 +1,6 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
-import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
 
 import java.io.File;
 import java.io.FileNotFoundException;
