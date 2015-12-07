@@ -93,7 +93,7 @@ public class DataStream {
         }
     }
 
-    public void add(DataPoint dp) {f
+    public void add(DataPoint dp) {
         if (!Double.isNaN(dp.value) && !Double.isInfinite(dp.value)) {
             data.add(new DataPoint(dp));
             stats.addValue(dp.value);
