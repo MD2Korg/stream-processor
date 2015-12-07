@@ -1,5 +1,7 @@
 package md2k.mCerebrum.cStress.Structs;
 
+import java.util.ArrayList;
+
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -26,19 +28,24 @@ package md2k.mCerebrum.cStress.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DataPoint extends TSDataPoint{
-    public double value;
+public class DataPointArray extends TSDataPoint {
+    public ArrayList<Double> value;
 
-    public DataPoint(long timestamp, double value) {
-        this.value = value;
+    public DataPointArray(long timestamp, ArrayList<Double> value) {
+        this.value = new ArrayList<Double>(value);
         this.timestamp = timestamp;
     }
-    public DataPoint(DataPoint other) {
+    public DataPointArray(DataPointArray other) {
         this.value = other.value;
         this.timestamp = other.timestamp;
     }
 
     public String toString() {
-        return "DP:(" + this.timestamp + "," + this.value + ")";
+        String result = "DPArray:("+ this.timestamp;
+        for (Double d: value) {
+            result += "," + d;
+        }
+        result += ")";
+        return result;
     }
 }

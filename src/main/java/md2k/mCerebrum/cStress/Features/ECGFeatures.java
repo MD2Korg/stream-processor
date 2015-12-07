@@ -374,7 +374,7 @@ public class ECGFeatures {
 
             DataPoint rr_ave;
 
-            if (rrAverage.statsSize() == 0) {
+            if (rrAverage.stats.getN() == 0) {
                 rrAverage.setPreservedLastInsert(true);
                 double rr_avg = 0.0;
                 for (int i1 = 1; i1 < peaks.data.size(); i1++) {

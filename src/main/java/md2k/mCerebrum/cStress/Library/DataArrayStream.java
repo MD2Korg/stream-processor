@@ -1,11 +1,14 @@
 package md2k.mCerebrum.cStress.Library;
 
 
-import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Structs.DataPointArray;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -35,30 +38,23 @@ import java.util.HashMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DataStream {
+public class DataArrayStream {
 
     public HashMap<String,Object> metadata;
-    public ArrayList<DataPoint> data;
-
-    public SummaryStatistics stats;
-    public DescriptiveStatistics descriptiveStats;
+    public ArrayList<DataPointArray> data;
 
     public boolean preserve;
 
-    public DataStream(String name) {
-        data = new ArrayList<DataPoint>();
+    public DataArrayStream(String name) {
+        data = new ArrayList<DataPointArray>();
         metadata = new HashMap<String, Object>();
         metadata.put("name", name);
         preserve = false;
-        stats = new SummaryStatistics();
-        descriptiveStats = new DescriptiveStatistics(10000);
     }
 
-    public DataStream(DataStream other) {
-        this.data = new ArrayList<DataPoint>(other.data);
+    public DataArrayStream(DataArrayStream other) {
+        this.data = new ArrayList<DataPointArray>(other.data);
         this.metadata = other.metadata;
-        this.stats = other.stats;
-        this.descriptiveStats = other.descriptiveStats;
         this.preserve = other.preserve;
     }
 
@@ -70,8 +66,12 @@ public class DataStream {
     public void persist(String filename) {
         try {
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
-            for(DataPoint dp: this.data) {
-                writer.write(dp.timestamp + ", " + dp.value + "\n");
+            for(DataPointArray dp: this.data) {
+                writer.write(dp.timestamp);
+                for (Double d: dp.value) {
+                    writer.write("," + d);
+                }
+                writer.write("\n");
             }
             writer.close();
         } catch (Exception e) {
@@ -84,7 +84,7 @@ public class DataStream {
             data.clear();
         } else {
             if (data.size() > 0) {
-                DataPoint temp = data.get(data.size() - 1);
+                DataPointArray temp = data.get(data.size() - 1);
                 data.clear();
                 data.add(temp);
             } else {
@@ -93,41 +93,12 @@ public class DataStream {
         }
     }
 
-    public void add(DataPoint dp) {
-        if (!Double.isNaN(dp.value) && !Double.isInfinite(dp.value)) {
-            data.add(new DataPoint(dp));
-            stats.addValue(dp.value);
-            descriptiveStats.addValue(dp.value);
-        }
+    public void add(DataPointArray dp) {
+        data.add(new DataPointArray(dp));
     }
 
     public String getName() {
         return (String) metadata.get("name");
     }
 
-    public double getPercentile(int i) {
-        return descriptiveStats.getPercentile(i);
-    }
-
-    public double getMean() {
-        return stats.getMean();
-    }
-
-    public double getStandardDeviation() {
-        return stats.getStandardDeviation();
-    }
-
-    public double[] getValues() {
-        double result[] = new double[data.size()];
-        for(int i=0; i<data.size(); i++)
-            result[i] = data.get(i).value;
-        return result;
-    }
-
-    public double[] getNormalizedValues() {
-        double result[] = new double[data.size()];
-        for(int i=0; i<data.size(); i++)
-            result[i] = (data.get(i).value - stats.getMean()) / stats.getStandardDeviation();
-        return result;
-    }
 }
