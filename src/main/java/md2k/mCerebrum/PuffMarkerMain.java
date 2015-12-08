@@ -1,11 +1,9 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.PuffMarker;
 import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
-import md2k.mCerebrum.cStress.cStress;
+import md2k.mCerebrum.cStress.PuffMarker;
 import md2k.mCerebrum.cStress.util.PuffMarkerUtils;
 
 /*
@@ -56,7 +54,7 @@ public class PuffMarkerMain {
                     tp.importData(fileName, id);
 
                 }
-                PuffMarker puffMarker = new PuffMarker(6000*1000, null, null, person);
+                PuffMarker puffMarker = new PuffMarker(6000 * 1000, null, null, person);
                 StressProbability output;
                 for (CSVDataPoint ap : tp) {
                     DataPoint dp = new DataPoint(ap.timestamp, ap.value);

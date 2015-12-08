@@ -552,9 +552,10 @@ public class ECGFeatures {
     /**
      * Identfy peaks in the y5 nroamlized datastream
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param peaks Output datastream
+     *
+     * @param peaks        Output datastream
      * @param y5normalized Input datastream
      */
     private void findpeaks(DataPointStream peaks, DataPointStream y5normalized) {
@@ -576,10 +577,11 @@ public class ECGFeatures {
     /**
      * rr-ave (Average) update method
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
+     *
      * @param rpeak_temp1 Input datastream
-     * @param rr_ave Current rr average
+     * @param rr_ave      Current rr average
      * @return New rr average
      */
     public DataPoint rr_ave_update(ArrayList<DataPoint> rpeak_temp1, DataPointStream rr_ave) { //TODO: Consider replacing this algorithm with something like and EWMA

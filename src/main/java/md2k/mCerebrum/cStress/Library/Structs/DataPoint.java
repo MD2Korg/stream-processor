@@ -49,6 +49,7 @@ public class DataPoint {
 
     /**
      * Copy Constructor
+     *
      * @param other DataPointArray object
      */
     public DataPoint(DataPoint other) {

@@ -40,12 +40,13 @@ import java.util.HashMap;
 /**
  * DataArray version of the DataPointStream object
  */
-public class DataArrayStream extends DataStream{
+public class DataArrayStream extends DataStream {
 
     public ArrayList<DataPointArray> data;
 
     /**
      * Constructor
+     *
      * @param name Unique name of the DataArrayStream object
      */
     public DataArrayStream(String name) {
@@ -58,6 +59,7 @@ public class DataArrayStream extends DataStream{
 
     /**
      * Copy Constructor
+     *
      * @param other DataArrayStream object to copy
      */
     public DataArrayStream(DataArrayStream other) {
@@ -69,6 +71,7 @@ public class DataArrayStream extends DataStream{
 
     /**
      * Set method for data stream preservation
+     *
      * @param state True to preserve last inserted value after a reset
      */
     public void setPreservedLastInsert(boolean state) {
@@ -78,6 +81,7 @@ public class DataArrayStream extends DataStream{
 
     /**
      * Persist the data stream to the local file system
+     *
      * @param filename File name and path where to append the data stream.
      */
     @Override
@@ -117,6 +121,7 @@ public class DataArrayStream extends DataStream{
 
     /**
      * Main method to add DatapointArrays to the data stream
+     *
      * @param dp New DatapointArray to add to the data stream
      */
     public void add(DataPointArray dp) {
@@ -125,6 +130,7 @@ public class DataArrayStream extends DataStream{
 
     /**
      * Retrieve stream name
+     *
      * @return The unique stream name
      */
     public String getName() {

@@ -3,7 +3,6 @@ package md2k.mCerebrum.cStress;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Features.AccelGyroFeatures;
 import md2k.mCerebrum.cStress.Library.DataPointStream;
-import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.FeatureVector;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
@@ -85,7 +84,7 @@ public class PuffMarker {
             AccelGyroFeatures agf = new AccelGyroFeatures(datastreams, wrist);
             DataPointStream gyr_intersections = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.intersections" + wrist);
             for (int i = 0; i < gyr_intersections.data.size(); i++) {
-                int startIndex = (int)gyr_intersections.data.get(i).timestamp;
+                int startIndex = (int) gyr_intersections.data.get(i).timestamp;
                 int endIndex = (int) gyr_intersections.data.get(i).value;
                 FeatureVector fv = computeStressFeatures(datastreams, wrist, startIndex, endIndex);
             }
@@ -119,19 +118,19 @@ public class PuffMarker {
         /* List of features for SVM model
         */
             /////////////// WRIST FEATURES ////////////////////////
-            DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist+".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex) );
-            DataPointStream gyr_mag_800 = new DataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist+".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex) );
-            DataPointStream gyr_mag_8000 = new DataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist+".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex) );
+            DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream gyr_mag_800 = new DataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream gyr_mag_8000 = new DataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex));
 
-            DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist+".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex) );
-            DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist+".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex) );
+            DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex));
 
             /*
             Three filtering criteria
              */
             double meanHeight = gyr_mag_800.descriptiveStats.getMean() - gyr_mag_8000.descriptiveStats.getMean();
-            double duration = gyr_mag_8000.data.get(gyr_mag_8000.data.size()-1).timestamp - gyr_mag_8000.data.get(0).timestamp;
-            boolean isValidRollPitch =checkValidRollPitch(rolls, pitchs);
+            double duration = gyr_mag_8000.data.get(gyr_mag_8000.data.size() - 1).timestamp - gyr_mag_8000.data.get(0).timestamp;
+            boolean isValidRollPitch = checkValidRollPitch(rolls, pitchs);
 
 
             /*
@@ -143,7 +142,7 @@ public class PuffMarker {
             double GYRO_Magnitude_Mean = gyr_mag.descriptiveStats.getMean();
             double GYRO_Magnitude_Median = gyr_mag.descriptiveStats.getPercentile(50);
             double GYRO_Magnitude_SD = gyr_mag.descriptiveStats.getStandardDeviation();
-            double GYRO_Magnitude_Quartile_Deviation = gyr_mag.descriptiveStats.getPercentile(75)-gyr_mag.descriptiveStats.getPercentile(25);
+            double GYRO_Magnitude_Quartile_Deviation = gyr_mag.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
 
              /*
                 WRIST - PITCH - mean
@@ -154,7 +153,7 @@ public class PuffMarker {
             double Pitch_Mean = pitchs.descriptiveStats.getMean();
             double Pitch_Median = pitchs.descriptiveStats.getPercentile(50);
             double Pitch_SD = pitchs.descriptiveStats.getStandardDeviation();
-            double Pitch_Quartile_Deviation = pitchs.descriptiveStats.getPercentile(75)-gyr_mag.descriptiveStats.getPercentile(25);
+            double Pitch_Quartile_Deviation = pitchs.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
 
              /*
                 WRIST - ROLL - mean
@@ -165,7 +164,7 @@ public class PuffMarker {
             double Roll_Mean = rolls.descriptiveStats.getMean();
             double Roll_Median = rolls.descriptiveStats.getPercentile(50);
             double Roll_SD = rolls.descriptiveStats.getStandardDeviation();
-            double Roll_Quartile_Deviation = rolls.descriptiveStats.getPercentile(75)-gyr_mag.descriptiveStats.getPercentile(25);
+            double Roll_Quartile_Deviation = rolls.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
 
 
         /*

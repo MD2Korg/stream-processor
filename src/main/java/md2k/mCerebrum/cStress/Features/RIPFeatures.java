@@ -134,14 +134,15 @@ public class RIPFeatures {
     /**
      * Filter peaks and valleys from data streams
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param peaksFiltered Filtered peaks output
-     * @param valleysFiltered Filtered valleys output
-     * @param respirationDuration Input respiration duration
-     * @param inspirationAmplitude Input inspiration amplitude
-     * @param peaks Peak datastream
-     * @param valleys Valley datastream
+     *
+     * @param peaksFiltered            Filtered peaks output
+     * @param valleysFiltered          Filtered valleys output
+     * @param respirationDuration      Input respiration duration
+     * @param inspirationAmplitude     Input inspiration amplitude
+     * @param peaks                    Peak datastream
+     * @param valleys                  Valley datastream
      * @param meanInspirationAmplitude Average inspiration amplitude
      */
     private void filterPeaksAndValleys(DataPointStream peaksFiltered, DataPointStream valleysFiltered, DataPointStream respirationDuration, DataPointStream inspirationAmplitude, DataPointStream peaks, DataPointStream valleys, double meanInspirationAmplitude) {
@@ -164,10 +165,11 @@ public class RIPFeatures {
     /**
      * Compute respiration duration from valley data stream
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
+     *
      * @param respirationDuration Output respiration durations
-     * @param valleys Input valley datastream
+     * @param valleys             Input valley datastream
      */
     private void generateRespirationDuration(DataPointStream respirationDuration, DataPointStream valleys) {
         try {
@@ -182,10 +184,11 @@ public class RIPFeatures {
     /**
      * Compute inspiration amplitude from peaks and valleys
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param ia Inspiration amplitude datastream output
-     * @param peaks Input peak datastream
+     *
+     * @param ia      Inspiration amplitude datastream output
+     * @param peaks   Input peak datastream
      * @param valleys Input valleys datastream
      * @return
      */
@@ -207,12 +210,13 @@ public class RIPFeatures {
     /**
      * Compute valleys in a respiration datastream
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param valleys Output valley datastream
-     * @param upInterceptsFiltered1sect20 Up intercept datastream
+     *
+     * @param valleys                       Output valley datastream
+     * @param upInterceptsFiltered1sect20   Up intercept datastream
      * @param downInterceptsFiltered1sect20 Down insercept datastream
-     * @param rip_smooth Smoothed RIP datastream
+     * @param rip_smooth                    Smoothed RIP datastream
      */
     private void generateValleys(DataPointStream valleys, DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream rip_smooth) {
         try {
@@ -230,12 +234,13 @@ public class RIPFeatures {
     /**
      * Compute peaks in a respiration datastream
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param peaks Output valley datastream
-     * @param upInterceptsFiltered1sect20 Up intercept datastream
+     *
+     * @param peaks                         Output valley datastream
+     * @param upInterceptsFiltered1sect20   Up intercept datastream
      * @param downInterceptsFiltered1sect20 Down insercept datastream
-     * @param rip_smooth Smoothed RIP datastream
+     * @param rip_smooth                    Smoothed RIP datastream
      */
     private void generatePeaks(DataPointStream peaks, DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream rip_smooth) {
         try {
@@ -253,12 +258,13 @@ public class RIPFeatures {
     /**
      * Filter up and down intercepts based on 1/20 of a second
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param upInterceptsFiltered1sect20 Output filtered up intercepts
+     *
+     * @param upInterceptsFiltered1sect20   Output filtered up intercepts
      * @param downInterceptsFiltered1sect20 Output filtered down intercepts
-     * @param upInterceptsFiltered1sec Input up intercepts
-     * @param downInterceptsFiltered1sec Input down intercepts
+     * @param upInterceptsFiltered1sec      Input up intercepts
+     * @param downInterceptsFiltered1sec    Input down intercepts
      */
     private void filtert20second(DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream upInterceptsFiltered1sec, DataPointStream downInterceptsFiltered1sec) {
         try {
@@ -279,12 +285,13 @@ public class RIPFeatures {
     /**
      * Filter up and down intercepts based on 1 second window
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param upInterceptsFiltered1sec Output filtered up intercepts
+     *
+     * @param upInterceptsFiltered1sec   Output filtered up intercepts
      * @param downInterceptsFiltered1sec Output filtered down intercepts
-     * @param upInterceptsFiltered Input up intercepts
-     * @param downInterceptsFiltered Input down intercepts
+     * @param upInterceptsFiltered       Input up intercepts
+     * @param downInterceptsFiltered     Input down intercepts
      */
     private void filter1Second(DataPointStream upInterceptsFiltered1sec, DataPointStream downInterceptsFiltered1sec, DataPointStream upInterceptsFiltered, DataPointStream downInterceptsFiltered) {
         try {
@@ -303,12 +310,13 @@ public class RIPFeatures {
     /**
      * Filter up and down intercepts
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param upInterceptsFiltered Output filtered up intercepts
+     *
+     * @param upInterceptsFiltered   Output filtered up intercepts
      * @param downInterceptsFiltered Output filtered down intercepts
-     * @param upIntercepts Input up intercepts
-     * @param downIntercepts Input down intercepts
+     * @param upIntercepts           Input up intercepts
+     * @param downIntercepts         Input down intercepts
      */
     private void filterIntercepts(DataPointStream upInterceptsFiltered, DataPointStream downInterceptsFiltered, DataPointStream upIntercepts, DataPointStream downIntercepts) {
         int upPointer = 0;
@@ -353,12 +361,13 @@ public class RIPFeatures {
     /**
      * Compute up and down intercepts from RIP signal
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
-     * @param upIntercepts Output up intercept datastream
+     *
+     * @param upIntercepts   Output up intercept datastream
      * @param downIntercepts Output down intercept datastream
-     * @param rip_smooth Smoothed RIP datastream
-     * @param rip_mac RIP datastream
+     * @param rip_smooth     Smoothed RIP datastream
+     * @param rip_mac        RIP datastream
      */
     private void generateIntercepts(DataPointStream upIntercepts, DataPointStream downIntercepts, DataPointStream rip_smooth, DataPointStream rip_mac) {
         for (int i1 = 1; i1 < rip_mac.data.size() - 1; i1++) {
@@ -378,11 +387,12 @@ public class RIPFeatures {
     /**
      * Compute up and down intercepts from RIP signal
      * <p>
-     *     Reference: Matlab code \\TODO
-     *     <a href="https://en.wikipedia.org/wiki/Vagal_tone#Relation_to_respiratory_sinus_arrhythmia">https://en.wikipedia.org/wiki/Vagal_tone#Relation_to_respiratory_sinus_arrhythmia</a>
+     * Reference: Matlab code \\TODO
+     * <a href="https://en.wikipedia.org/wiki/Vagal_tone#Relation_to_respiratory_sinus_arrhythmia">https://en.wikipedia.org/wiki/Vagal_tone#Relation_to_respiratory_sinus_arrhythmia</a>
      * </p>
-     * @param starttime Beginning time of data window
-     * @param endtime Ending time of data window
+     *
+     * @param starttime   Beginning time of data window
+     * @param endtime     Ending time of data window
      * @param rrintervals Input rr-interval datastream
      * @return Max - min of the ECG signal within the RSA window
      */
@@ -420,11 +430,12 @@ public class RIPFeatures {
     /**
      * Identifies valleys in a datastream
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
+     *
      * @param downIntercept Down intercept DataPoint
-     * @param upIntercept Up intercept DataPoint
-     * @param data Input datastream
+     * @param upIntercept   Up intercept DataPoint
+     * @param data          Input datastream
      * @return Valley point from data located between the downIntercept and upIntercept
      */
     private DataPoint findValley(DataPoint downIntercept, DataPoint upIntercept, DataPointStream data) {
@@ -481,11 +492,12 @@ public class RIPFeatures {
     /**
      * Identifies peaks in a datastream
      * <p>
-     *     Reference: Matlab code \\TODO
+     * Reference: Matlab code \\TODO
      * </p>
+     *
      * @param downIntercept Down intercept DataPoint
-     * @param upIntercept Up intercept DataPoint
-     * @param data Input datastream
+     * @param upIntercept   Up intercept DataPoint
+     * @param data          Input datastream
      * @return Peak point from data located between the upIntercept and downIntercept
      */
     public DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataPointStream data) {

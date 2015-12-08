@@ -33,6 +33,7 @@ public class Main {
 
     /**
      * Main driver class for replaying AutoSense data through cStress
+     *
      * @param args Arguments to the program
      */
     public static void main(String[] args) {

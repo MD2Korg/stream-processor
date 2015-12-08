@@ -75,8 +75,8 @@ public class ECG {
      * Reference: Matlab code \\TODO
      * </p>
      *
-     * @param P        Lomb P result
-     * @param f        Lomb f result
+     * @param P             Lomb P result
+     * @param f             Lomb f result
      * @param lowFrequency  Defines the value below which is consider low frequency
      * @param highFrequency Defines the value above which is consider high frequency
      * @return Sum of all values between the low and high frequencies

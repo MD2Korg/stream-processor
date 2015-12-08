@@ -46,7 +46,7 @@ public class DataStreams {
 
     /**
      * Retrieve a DataPointStream from the DataStreams object
-     * <p>
+     * <p/>
      * Will create the DataPointStream if it does not exist
      *
      * @param stream String identifier of the stream to retrieve

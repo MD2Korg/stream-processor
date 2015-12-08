@@ -3,12 +3,10 @@ package md2k.mCerebrum.cStress.Features;
 import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
-import md2k.mCerebrum.cStress.Library.Vector;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Vector;
 import md2k.mCerebrum.cStress.util.PuffMarkerUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -111,6 +109,14 @@ public class AccelGyroFeatures {
         return intersectionIndex;
     }
 
+    public static double roll(double ax, double ay, double az) {
+        return 180 * Math.atan2(ax, Math.sqrt(ay * ay + az * az)) / Math.PI;
+    }
+
+    public static double pitch(double ax, double ay, double az) {
+        return 180 * Math.atan2(-ay, -az) / Math.PI;
+    }
+
     private void calculateRollPitchSegment(DataPointStream rolls, DataPointStream pitchs, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
         for (int i = 0; i < accelx.data.size(); i++) {
             double rll = roll(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
@@ -118,14 +124,6 @@ public class AccelGyroFeatures {
             rolls.data.add(new DataPoint(accelx.data.get(i).timestamp, rll));
             pitchs.data.add(new DataPoint(accelx.data.get(i).timestamp, ptch));
         }
-    }
-
-    public static double roll(double ax, double ay, double az) {
-        return 180 * Math.atan2(ax, Math.sqrt(ay * ay + az * az)) / Math.PI;
-    }
-
-    public static double pitch(double ax, double ay, double az) {
-        return 180 * Math.atan2(-ay, -az) / Math.PI;
     }
 
 

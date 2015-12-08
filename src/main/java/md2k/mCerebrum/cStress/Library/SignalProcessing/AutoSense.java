@@ -37,10 +37,11 @@ public class AutoSense {
 
     /**
      * Applies a filter and normalizes the result
-     * @param input Input DataPointStream
-     * @param output Output DataPointStream
-     * @param outputNormalized Output normalized DataPointStream
-     * @param filter Filter array
+     *
+     * @param input               Input DataPointStream
+     * @param output              Output DataPointStream
+     * @param outputNormalized    Output normalized DataPointStream
+     * @param filter              Filter array
      * @param normalizePercentile What percentile to utilize for normalization
      */
     public static void applyFilterNormalize(DataPointStream input, DataPointStream output, DataPointStream outputNormalized, double[] filter, int normalizePercentile) {
@@ -62,9 +63,10 @@ public class AutoSense {
 
     /**
      * Applies the filter (n^2) and normalizes the result
-     * @param input Input DataPointStream
-     * @param output Output DataPointStream
-     * @param outputNormalized Output normalized DataPointStream
+     *
+     * @param input               Input DataPointStream
+     * @param output              Output DataPointStream
+     * @param outputNormalized    Output normalized DataPointStream
      * @param normalizePercentile What percentile to utilize for normalization
      */
     public static void applySquareFilterNormalize(DataPointStream input, DataPointStream output, DataPointStream outputNormalized,
