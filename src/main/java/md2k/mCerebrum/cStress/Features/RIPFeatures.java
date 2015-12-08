@@ -3,7 +3,7 @@ package md2k.mCerebrum.cStress.Features;
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Library.*;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;

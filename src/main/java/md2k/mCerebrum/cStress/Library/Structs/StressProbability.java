@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Structs;
+package md2k.mCerebrum.cStress.Library.Structs;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -9,11 +9,11 @@ package md2k.mCerebrum.cStress.Structs;
  * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
+ * list of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -26,27 +26,12 @@ package md2k.mCerebrum.cStress.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CSVDataPoint implements Comparable{
-    public double value;
-    public long timestamp;
-    public int channel;
+public class StressProbability {
+    public double probability;
+    public int label;
 
-    public CSVDataPoint(int channel, long timestamp, double value) {
-        this.channel = channel;
-        this.value = value;
-        this.timestamp = timestamp;
+    public StressProbability(int i, double v) {
+        probability = v;
+        label = i;
     }
-
-    @Override
-    public int compareTo(Object obj) {
-        CSVDataPoint o = (CSVDataPoint) obj;
-        if (this.value == o.value && this.timestamp == o.timestamp && this.channel == o.channel) {
-            return 0; //They are the same
-        } else if (this.timestamp < o.timestamp) {
-            return -1; //"this" is before "o"
-        } else {
-            return 1; //"this" is after "o"
-        }
-    }
-
 }
