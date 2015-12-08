@@ -46,6 +46,7 @@ public class FeatureVector {
 
     /**
      * Persist the feature vector to the local file system
+     *
      * @param filename File name and path where to append the data stream.
      */
     public void persist(String filename) {

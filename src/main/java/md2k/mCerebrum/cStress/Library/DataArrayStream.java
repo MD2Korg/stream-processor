@@ -38,16 +38,15 @@ import java.util.HashMap;
  */
 
 /**
- * DataArray version of the DataStream object
+ * DataArray version of the DataPointStream object
  */
-public class DataArrayStream {
+public class DataArrayStream extends DataStream {
 
-    public HashMap<String, Object> metadata;
     public ArrayList<DataPointArray> data;
-    public boolean preserve;
 
     /**
      * Constructor
+     *
      * @param name Unique name of the DataArrayStream object
      */
     public DataArrayStream(String name) {
@@ -60,6 +59,7 @@ public class DataArrayStream {
 
     /**
      * Copy Constructor
+     *
      * @param other DataArrayStream object to copy
      */
     public DataArrayStream(DataArrayStream other) {
@@ -71,6 +71,7 @@ public class DataArrayStream {
 
     /**
      * Set method for data stream preservation
+     *
      * @param state True to preserve last inserted value after a reset
      */
     public void setPreservedLastInsert(boolean state) {
@@ -80,8 +81,10 @@ public class DataArrayStream {
 
     /**
      * Persist the data stream to the local file system
+     *
      * @param filename File name and path where to append the data stream.
      */
+    @Override
     public void persist(String filename) {
         try {
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
@@ -101,6 +104,7 @@ public class DataArrayStream {
     /**
      * Reset the data stream array for the next interval
      */
+    @Override
     public void reset() {
         if (!preserve) {
             data.clear();
@@ -117,6 +121,7 @@ public class DataArrayStream {
 
     /**
      * Main method to add DatapointArrays to the data stream
+     *
      * @param dp New DatapointArray to add to the data stream
      */
     public void add(DataPointArray dp) {
@@ -125,6 +130,7 @@ public class DataArrayStream {
 
     /**
      * Retrieve stream name
+     *
      * @return The unique stream name
      */
     public String getName() {

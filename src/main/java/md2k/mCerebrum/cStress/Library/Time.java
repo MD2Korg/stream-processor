@@ -51,6 +51,7 @@ public class Time {
 
     /**
      * Windowing function for DataPoint arrays
+     *
      * @param data Input data array
      * @param size Time window size in milliseconds
      * @return ArrayList of data split by size

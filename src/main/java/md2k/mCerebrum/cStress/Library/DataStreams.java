@@ -45,17 +45,17 @@ public class DataStreams {
 
 
     /**
-     * Retrieve a DataStream from the DataStreams object
-     * <p>
-     * Will create the DataStream if it does not exist
+     * Retrieve a DataPointStream from the DataStreams object
+     * <p/>
+     * Will create the DataPointStream if it does not exist
      *
      * @param stream String identifier of the stream to retrieve
-     * @return DataStream
+     * @return DataPointStream
      */
     public DataStream get(String stream) {
-        if (!datastreams.containsKey(stream)) {
-            datastreams.put(stream, new DataStream(stream));
-        }
+//        if (!datastreams.containsKey(stream)) {
+//            datastreams.put(stream, new DataStream(stream));
+//        }
         return datastreams.get(stream);
     }
 

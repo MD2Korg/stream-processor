@@ -34,7 +34,7 @@ public class AUTOSENSE_PACKET {
 
     /**
      * Timestamp in milliseconds.
-     * <p>
+     * <p/>
      * Packet timestamp as recorded by the Android phone
      */
     public long timestamp;
