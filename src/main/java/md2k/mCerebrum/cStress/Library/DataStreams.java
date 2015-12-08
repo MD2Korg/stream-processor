@@ -2,21 +2,21 @@ package md2k.mCerebrum.cStress.Library;
 
 import java.util.TreeMap;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -28,29 +28,54 @@ import java.util.TreeMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Main object that contains all data streams in this library
+ */
 public class DataStreams {
 
     private TreeMap<String, DataStream> datastreams;
 
+    /**
+     * Constructor
+     */
     public DataStreams() {
         datastreams = new TreeMap<String, DataStream>();
     }
 
+
+    /**
+     * Retrieve a DataStream from the DataStreams object
+     * <p>
+     * Will create the DataStream if it does not exist
+     *
+     * @param stream String identifier of the stream to retrieve
+     * @return DataStream
+     */
     public DataStream get(String stream) {
-        if(!datastreams.containsKey(stream)) {
+        if (!datastreams.containsKey(stream)) {
             datastreams.put(stream, new DataStream(stream));
         }
         return datastreams.get(stream);
     }
 
+
+    /**
+     * Iterate through all data streams and persist them to disk
+     *
+     * @param filebase Based directory where data streams are persisted
+     */
     public void persist(String filebase) {
-        for(String key: datastreams.keySet()) {
+        for (String key : datastreams.keySet()) {
             datastreams.get(key).persist(filebase + datastreams.get(key).getName() + ".csv");
         }
     }
 
+    /**
+     * Reset all data streams
+     */
     public void reset() {
-        for(String key: datastreams.keySet()) {
+        for (String key : datastreams.keySet()) {
             datastreams.get(key).reset();
         }
     }

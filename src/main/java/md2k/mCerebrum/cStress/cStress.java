@@ -8,29 +8,29 @@ import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.FeatureVector;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-
 import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
+import md2k.mCerebrum.cStress.Library.Time;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.Date;
 
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * - Karen Hovsepian <karoaper@gmail.com>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -43,6 +43,9 @@ import java.util.Date;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Main class that implements cStress and controls the data processing pipeline
+ */
 public class cStress {
 
     long windowStartTime = -1;
@@ -54,6 +57,12 @@ public class cStress {
     private DataStreams datastreams = new DataStreams();
 
 
+    /**
+     * Main constructor for cStress
+     * @param windowSize Time in milliseconds to segment and buffer data before processing
+     * @param path Location where data will be persisted on disk
+     * @param participant A participant identifier that should identify a directory within 'path'
+     */
     public cStress(long windowSize, String path, String participant) {
         this.windowSize = windowSize;
         this.participant = participant;
@@ -77,46 +86,7 @@ public class cStress {
 
         resetDataStreams();
 
-
-//        try {
-//            Model = svm.svm_load_model(svmModelFile);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-//        this.featureVectorMean = new double[37];
-//        this.featureVectorStd = new double[37];
-//        loadFVParameters(featureVectorParameterFile);
-
     }
-
-//    private void loadFVParameters(String featureVectorParameterFile) {
-//
-//        BufferedReader br = null;
-//        String line = "";
-//        String csvSplitBy = ",";
-//        int count;
-//        try {
-//            br = new BufferedReader(new FileReader(featureVectorParameterFile));
-//            count = 0;
-//            while ((line = br.readLine()) != null) {
-//                String[] meanstd = line.split(csvSplitBy);
-//                this.featureVectorMean[count] = Double.parseDouble(meanstd[0]);
-//                this.featureVectorStd[count] = Double.parseDouble(meanstd[1]);
-//                count++;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (br != null) {
-//                try {
-//                    br.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
 
 
 //    private StressProbability evaluteStressModel(AccelerometerFeatures accelFeatures, ECGFeatures ecgFeatures, RIPFeatures ripFeatures, double bias) {
@@ -175,6 +145,10 @@ public class cStress {
 //    }
 
 
+    /**
+     * Main computation loop that processes all buffered data, computes a feature vector, and evaluates stress
+     * @return Probability of stress
+     */
     public StressProbability process() {
 
         StressProbability probabilityOfStress = null;
@@ -205,6 +179,11 @@ public class cStress {
         return probabilityOfStress;
     }
 
+    /**
+     * Extract and compute the 37 features that are needed for cStress's model
+     * @param datastreams Global DataStreams object
+     * @return FV
+     */
     private FeatureVector computeStressFeatures(DataStreams datastreams) {
 
         try {
@@ -229,16 +208,16 @@ public class cStress {
             double ECG_RR_Interval_Quartile_Deviation = (RRint.getPercentile(75) - RRint.getPercentile(25)) / 2.0;
 
             DataStream lombLE = datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy");
-            double ECG_RR_Interval_Low_Frequency_Energy = (lombLE.data.get(0).value-lombLE.stats.getMean()) / lombLE.stats.getStandardDeviation();
-            
+            double ECG_RR_Interval_Low_Frequency_Energy = (lombLE.data.get(0).value - lombLE.stats.getMean()) / lombLE.stats.getStandardDeviation();
+
             DataStream lombME = datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy");
-            double ECG_RR_Interval_Medium_Frequency_Energy = (lombME.data.get(0).value-lombME.stats.getMean()) / lombME.stats.getStandardDeviation();
+            double ECG_RR_Interval_Medium_Frequency_Energy = (lombME.data.get(0).value - lombME.stats.getMean()) / lombME.stats.getStandardDeviation();
 
             DataStream lombHE = datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy");
-            double ECG_RR_Interval_High_Frequency_Energy = (lombHE.data.get(0).value-lombHE.stats.getMean()) / lombHE.stats.getStandardDeviation();
+            double ECG_RR_Interval_High_Frequency_Energy = (lombHE.data.get(0).value - lombHE.stats.getMean()) / lombHE.stats.getStandardDeviation();
 
             DataStream lombLH = datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio");
-            double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = (lombLH.data.get(0).value-lombLH.stats.getMean()) / lombLH.stats.getStandardDeviation();
+            double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = (lombLH.data.get(0).value - lombLH.stats.getMean()) / lombLH.stats.getStandardDeviation();
 
             double ECG_RR_Interval_Mean = RRint.getMean();
             double ECG_RR_Interval_Median = RRint.getPercentile(50);
@@ -389,14 +368,14 @@ public class cStress {
 
 
             boolean valid = true;
-            for(int i=0; i<featureVector.length; i++) {
+            for (int i = 0; i < featureVector.length; i++) {
                 if (Double.isNaN(featureVector[i])) {
                     valid = false;
                     break;
                 }
             }
 
-            if(valid) {
+            if (valid) {
                 FeatureVector fv = new FeatureVector(windowStartTime, featureVector);
                 return fv;
             }
@@ -409,11 +388,17 @@ public class cStress {
     }
 
 
+    /**
+     * Add new DataPoint to the buffers
+     * @param channel Identifies which sensor stream the DataPoint is associated with
+     * @param dp DataPoint containing a timestamp and value
+     * @return Stress probability if it is computed, otherwise Null
+     */
     public StressProbability add(int channel, DataPoint dp) {
         StressProbability result = null;
 
         if (this.windowStartTime < 0)
-            this.windowStartTime = nextEpochTimestamp(dp.timestamp);
+            this.windowStartTime = Time.nextEpochTimestamp(dp.timestamp, this.windowSize);
 
         if ((dp.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
             result = process();
@@ -452,12 +437,9 @@ public class cStress {
         return result;
     }
 
-    private long nextEpochTimestamp(long timestamp) {
-        long previousMinute = timestamp / (60 * 1000);
-        Date date = new Date((previousMinute + 1) * (60 * 1000));
-        return date.getTime();
-    }
-
+    /**
+     * Persist and reset all datastreams
+     */
     private void resetDataStreams() {
         datastreams.persist(path + participant + "/");
         datastreams.reset();

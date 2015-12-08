@@ -2,7 +2,7 @@ package md2k.mCerebrum.cStress.Library.Structs;
 
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -28,21 +28,43 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class DataPointArray extends TSDataPoint {
-    public ArrayList<Double> value;
 
+/**
+ * Array version of DataPoint
+ */
+public class DataPointArray {
+    public ArrayList<Double> value;
+    public long timestamp;
+
+
+    /**
+     * DataPointArray Constructor
+     *
+     * @param timestamp Time in milliseconds since Jan 1st, 1970
+     * @param value     Array of floating point values
+     */
     public DataPointArray(long timestamp, ArrayList<Double> value) {
         this.value = new ArrayList<Double>(value);
         this.timestamp = timestamp;
     }
+
+    /**
+     * Copy Constructor
+     *
+     * @param other DataPointArray object
+     */
     public DataPointArray(DataPointArray other) {
         this.value = other.value;
         this.timestamp = other.timestamp;
     }
 
+    /**
+     * @return String representation of a DataPoint object
+     */
+    @Override
     public String toString() {
-        String result = "DPArray:("+ this.timestamp;
-        for (Double d: value) {
+        String result = "DPArray:(" + this.timestamp;
+        for (Double d : value) {
             result += "," + d;
         }
         result += ")";

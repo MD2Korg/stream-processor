@@ -4,9 +4,12 @@ import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Scanner;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.

@@ -3,21 +3,21 @@ package md2k.mCerebrum.cStress.Library.SignalProcessing;
 import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,16 +29,35 @@ import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Data smoothing library routines
+ */
 public class Smoothing {
+    /**
+     * Normalization routine
+     * <p>
+     * Normalize an input data stream based on mean and standard deviation
+     * </p>
+     *
+     * @param input  Input datastream object
+     * @param output Output datastream object
+     */
     public static void normalize(DataStream output, DataStream input) {
-        for (DataPoint dp: input.data) {
-            output.add(new DataPoint(dp.timestamp,(dp.value - input.getMean()) / input.getStandardDeviation()));
+        for (DataPoint dp : input.data) {
+            output.add(new DataPoint(dp.timestamp, (dp.value - input.getMean()) / input.getStandardDeviation()));
         }
     }
 
     /**
      * Reimplementation of Matlab's smooth function
+     * <p>
+     * Reference Matlab's implementation in smooth.m
+     * </p>
      *
+     * @param output Output datastream object
+     * @param input  Input datastream object
+     * @param n      Windows size
      */
     public static void smooth(DataStream output, DataStream input, int n) {
         int windowSize = 1;
@@ -66,9 +85,17 @@ public class Smoothing {
         }
     }
 
+
     /**
-     * Basic EWMA function
+     * Exponentially Weighted Moving Average
+     * <p>
+     * Reference: https://en.wikipedia.org/wiki/Moving_average
+     * </p>
      *
+     * @param x     Newest sample value
+     * @param y     Historical value
+     * @param alpha Degree of weighting between 0 and 1
+     * @return New weighted average
      */
     public static double ewma(double x, double y, double alpha) {
         return alpha * x + (1 - alpha) * y;

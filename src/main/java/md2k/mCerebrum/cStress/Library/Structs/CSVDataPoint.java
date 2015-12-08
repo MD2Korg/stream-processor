@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Library.Structs;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -26,11 +26,21 @@ package md2k.mCerebrum.cStress.Library.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CSVDataPoint implements Comparable{
+
+/**
+ * DataPoint object to handle CSV AutoSense data files
+ */
+public class CSVDataPoint implements Comparable {
     public double value;
     public long timestamp;
     public int channel;
 
+
+    /**
+     * @param channel   AutoSense channel which determine a specific sensor
+     * @param timestamp Timestamp in milliseconds since Jan 1st, 1970
+     * @param value     Sensor value
+     */
     public CSVDataPoint(int channel, long timestamp, double value) {
         this.channel = channel;
         this.value = value;

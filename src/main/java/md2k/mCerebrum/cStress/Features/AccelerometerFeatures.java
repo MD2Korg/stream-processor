@@ -1,13 +1,16 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.Library.*;
+import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Time;
+import md2k.mCerebrum.cStress.Library.Vector;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Md. Mahbubur Rahman <mmrahman@memphis.edu>
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -34,8 +37,20 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+
+/**
+ * Accelerometer feature computation class
+ */
 public class AccelerometerFeatures {
 
+    /**
+     * Accelerometer feature processor for cStress-Autosense
+     *
+     * @param datastreams        object
+     * @param ACTIVITY_THRESHOLD threshold based on accelerometer magnitude
+     * @param windowSize         seconds
+     */
     public AccelerometerFeatures(DataStreams datastreams, double ACTIVITY_THRESHOLD, int windowSize) {
         //Compute normalized accelerometer values
         DataStream accelx = datastreams.get("org.md2k.cstress.data.accelx");
@@ -74,27 +89,26 @@ public class AccelerometerFeatures {
             }
 
 
-
             //Compute Activity from datastreams
             double lowlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").getPercentile(1);
             double highlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").getPercentile(99);
-            double range = highlimit-lowlimit;
+            double range = highlimit - lowlimit;
 
             DataStream stdmag = datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
 
             boolean[] activityOrNot = new boolean[stdmag.data.size()];
-            for(int i=0; i<stdmag.data.size(); i++) {
+            for (int i = 0; i < stdmag.data.size(); i++) {
                 activityOrNot[i] = stdmag.data.get(i).value > (lowlimit + ACTIVITY_THRESHOLD * range);
             }
 
             int minActive = 0;
-            for(boolean b: activityOrNot) {
+            for (boolean b : activityOrNot) {
                 if (b) {
                     minActive += 1;
                 }
             }
             int active = 0;
-            if (minActive > (stdmag.data.size()/2)) {
+            if (minActive > (stdmag.data.size() / 2)) {
                 active = 1;
             }
 

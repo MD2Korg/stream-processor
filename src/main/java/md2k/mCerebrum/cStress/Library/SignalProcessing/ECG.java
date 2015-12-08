@@ -10,21 +10,21 @@ import org.apache.commons.math3.transform.TransformType;
 
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,10 +36,22 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Electrocardiogram (ECG) signal processing routines
+ */
 public class ECG {
     /**
-     * Heartrate Low Frequency - High Frequency ratio
+     * Heart rate Low Frequency - High Frequency ratio
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
      *
+     * @param P        Lomb P result
+     * @param f        Lomb f result
+     * @param lowRate  Defines the rate below which is consider low frequency
+     * @param highRate Defines the rate above which is consider high frequency
+     * @return Double value that is the ratio between low and and high frequencies
      */
     public static double heartRateLFHF(double[] P, double[] f, double lowRate, double highRate) {
         double result1 = 0;
@@ -58,8 +70,16 @@ public class ECG {
     }
 
     /**
-     * Heartrate Power
+     * Heart Rate Power function
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
      *
+     * @param P        Lomb P result
+     * @param f        Lomb f result
+     * @param lowFrequency  Defines the value below which is consider low frequency
+     * @param highFrequency Defines the value above which is consider high frequency
+     * @return Sum of all values between the low and high frequencies
      */
     public static double heartRatePower(double[] P, double[] f, double lowFrequency, double highFrequency) {
         double result = 0;
@@ -74,8 +94,13 @@ public class ECG {
 
     /**
      * Lomb–Scargle periodogram implementation
-     * Reference: HeartRateLomb.m
+     * <p>
+     * Reference: https://en.wikipedia.org/wiki/Least-squares_spectral_analysis#The_Lomb.E2.80.93Scargle_periodogram
+     * Matlab HeartRateLomb.m
+     * </p>
      *
+     * @param dp DataPoint array of values
+     * @return Lomb object containing P and f
      */
     public static Lomb lomb(DataPoint[] dp) {
         double T = dp[dp.length - 1].timestamp - dp[0].timestamp;
@@ -175,7 +200,13 @@ public class ECG {
 
     /**
      * Compute the signal energy using FFTs
+     * <p>
+     * Reference: Matlab \\TODO
+     * </p>
      *
+     * @param data Input data array
+     * @param inc  Increment
+     * @return Energy
      */
     public static double computeEnergy(double[] data, int inc) {
         double result = 0;
@@ -194,9 +225,15 @@ public class ECG {
         return result;
     }
 
+
     /**
      * Determine the next power of 2 larger than length
+     * <p>
+     * Reference: Matlab implementation
+     * </p>
      *
+     * @param length Input
+     * @return The next largest power of 2 greater than length
      */
     public static int nextPower2(int length) {
         if (length == 0)
@@ -207,7 +244,13 @@ public class ECG {
 
     /**
      * Mean crossing algorithm
+     * <p>
+     * Reference: Matlab? \\TODO
+     * </p>
      *
+     * @param x    Input DataPoint array
+     * @param mean Value which to compute crossings based on
+     * @return Array containing the indexes of x that are cross mean
      */
     public static double[] crossing(DataPoint[] x, double mean) {
         ArrayList<Double> crossings = new ArrayList<Double>();
