@@ -3,6 +3,7 @@ package md2k.mCerebrum.cStress.Library;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -65,5 +66,17 @@ public class Vector {
             }
         }
         return result;
+    }
+
+
+    public static double getMagnitude(double x, double y, double z) {
+        return Math.sqrt(x * x + y * y + z * z);
+    }
+
+    public static void magnitude(DataStream gyr_mag, List<DataPoint> x, List<DataPoint> y, List<DataPoint> z) {
+        for (int i = 0; i < x.size(); i++) {
+            double mag = getMagnitude(x.get(i).value, y.get(i).value, z.get(i).value);
+            gyr_mag.add(new DataPoint(x.get(i).timestamp, mag));
+        }
     }
 }
