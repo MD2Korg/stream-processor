@@ -40,7 +40,6 @@ import java.util.List;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
 
 public class DataStream {
 
