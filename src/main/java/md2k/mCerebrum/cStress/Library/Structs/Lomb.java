@@ -1,6 +1,6 @@
-package md2k.mCerebrum.cStress.Structs;
+package md2k.mCerebrum.cStress.Library.Structs;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -26,27 +26,12 @@ package md2k.mCerebrum.cStress.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CSVDataPoint implements Comparable{
-    public double value;
-    public long timestamp;
-    public int channel;
 
-    public CSVDataPoint(int channel, long timestamp, double value) {
-        this.channel = channel;
-        this.value = value;
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public int compareTo(Object obj) {
-        CSVDataPoint o = (CSVDataPoint) obj;
-        if (this.value == o.value && this.timestamp == o.timestamp && this.channel == o.channel) {
-            return 0; //They are the same
-        } else if (this.timestamp < o.timestamp) {
-            return -1; //"this" is before "o"
-        } else {
-            return 1; //"this" is after "o"
-        }
-    }
-
+/**
+ * Data structure holding the results from Lomb-Scargle periodogram computation
+ * Reference: https://en.wikipedia.org/wiki/Least-squares_spectral_analysis#The_Lomb.E2.80.93Scargle_periodogram
+ */
+public class Lomb {
+    public double[] P;
+    public double[] f;
 }

@@ -1,6 +1,6 @@
-package md2k.mCerebrum.cStress.Structs;
+package md2k.mCerebrum.cStress.Library.Structs;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.

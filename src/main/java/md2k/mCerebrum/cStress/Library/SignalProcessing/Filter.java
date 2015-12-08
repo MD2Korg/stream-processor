@@ -1,20 +1,20 @@
 package md2k.mCerebrum.cStress.Library.SignalProcessing;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,10 +26,19 @@ package md2k.mCerebrum.cStress.Library.SignalProcessing;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Signal processing filters
+ */
 public class Filter {
     /**
      * Standard implementation of the Blackman filter
+     * <p>
+     * Reference: <a href="https://en.wikipedia.org/wiki/Window_function#Blackman_windows">https://en.wikipedia.org/wiki/Window_function#Blackman_windows</a>
+     * </p>
      *
+     * @param window_l Size of the filter to create
+     * @return Filter vector
      */
     public static double[] blackman(int window_l) {
         double[] result = new double[window_l];
@@ -46,7 +55,15 @@ public class Filter {
     /**
      * Finite Impulse Response Least-Squares filter
      * This filter is hard-coded from a Matlab output based on the frequency of the ECG sensor
+     * <p>
+     * Reference: AutoSense Matlab code file //TODO
+     * </p>
      *
+     * @param a  Ignored
+     * @param f  Ignored
+     * @param fl Ignored
+     * @param w  Ignored
+     * @return Filter vector
      */
     public static double[] firls(double fl, double[] f, double[] a, double[] w) {
         //Hardcoded to the specifications of the Autosense ECG sensor.  Determined from the Matlab code
@@ -123,7 +140,13 @@ public class Filter {
 
     /**
      * Standard convolution implementation for producing the "same" size filter
+     * <p>
+     * Reference: Matlab's conv algorithm
+     * </p>
      *
+     * @param signal Input data array
+     * @param kernel Filter kernel
+     * @return Filtered signal array that is the same size as the input array
      */
     public static double[] conv(double[] signal, double[] kernel) {
         double[] result = new double[Math.max(Math.max(signal.length + kernel.length, signal.length), kernel.length)];

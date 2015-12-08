@@ -1,28 +1,26 @@
 package md2k.mCerebrum.cStress.Library;
 
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,17 +38,21 @@ public class FeatureVector {
 
     public FeatureVector(long ts, double[] d) {
         data = new ArrayList<Double>();
-        for(double di: d) {
+        for (double di : d) {
             data.add(di);
         }
         timestamp = ts;
     }
 
+    /**
+     * Persist the feature vector to the local file system
+     * @param filename File name and path where to append the data stream.
+     */
     public void persist(String filename) {
         try {
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
             writer.write(Long.toString(timestamp));
-            for(double dp: this.data) {
+            for (double dp : this.data) {
                 writer.write(", " + dp);
             }
             writer.write("\n");

@@ -1,8 +1,6 @@
-package md2k.mCerebrum.cStress.tests;
+package md2k.mCerebrum.cStress.Library.Structs;
 
-import org.junit.After;
-import org.junit.Before;
-
+import java.util.ArrayList;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -13,11 +11,11 @@ import org.junit.Before;
  * modification, are permitted provided that the following conditions are met:
  *
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
+ *   list of conditions and the following disclaimer.
  *
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -30,16 +28,46 @@ import org.junit.Before;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class AccelerometerFeaturesTest {
 
-    @Before
-    public void setUp() throws Exception {
+/**
+ * Array version of DataPoint
+ */
+public class DataPointArray {
+    public ArrayList<Double> value;
+    public long timestamp;
 
+
+    /**
+     * DataPointArray Constructor
+     *
+     * @param timestamp Time in milliseconds since Jan 1st, 1970
+     * @param value     Array of floating point values
+     */
+    public DataPointArray(long timestamp, ArrayList<Double> value) {
+        this.value = new ArrayList<Double>(value);
+        this.timestamp = timestamp;
     }
 
-    @After
-    public void tearDown() throws Exception {
-
+    /**
+     * Copy Constructor
+     *
+     * @param other DataPointArray object
+     */
+    public DataPointArray(DataPointArray other) {
+        this.value = other.value;
+        this.timestamp = other.timestamp;
     }
 
+    /**
+     * @return String representation of a DataPoint object
+     */
+    @Override
+    public String toString() {
+        String result = "DPArray:(" + this.timestamp;
+        for (Double d : value) {
+            result += "," + d;
+        }
+        result += ")";
+        return result;
+    }
 }

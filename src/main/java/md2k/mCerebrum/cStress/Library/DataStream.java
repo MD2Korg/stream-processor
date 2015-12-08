@@ -1,30 +1,33 @@
 package md2k.mCerebrum.cStress.Library;
 
 
-import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -36,9 +39,13 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Core data stream object on which most computation is based in this framework
+ */
 public class DataStream {
 
-    public HashMap<String,Object> metadata;
+    public HashMap<String, Object> metadata;
     public ArrayList<DataPoint> data;
 
     public SummaryStatistics stats;
@@ -46,6 +53,11 @@ public class DataStream {
 
     public boolean preserve;
 
+
+    /**
+     * Constructor
+     * @param name Unique name of the DataPoint object
+     */
     public DataStream(String name) {
         data = new ArrayList<DataPoint>();
         metadata = new HashMap<String, Object>();
@@ -55,6 +67,10 @@ public class DataStream {
         descriptiveStats = new DescriptiveStatistics(10000);
     }
 
+    /**
+     * Copy Constructor
+     * @param other DataStream object to copy
+     */
     public DataStream(DataStream other) {
         this.data = new ArrayList<DataPoint>(other.data);
         this.metadata = other.metadata;
@@ -63,6 +79,10 @@ public class DataStream {
         this.preserve = other.preserve;
     }
 
+    /**
+     * Set method for data stream preservation
+     * @param state True to preserve last inserted value after a reset
+     */
     public DataStream(String name, DataPoint[] data) {
         this(name);
         for(DataPoint dp: data) {
@@ -81,10 +101,14 @@ public class DataStream {
         preserve = state;
     }
 
+    /**
+     * Persist the data stream to the local file system
+     * @param filename File name and path where to append the data stream.
+     */
     public void persist(String filename) {
         try {
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
-            for(DataPoint dp: this.data) {
+            for (DataPoint dp : this.data) {
                 writer.write(dp.timestamp + ", " + dp.value + "\n");
             }
             writer.close();
@@ -93,8 +117,11 @@ public class DataStream {
         }
     }
 
+    /**
+     * Reset the data stream array for the next interval.  Preserve stats and descriptiveStats if preserve is set
+     */
     public void reset() {
-        if(!preserve) {
+        if (!preserve) {
             data.clear();
         } else {
             if (data.size() > 0) {
@@ -107,6 +134,13 @@ public class DataStream {
         }
     }
 
+
+    /**
+     * Main method to add DataPoint to the data stream.  Updates stats and descriptiveStats and checks for invalid data
+     * values.
+     *
+     * @param dp New DataPoint to add to the data stream
+     */
     public void add(DataPoint dp) {
         if (!Double.isNaN(dp.value) && !Double.isInfinite(dp.value)) {
             data.add(new DataPoint(dp));
@@ -115,36 +149,59 @@ public class DataStream {
         }
     }
 
+    /**
+     * Retrieve stream name
+     *
+     * @return The unique stream name
+     */
     public String getName() {
         return (String) metadata.get("name");
     }
 
+
+    /**
+     * Percentile computation based on a buffer of datapoints
+     * @param i The percentile to retrieve
+     * @return Computed percentile
+     */
     public double getPercentile(int i) {
         return descriptiveStats.getPercentile(i);
     }
 
+    /**
+     * Mean computation based on an online algorithm
+     * @return Mean of all DataPoints up to the current time
+     */
     public double getMean() {
         return stats.getMean();
     }
 
+    /**
+     * Standard deviation computation based on an online algorithm
+     * @return Standard deviation of all DataPoints up to the current time
+     */
     public double getStandardDeviation() {
         return stats.getStandardDeviation();
     }
 
-    public long statsSize() {
-        return stats.getN();
-    }
-
+    /**
+     * Retrieves all values in the current data window
+     * @return Array of double values
+     */
     public double[] getValues() {
         double result[] = new double[data.size()];
-        for(int i=0; i<data.size(); i++)
+        for (int i = 0; i < data.size(); i++)
             result[i] = data.get(i).value;
         return result;
     }
 
+    /**
+     * Retrieves all values in the current data window
+     * @return Array of double values normalized based on the mean and standard deviation
+     */
     public double[] getNormalizedValues() {
         double result[] = new double[data.size()];
-        for(int i=0; i<data.size(); i++)
+        for (int i = 0; i < data.size(); i++)
             result[i] = (data.get(i).value - stats.getMean()) / stats.getStandardDeviation();
         return result;
     }

@@ -1,6 +1,10 @@
-package md2k.mCerebrum.cStress.Library;
+package md2k.mCerebrum;
 
-import java.util.TreeMap;
+import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
+import md2k.mCerebrum.cStress.cStress;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,55 +32,38 @@ import java.util.TreeMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+public class WorkerThread implements Runnable {
 
-/**
- * Main object that contains all data streams in this library
- */
-public class DataStreams {
+    private String path;
+    private String id;
 
-    private TreeMap<String, DataStream> datastreams;
 
-    /**
-     * Constructor
-     */
-    public DataStreams() {
-        datastreams = new TreeMap<String, DataStream>();
+    public WorkerThread(String path, String id) {
+        this.path = path;
+        this.id = id;
     }
 
+    @Override
+    public void run() {
 
-    /**
-     * Retrieve a DataStream from the DataStreams object
-     * <p>
-     * Will create the DataStream if it does not exist
-     *
-     * @param stream String identifier of the stream to retrieve
-     * @return DataStream
-     */
-    public DataStream get(String stream) {
-        if (!datastreams.containsKey(stream)) {
-            datastreams.put(stream, new DataStream(stream));
-        }
-        return datastreams.get(stream);
-    }
+        CSVParser tp = new CSVParser();
+        tp.importData(path + id + "/rip.txt", AUTOSENSE.CHEST_RIP);
+        tp.importData(path + id + "/ecg.txt", AUTOSENSE.CHEST_ECG);
+        tp.importData(path + id + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
+        tp.importData(path + id + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
+        tp.importData(path + id + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
+        tp.sort();
 
-    /**
-     * Iterate through all data streams and persist them to disk
-     *
-     * @param filebase Based directory where data streams are persisted
-     */
-    public void persist(String filebase) {
-        for (String key : datastreams.keySet()) {
-            datastreams.get(key).persist(filebase + datastreams.get(key).getName() + ".csv");
-        }
-    }
+        cStress stress = new cStress(60 * 1000, path, id);
 
-    /**
-     * Reset all data streams
-     */
-    public void reset() {
-        for (String key : datastreams.keySet()) {
-            datastreams.get(key).reset();
+        StressProbability output;
+        for (CSVDataPoint ap : tp) {
+            DataPoint dp = new DataPoint(ap.timestamp, ap.value);
+            output = stress.add(ap.channel, dp);
+            if (output != null) {
+                System.out.println(output.label + " " + output.probability);
+            }
         }
     }
 }

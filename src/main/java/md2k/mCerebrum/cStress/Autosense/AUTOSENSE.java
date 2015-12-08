@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Autosense;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -26,6 +26,10 @@ package md2k.mCerebrum.cStress.Autosense;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Static enumerations and configurable constants for the AutoSense platform
+ */
 public class AUTOSENSE {
 
     //Autosense hardware-specific constants
@@ -49,7 +53,6 @@ public class AUTOSENSE {
     public static final int STRESSED = 1;
 
     //Library signal processing constants
-    //TODO: These could be moved to a configuration file
     public static final double MED_CONSTANT = 4.5;
     public static final double MAD_CONSTANT = 2.8;
     public static final double CBD_THRESHOLD = 0.2;

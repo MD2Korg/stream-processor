@@ -1,26 +1,23 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Structs.CSVDataPoint;
-import md2k.mCerebrum.cStress.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Structs.StressProbability;
-import md2k.mCerebrum.cStress.cStress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,33 +31,26 @@ import md2k.mCerebrum.cStress.cStress;
  */
 public class Main {
 
+    /**
+     * Main driver class for replaying AutoSense data through cStress
+     * @param args Arguments to the program
+     */
     public static void main(String[] args) {
 
-        String path = "/Users/hnat/Downloads/processedrawdata/SI";
+        String path = args[0];
 
+
+        ExecutorService executor = Executors.newFixedThreadPool(4);
 
         for (int i = 1; i < 23; i++) {
-            String person = String.format("%02d", i);
-            CSVParser tp = new CSVParser();
-            tp.importData(path + person + "/rip.txt", AUTOSENSE.CHEST_RIP);
-            tp.importData(path + person + "/ecg.txt", AUTOSENSE.CHEST_ECG);
-            tp.importData(path + person + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
-            tp.importData(path + person + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
-            tp.importData(path + person + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
-
-            tp.sort();
-
-            cStress stress = new cStress(60 * 1000, "ecg_rip_accel_60_realtime.model", "ecg_rip_accel_60_realtime_meanstdev.dat", "SI" + person);
-
-            StressProbability output;
-            for (CSVDataPoint ap : tp) {
-                DataPoint dp = new DataPoint(ap.timestamp, ap.value);
-                output = stress.add(ap.channel, dp);
-                if (output != null) {
-                    System.out.println(output.label + " " + output.probability);
-                }
-            }
+            String person = "SI" + String.format("%02d", i);
+            Runnable worker = new WorkerThread(path, person);
+            executor.execute(worker);
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {
 
         }
+        System.out.println("Finished all threads");
     }
 }

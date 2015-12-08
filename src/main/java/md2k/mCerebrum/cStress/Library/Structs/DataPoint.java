@@ -1,6 +1,6 @@
-package md2k.mCerebrum.cStress.Structs;
+package md2k.mCerebrum.cStress.Library.Structs;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -26,7 +26,42 @@ package md2k.mCerebrum.cStress.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Lomb {
-        public double[] P;
-        public double[] f;
+
+/**
+ * Data Point class that most computations are based on
+ */
+public class DataPoint {
+    public double value;
+    public long timestamp;
+
+
+    /**
+     * DataPoint Constructor
+     *
+     * @param timestamp Time in milliseconds since Jan 1st, 1970
+     * @param value     Floating point value
+     */
+    public DataPoint(long timestamp, double value) {
+        this.value = value;
+        this.timestamp = timestamp;
     }
+
+
+    /**
+     * Copy Constructor
+     * @param other DataPointArray object
+     */
+    public DataPoint(DataPoint other) {
+        this.value = other.value;
+        this.timestamp = other.timestamp;
+    }
+
+
+    /**
+     * @return String representation of a DataPoint object
+     */
+    @Override
+    public String toString() {
+        return "DP:(" + this.timestamp + "," + this.value + ")";
+    }
+}

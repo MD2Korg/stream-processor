@@ -1,25 +1,25 @@
 package md2k.mCerebrum.cStress.Library;
 
-import md2k.mCerebrum.cStress.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,14 +31,18 @@ import java.util.List;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Support routines for handling vector computation
+ */
 public class Vector {
     /**
      * Convert inputs to a magnitude vector
      *
-     * @param x
-     * @param y
-     * @param z
-     * @return
+     * @param x X axis
+     * @param y Y axis
+     * @param z Z axis
+     * @return Magnitude of (x,y,z) tuple
      */
     public static double[] magnitude(DataPoint[] x, DataPoint[] y, DataPoint[] z) {
         double[] result = new double[Math.min(Math.min(x.length, y.length), z.length)];
@@ -51,8 +55,8 @@ public class Vector {
     /**
      * Compute a discrete derivative
      *
-     * @param dp
-     * @return
+     * @param dp DataPoint array
+     * @return Difference of each consecutive pair of DataPoints
      */
     public static ArrayList<DataPoint> diff(ArrayList<DataPoint> dp) {
         ArrayList<DataPoint> result = new ArrayList<DataPoint>();
