@@ -53,9 +53,9 @@ public class DataStreams {
      * @return DataPointStream
      */
     public DataStream get(String stream) {
-        if (!datastreams.containsKey(stream)) {
-            datastreams.put(stream, new DataStream(stream));
-        }
+//        if (!datastreams.containsKey(stream)) {
+//            datastreams.put(stream, new DataStream(stream));
+//        }
         return datastreams.get(stream);
     }
 

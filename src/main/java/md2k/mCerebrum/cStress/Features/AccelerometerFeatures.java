@@ -53,23 +53,23 @@ public class AccelerometerFeatures {
      */
     public AccelerometerFeatures(DataStreams datastreams, double ACTIVITY_THRESHOLD, int windowSize) {
         //Compute normalized accelerometer values
-        DataPointStream accelx = datastreams.get("org.md2k.cstress.data.accelx");
-        DataPointStream accelxNormalized = datastreams.get("org.md2k.cstress.data.accelx.normalized");
+        DataPointStream accelx = (DataPointStream) datastreams.get("org.md2k.cstress.data.accelx");
+        DataPointStream accelxNormalized = (DataPointStream) datastreams.get("org.md2k.cstress.data.accelx.normalized");
         Smoothing.normalize(accelxNormalized, accelx);
 
-        DataPointStream accely = datastreams.get("org.md2k.cstress.data.accely");
-        DataPointStream accelyNormalized = datastreams.get("org.md2k.cstress.data.accely.normalized");
+        DataPointStream accely = (DataPointStream) datastreams.get("org.md2k.cstress.data.accely");
+        DataPointStream accelyNormalized = (DataPointStream) datastreams.get("org.md2k.cstress.data.accely.normalized");
         Smoothing.normalize(accelyNormalized, accely);
 
-        DataPointStream accelz = datastreams.get("org.md2k.cstress.data.accelz");
-        DataPointStream accelzNormalized = datastreams.get("org.md2k.cstress.data.accelz.normalized");
+        DataPointStream accelz = (DataPointStream) datastreams.get("org.md2k.cstress.data.accelz");
+        DataPointStream accelzNormalized = (DataPointStream) datastreams.get("org.md2k.cstress.data.accelz.normalized");
         Smoothing.normalize(accelzNormalized, accelz);
 
 
         //Window accel data streams
-        ArrayList<DataPoint[]> segxWindowed = Time.window(datastreams.get("org.md2k.cstress.data.accelx").data, windowSize);
-        ArrayList<DataPoint[]> segyWindowed = Time.window(datastreams.get("org.md2k.cstress.data.accely").data, windowSize);
-        ArrayList<DataPoint[]> segzWindowed = Time.window(datastreams.get("org.md2k.cstress.data.accelz").data, windowSize);
+        ArrayList<DataPoint[]> segxWindowed = Time.window(((DataPointStream) datastreams.get("org.md2k.cstress.data.accelx")).data, windowSize);
+        ArrayList<DataPoint[]> segyWindowed = Time.window(((DataPointStream) datastreams.get("org.md2k.cstress.data.accely")).data, windowSize);
+        ArrayList<DataPoint[]> segzWindowed = Time.window(((DataPointStream) datastreams.get("org.md2k.cstress.data.accelz")).data, windowSize);
 
         try {
             //Compute magnitude and stdev from windowed datastreams
@@ -79,22 +79,22 @@ public class AccelerometerFeatures {
                 DataPoint[] wz = segzWindowed.get(i);
                 double[] magnitude = Vector.magnitude(wx, wy, wz);
                 for (int j = 0; j < magnitude.length; j++) {
-                    datastreams.get("org.md2k.cstress.data.accel.magnitude").add(new DataPoint(wx[j].timestamp, magnitude[j]));
+                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.accel.magnitude")).add(new DataPoint(wx[j].timestamp, magnitude[j]));
                 }
                 DescriptiveStatistics sd = new DescriptiveStatistics(magnitude);
 
                 if (wx.length > 0) {
-                    datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev").add(new DataPoint(wx[0].timestamp, sd.getStandardDeviation()));
+                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev")).add(new DataPoint(wx[0].timestamp, sd.getStandardDeviation()));
                 }
             }
 
 
             //Compute Activity from datastreams
-            double lowlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").getPercentile(1);
-            double highlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").getPercentile(99);
+            double lowlimit = ((DataPointStream) datastreams.get("org.md2k.cstress.data.accel.magnitude")).getPercentile(1);
+            double highlimit = ((DataPointStream) datastreams.get("org.md2k.cstress.data.accel.magnitude")).getPercentile(99);
             double range = highlimit - lowlimit;
 
-            DataPointStream stdmag = datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
+            DataPointStream stdmag = (DataPointStream) datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
 
             boolean[] activityOrNot = new boolean[stdmag.data.size()];
             for (int i = 0; i < stdmag.data.size(); i++) {
@@ -112,7 +112,7 @@ public class AccelerometerFeatures {
                 active = 1;
             }
 
-            datastreams.get("org.md2k.cstress.data.accel.activity").add(new DataPoint(datastreams.get("org.md2k.cstress.data.accelx").data.get(0).timestamp, active));
+            ((DataPointStream) datastreams.get("org.md2k.cstress.data.accel.activity")).add(new DataPoint(((DataPointStream) datastreams.get("org.md2k.cstress.data.accelx")).data.get(0).timestamp, active));
 
         } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();

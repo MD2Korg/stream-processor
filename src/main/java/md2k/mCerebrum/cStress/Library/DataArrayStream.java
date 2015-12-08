@@ -40,7 +40,7 @@ import java.util.HashMap;
 /**
  * DataArray version of the DataPointStream object
  */
-public class DataArrayStream extends DataStream implements DataStreamInterface{
+public class DataArrayStream extends DataStream{
 
     public ArrayList<DataPointArray> data;
 
@@ -80,6 +80,7 @@ public class DataArrayStream extends DataStream implements DataStreamInterface{
      * Persist the data stream to the local file system
      * @param filename File name and path where to append the data stream.
      */
+    @Override
     public void persist(String filename) {
         try {
             Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename, true), "utf-8"));
@@ -99,6 +100,7 @@ public class DataArrayStream extends DataStream implements DataStreamInterface{
     /**
      * Reset the data stream array for the next interval
      */
+    @Override
     public void reset() {
         if (!preserve) {
             data.clear();

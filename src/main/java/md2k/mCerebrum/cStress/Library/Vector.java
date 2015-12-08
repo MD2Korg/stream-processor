@@ -73,7 +73,7 @@ public class Vector {
         return Math.sqrt(x * x + y * y + z * z);
     }
 
-    public static void magnitude(DataStream gyr_mag, List<DataPoint> x, List<DataPoint> y, List<DataPoint> z) {
+    public static void magnitude(DataPointStream gyr_mag, List<DataPoint> x, List<DataPoint> y, List<DataPoint> z) {
         for (int i = 0; i < x.size(); i++) {
             double mag = getMagnitude(x.get(i).value, y.get(i).value, z.get(i).value);
             gyr_mag.add(new DataPoint(x.get(i).timestamp, mag));

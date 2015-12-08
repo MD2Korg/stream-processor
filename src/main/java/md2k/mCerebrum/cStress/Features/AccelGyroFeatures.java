@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Vector;
@@ -43,25 +43,25 @@ public class AccelGyroFeatures {
 
 //        String[] wristList = new String[]{PuffMarkerUtils.LEFT_WRIST, PuffMarkerUtils.RIGHT_WRIST};
 //        for (String wrist : wristList) {
-        DataStream gyrox = datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_X + wrist);
-        DataStream gyroy = datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_Y + wrist);
-        DataStream gyroz = datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_Z + wrist);
+        DataPointStream gyrox = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_X + wrist);
+        DataPointStream gyroy = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_Y + wrist);
+        DataPointStream gyroz = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_Z + wrist);
 
-        DataStream accelx = datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_X + wrist);
-        DataStream accely = datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_Y + wrist);
-        DataStream accelz = datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_Z + wrist);
+        DataPointStream accelx = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_X + wrist);
+        DataPointStream accely = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_Y + wrist);
+        DataPointStream accelz = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_Z + wrist);
 
-        DataStream gyr_mag = datastreams.get("org.md2k.cstress.data.gyr.mag" + wrist);
+        DataPointStream gyr_mag = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
         System.out.println("gyr_mag=" + gyr_mag.data.size());
 
-        DataStream gyr_mag_800 = datastreams.get("org.md2k.cstress.data.gyr.mag800" + wrist);
+        DataPointStream gyr_mag_800 = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag800" + wrist);
         Smoothing.smooth(gyr_mag_800, gyr_mag, PuffMarkerUtils.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
-        DataStream gyr_mag_8000 = datastreams.get("org.md2k.cstress.data.gyr.mag8000" + wrist);
+        DataPointStream gyr_mag_8000 = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag8000" + wrist);
         Smoothing.smooth(gyr_mag_8000, gyr_mag, PuffMarkerUtils.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
 
-        DataStream roll = datastreams.get("org.md2k.cstress.data.roll" + wrist);
-        DataStream pitch = datastreams.get("org.md2k.cstress.data.pitch" + wrist);
+        DataPointStream roll = (DataPointStream) datastreams.get("org.md2k.cstress.data.roll" + wrist);
+        DataPointStream pitch = (DataPointStream) datastreams.get("org.md2k.cstress.data.pitch" + wrist);
         //TODO: add yew
 
         if (PuffMarkerUtils.LEFT_WRIST.equals(wrist))
@@ -69,7 +69,7 @@ public class AccelGyroFeatures {
         else
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, 1);
 
-        DataStream gyr_intersections = datastreams.get("org.md2k.cstress.data.gyr.intersections" + wrist);
+        DataPointStream gyr_intersections = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.intersections" + wrist);
 
         int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
         System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
@@ -80,8 +80,8 @@ public class AccelGyroFeatures {
     /*
         segmenting those part where slow moving avg is greater than fast moving avg
     */
-    public static int[] segmentationUsingTwoMovingAverage(DataStream output, DataStream slowMovingAverage
-            , DataStream fastMovingAverage
+    public static int[] segmentationUsingTwoMovingAverage(DataPointStream output, DataPointStream slowMovingAverage
+            , DataPointStream fastMovingAverage
             , int THRESHOLD, int near) {
         int[] indexList = new int[slowMovingAverage.data.size()];
         int curIndex = 0;
@@ -111,7 +111,7 @@ public class AccelGyroFeatures {
         return intersectionIndex;
     }
 
-    private void calculateRollPitchSegment(DataStream rolls, DataStream pitchs, DataStream accelx, DataStream accely, DataStream accelz, int sign) {
+    private void calculateRollPitchSegment(DataPointStream rolls, DataPointStream pitchs, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
         for (int i = 0; i < accelx.data.size(); i++) {
             double rll = roll(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
             double ptch = pitch(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
