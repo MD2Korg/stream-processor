@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Autosense;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -26,17 +26,35 @@ package md2k.mCerebrum.cStress.Autosense;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * AutoSense packet definition
+ */
 public class AUTOSENSE_PACKET {
 
-    public long timestamp; //Packet timestamp as recorded by the Android phone
-    public int channelID; //Channel ID from Autosense
-    public int[] data; //Data array of 5 samples
+    /**
+     * Timestamp in milliseconds.
+     * <p>
+     * Packet timestamp as recorded by the Android phone
+     */
+    public long timestamp;
 
     /**
-     * Constructor
-     * @param timestamp
-     * @param channelID
-     * @param data
+     * AutoSense channel identification
+     */
+    public int channelID;
+
+    /**
+     * Data array of 5 samples
+     */
+    public int[] data;
+
+    /**
+     * Populates timestamp, channelID, and data array
+     *
+     * @param timestamp Timestamp in milliseconds since Jan 1st, 1970
+     * @param channelID AutoSense sensor channel identification
+     * @param data      Array of data values (5 entries is typical)
      */
     public AUTOSENSE_PACKET(long timestamp, int channelID, int[] data) {
         this.timestamp = timestamp;

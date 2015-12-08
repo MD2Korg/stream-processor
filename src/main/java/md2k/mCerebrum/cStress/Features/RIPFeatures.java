@@ -1,28 +1,30 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Library.*;
+import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Vector;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,11 +36,16 @@ import java.util.ArrayList;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Respiration feature computation class
+ */
 public class RIPFeatures {
     /**
      * Core Respiration Features
      * Reference: ripFeature_Extraction.m
      *
+     * @param datastreams Global data stream object
      */
     public RIPFeatures(DataStreams datastreams) {
 
@@ -81,7 +88,7 @@ public class RIPFeatures {
 
         DataStream valleysFiltered = datastreams.get("org.md2k.cstress.data.rip.valleys.filtered");
         DataStream peaksFiltered = datastreams.get("org.md2k.cstress.data.rip.peaks.filtered");
-        filterPeaksAndValleys(peaksFiltered,valleysFiltered,respirationDuration,inspirationAmplitude,peaks, valleys, meanInspirationAmplitude);
+        filterPeaksAndValleys(peaksFiltered, valleysFiltered, respirationDuration, inspirationAmplitude, peaks, valleys, meanInspirationAmplitude);
 
 
         //Key features
@@ -124,6 +131,19 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Filter peaks and valleys from data streams
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param peaksFiltered Filtered peaks output
+     * @param valleysFiltered Filtered valleys output
+     * @param respirationDuration Input respiration duration
+     * @param inspirationAmplitude Input inspiration amplitude
+     * @param peaks Peak datastream
+     * @param valleys Valley datastream
+     * @param meanInspirationAmplitude Average inspiration amplitude
+     */
     private void filterPeaksAndValleys(DataStream peaksFiltered, DataStream valleysFiltered, DataStream respirationDuration, DataStream inspirationAmplitude, DataStream peaks, DataStream valleys, double meanInspirationAmplitude) {
         try {
             for (int i1 = 0; i1 < respirationDuration.data.size(); i1++) {
@@ -141,6 +161,14 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Compute respiration duration from valley data stream
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param respirationDuration Output respiration durations
+     * @param valleys Input valley datastream
+     */
     private void generateRespirationDuration(DataStream respirationDuration, DataStream valleys) {
         try {
             for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
@@ -151,6 +179,16 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Compute inspiration amplitude from peaks and valleys
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param ia Inspiration amplitude datastream output
+     * @param peaks Input peak datastream
+     * @param valleys Input valleys datastream
+     * @return
+     */
     private double generateInspirationAmplitude(DataStream ia, DataStream peaks, DataStream valleys) {
         SummaryStatistics inspirationAmplitude = new SummaryStatistics();
         try {
@@ -165,6 +203,17 @@ public class RIPFeatures {
         return inspirationAmplitude.getMean();
     }
 
+
+    /**
+     * Compute valleys in a respiration datastream
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param valleys Output valley datastream
+     * @param upInterceptsFiltered1sect20 Up intercept datastream
+     * @param downInterceptsFiltered1sect20 Down insercept datastream
+     * @param rip_smooth Smoothed RIP datastream
+     */
     private void generateValleys(DataStream valleys, DataStream upInterceptsFiltered1sect20, DataStream downInterceptsFiltered1sect20, DataStream rip_smooth) {
         try {
             for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
@@ -178,6 +227,16 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Compute peaks in a respiration datastream
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param peaks Output valley datastream
+     * @param upInterceptsFiltered1sect20 Up intercept datastream
+     * @param downInterceptsFiltered1sect20 Down insercept datastream
+     * @param rip_smooth Smoothed RIP datastream
+     */
     private void generatePeaks(DataStream peaks, DataStream upInterceptsFiltered1sect20, DataStream downInterceptsFiltered1sect20, DataStream rip_smooth) {
         try {
             for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
@@ -191,6 +250,16 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Filter up and down intercepts based on 1/20 of a second
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param upInterceptsFiltered1sect20 Output filtered up intercepts
+     * @param downInterceptsFiltered1sect20 Output filtered down intercepts
+     * @param upInterceptsFiltered1sec Input up intercepts
+     * @param downInterceptsFiltered1sec Input down intercepts
+     */
     private void filtert20second(DataStream upInterceptsFiltered1sect20, DataStream downInterceptsFiltered1sect20, DataStream upInterceptsFiltered1sec, DataStream downInterceptsFiltered1sec) {
         try {
             if (downInterceptsFiltered1sec.data.size() > 0) {
@@ -207,6 +276,16 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Filter up and down intercepts based on 1 second window
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param upInterceptsFiltered1sec Output filtered up intercepts
+     * @param downInterceptsFiltered1sec Output filtered down intercepts
+     * @param upInterceptsFiltered Input up intercepts
+     * @param downInterceptsFiltered Input down intercepts
+     */
     private void filter1Second(DataStream upInterceptsFiltered1sec, DataStream downInterceptsFiltered1sec, DataStream upInterceptsFiltered, DataStream downInterceptsFiltered) {
         try {
             for (int i1 = 1; i1 < downInterceptsFiltered.data.size(); i1++) {
@@ -221,6 +300,16 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Filter up and down intercepts
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param upInterceptsFiltered Output filtered up intercepts
+     * @param downInterceptsFiltered Output filtered down intercepts
+     * @param upIntercepts Input up intercepts
+     * @param downIntercepts Input down intercepts
+     */
     private void filterIntercepts(DataStream upInterceptsFiltered, DataStream downInterceptsFiltered, DataStream upIntercepts, DataStream downIntercepts) {
         int upPointer = 0;
         int downPointer = 0;
@@ -261,6 +350,16 @@ public class RIPFeatures {
         }
     }
 
+    /**
+     * Compute up and down intercepts from RIP signal
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param upIntercepts Output up intercept datastream
+     * @param downIntercepts Output down intercept datastream
+     * @param rip_smooth Smoothed RIP datastream
+     * @param rip_mac RIP datastream
+     */
     private void generateIntercepts(DataStream upIntercepts, DataStream downIntercepts, DataStream rip_smooth, DataStream rip_mac) {
         for (int i1 = 1; i1 < rip_mac.data.size() - 1; i1++) {
             try {
@@ -276,16 +375,27 @@ public class RIPFeatures {
     }
 
 
+    /**
+     * Compute up and down intercepts from RIP signal
+     * <p>
+     *     Reference: Matlab code \\TODO
+     *     <a href="https://en.wikipedia.org/wiki/Vagal_tone#Relation_to_respiratory_sinus_arrhythmia">https://en.wikipedia.org/wiki/Vagal_tone#Relation_to_respiratory_sinus_arrhythmia</a>
+     * </p>
+     * @param starttime Beginning time of data window
+     * @param endtime Ending time of data window
+     * @param rrintervals Input rr-interval datastream
+     * @return Max - min of the ECG signal within the RSA window
+     */
     private DataPoint rsaCalculateCycle(long starttime, long endtime, DataStream rrintervals) {
-        DataPoint result = new DataPoint(starttime,-1.0);
+        DataPoint result = new DataPoint(starttime, -1.0);
 
-        DataPoint max = new DataPoint(0,0.0);
-        DataPoint min = new DataPoint(0,0.0);
+        DataPoint max = new DataPoint(0, 0.0);
+        DataPoint min = new DataPoint(0, 0.0);
         boolean maxFound = false;
         boolean minFound = false;
-        for(DataPoint dp: rrintervals.data) {
-            if(dp.timestamp > starttime && dp.timestamp < endtime) {
-                if(max.timestamp == 0 && min.timestamp == 0) {
+        for (DataPoint dp : rrintervals.data) {
+            if (dp.timestamp > starttime && dp.timestamp < endtime) {
+                if (max.timestamp == 0 && min.timestamp == 0) {
                     max = new DataPoint(dp);
                     min = new DataPoint(dp);
                 } else {
@@ -301,12 +411,22 @@ public class RIPFeatures {
             }
         }
 
-        if(maxFound && minFound) {
+        if (maxFound && minFound) {
             result.value = max.value - min.value; //RSA amplitude
         }
         return result;
     }
 
+    /**
+     * Identifies valleys in a datastream
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param downIntercept Down intercept DataPoint
+     * @param upIntercept Up intercept DataPoint
+     * @param data Input datastream
+     * @return Valley point from data located between the downIntercept and upIntercept
+     */
     private DataPoint findValley(DataPoint downIntercept, DataPoint upIntercept, DataStream data) {
         DataPoint result = new DataPoint(upIntercept);
 
@@ -358,6 +478,16 @@ public class RIPFeatures {
         return result;
     }
 
+    /**
+     * Identifies peaks in a datastream
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param downIntercept Down intercept DataPoint
+     * @param upIntercept Up intercept DataPoint
+     * @param data Input datastream
+     * @return Peak point from data located between the upIntercept and downIntercept
+     */
     public DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataStream data) {
 
         ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
@@ -366,7 +496,7 @@ public class RIPFeatures {
                 temp.add(data.data.get(i));
             }
         }
-        if(temp.size() > 0) {
+        if (temp.size() > 0) {
             DataPoint max = temp.get(0);
             for (int i = 0; i < temp.size(); i++) {
                 if (temp.get(i).value > max.value) {
@@ -376,7 +506,7 @@ public class RIPFeatures {
 
             return max;
         } else {
-            return new DataPoint(0,0.0);
+            return new DataPoint(0, 0.0);
         }
     }
 

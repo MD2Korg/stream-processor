@@ -10,11 +10,10 @@ import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Library.Structs.Lomb;
 
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -40,12 +39,21 @@ import java.util.Iterator;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+
+/**
+ * ECG feature computation class
+ */
 public class ECGFeatures {
 
+    /**
+     * ECG Constructor which handles feature computation.
+     *
+     * @param datastreams Global data stream object
+     */
     public ECGFeatures(DataStreams datastreams) {
 
         //Compute RR Intervals
-
         DataStream ECGstream = datastreams.get("org.md2k.cstress.data.ecg");
         double frequency = (Double) ECGstream.metadata.get("frequency");
 
@@ -60,19 +68,19 @@ public class ECGFeatures {
         double fl = AUTOSENSE.FL_INIT;
 
         DataStream y2 = datastreams.get("org.md2k.cstress.data.ecg.y2");
-        DataStream y2normalized =  datastreams.get("org.md2k.cstress.data.ecg.y2-normalized");
+        DataStream y2normalized = datastreams.get("org.md2k.cstress.data.ecg.y2-normalized");
         AutoSense.applyFilterNormalize(ECGstream, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
 
         DataStream y3 = datastreams.get("org.md2k.cstress.data.ecg.y3");
-        DataStream y3normalized =  datastreams.get("org.md2k.cstress.data.ecg.y3-normalized");
+        DataStream y3normalized = datastreams.get("org.md2k.cstress.data.ecg.y3-normalized");
         AutoSense.applyFilterNormalize(y2normalized, y3, y3normalized, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
 
         DataStream y4 = datastreams.get("org.md2k.cstress.data.ecg.y4");
-        DataStream y4normalized =  datastreams.get("org.md2k.cstress.data.ecg.y4-normalized");
+        DataStream y4normalized = datastreams.get("org.md2k.cstress.data.ecg.y4-normalized");
         AutoSense.applySquareFilterNormalize(y3normalized, y4, y4normalized, 90);
 
         DataStream y5 = datastreams.get("org.md2k.cstress.data.ecg.y5");
-        DataStream y5normalized =  datastreams.get("org.md2k.cstress.data.ecg.y5-normalized");
+        DataStream y5normalized = datastreams.get("org.md2k.cstress.data.ecg.y5-normalized");
         AutoSense.applyFilterNormalize(y4normalized, y5, y5normalized, Filter.blackman(window_l), 90);
 
 
@@ -84,10 +92,10 @@ public class ECGFeatures {
         filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream);
 
         DataStream Rpeak_temp2 = datastreams.get("org.md2k.cstress.data.ecg.peaks.temp2");
-        filterPeaksTemp2(Rpeak_temp2,Rpeak_temp1, frequency);
+        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
 
         DataStream rpeaks = datastreams.get("org.md2k.cstress.data.ecg.peaks.rpeaks");
-        filterRpeaks(rpeaks,Rpeak_temp2, peaks, frequency);
+        filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
 
         DataStream rr_value = datastreams.get("org.md2k.cstress.data.ecg.rr_value");
         computeRRValue(rr_value, rpeaks);
@@ -95,7 +103,7 @@ public class ECGFeatures {
         DataStream rr_value_diff = datastreams.get("org.md2k.cstress.data.ecg.rr_value_diff");
         DataStream validfilter_rr_interval = datastreams.get("org.md2k.cstress.data.ecg.validfilter_rr_value");
         DataStream rr_outlier = datastreams.get("org.md2k.cstress.data.ecg.outlier");
-        validRRinterval(rr_outlier, validfilter_rr_interval, rr_value_diff, rr_value );
+        validRRinterval(rr_outlier, validfilter_rr_interval, rr_value_diff, rr_value);
 
         DataStream rr_value_filtered = datastreams.get("org.md2k.cstress.data.ecg.rr_value.filtered");
         rpeakFilter(rr_value, rr_value_filtered, rr_outlier);
@@ -119,7 +127,7 @@ public class ECGFeatures {
                     rrDatapoints[i] = new DataPoint(i, datastreams.get("org.md2k.cstress.data.ecg.rr").data.get(i).value);
                 }
 
-                if(rrDatapoints.length > 0) {
+                if (rrDatapoints.length > 0) {
                     Lomb HRLomb = ECG.lomb(rrDatapoints);
 
                     double lfhf = ECG.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
@@ -146,6 +154,17 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Determine valid RR-intervals and outliers
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
+     *
+     * @param outlierresult     Output outlier datastream
+     * @param valid_rr_interval Output valid rr-interval datastream
+     * @param rr_value_diff     Output derivitive of rr-intervals datastream
+     * @param ds                Input datastream
+     */
     private void validRRinterval(DataStream outlierresult, DataStream valid_rr_interval, DataStream rr_value_diff, DataStream ds) {
         try {
             ArrayList<Integer> outlier = new ArrayList<Integer>();
@@ -221,6 +240,15 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Compute RR intervals in seconds
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
+     *
+     * @param rr_value Output rr-interval datastream
+     * @param rpeaks   Input r-peak datastream
+     */
     private void computeRRValue(DataStream rr_value, DataStream rpeaks) {
         try {
             for (int i1 = 0; i1 < rpeaks.data.size() - 1; i1++) {
@@ -231,6 +259,16 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Filter r-peaks
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
+     *
+     * @param rr_value          Input rr-value datastream
+     * @param rr_value_filtered Output filtered rr-value datastream
+     * @param rr_outlier        Input outlier identification of rr-interval datastream
+     */
     private void rpeakFilter(DataStream rr_value, DataStream rr_value_filtered, DataStream rr_outlier) {
         try {
             for (int i1 = 0; i1 < rr_value.data.size(); i1++) {
@@ -255,6 +293,17 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Filter r-peaks
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
+     *
+     * @param Rpeaks      output r-peak datastream
+     * @param Rpeak_temp2 Input temporary r-peak datastream
+     * @param peaks       Input peak datastream
+     * @param frequency   Sampling frequence
+     */
     private void filterRpeaks(DataStream Rpeaks, DataStream Rpeak_temp2, DataStream peaks, double frequency) {
         try {
             DataStream Rpeak_temp3 = new DataStream("temp3");
@@ -303,6 +352,16 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Filter r-peaks Temp 2
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
+     *
+     * @param Rpeak_temp2 Output datastream
+     * @param Rpeak_temp1 Input datastream
+     * @param frequency   Sampling frequency
+     */
     private void filterPeaksTemp2(DataStream Rpeak_temp2, DataStream Rpeak_temp1, double frequency) {
         try {
             Rpeak_temp2.data.addAll(Rpeak_temp1.data);
@@ -354,18 +413,33 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Filter r-peaks
+     * <p>
+     * Reference: Matlab code \\TODO
+     * </p>
+     * <p>
+     * <code>
+     * If CURRENTPEAK > THR_SIG, that location is identified as a ìQRS complex
+     * candidateî and the signal level (SIG_LEV) is updated:
+     * SIG _ LEV = 0.125 ◊CURRENTPEAK + 0.875◊ SIG _ LEV
+     * If THR_NOISE < CURRENTPEAK < THR_SIG, then that location is identified as a
+     * ìnoise peakî and the noise level (NOISE_LEV) is updated:
+     * NOISE _ LEV = 0.125◊CURRENTPEAK + 0.875◊ NOISE _ LEV
+     * Based on new estimates of the signal and noise levels (SIG_LEV and NOISE_LEV,
+     * respectively) at that point in the ECG, the thresholds are adjusted as follows:
+     * THR _ SIG = NOISE _ LEV + 0.25 ◊ (SIG _ LEV ? NOISE _ LEV )
+     * THR _ NOISE = 0.5◊ (THR _ SIG)
+     * </code>
+     * </p>
+     *
+     * @param rrAverage Output datastream
+     * @param temp1     Input temp datastream
+     * @param peaks     INput datastream
+     * @param ECG       Input ECG datastream
+     */
     private void filterPeaks(DataStream rrAverage, DataStream temp1, DataStream peaks, DataStream ECG) {
         try {
-            // If CURRENTPEAK > THR_SIG, that location is identified as a ìQRS complex
-            // candidateî and the signal level (SIG_LEV) is updated:
-            // SIG _ LEV = 0.125 ◊CURRENTPEAK + 0.875◊ SIG _ LEV
-            // If THR_NOISE < CURRENTPEAK < THR_SIG, then that location is identified as a
-            // ìnoise peakî and the noise level (NOISE_LEV) is updated:
-            // NOISE _ LEV = 0.125◊CURRENTPEAK + 0.875◊ NOISE _ LEV
-            // Based on new estimates of the signal and noise levels (SIG_LEV and NOISE_LEV,
-            // respectively) at that point in the ECG, the thresholds are adjusted as follows:
-            // THR _ SIG = NOISE _ LEV + 0.25 ◊ (SIG _ LEV ? NOISE _ LEV )
-            // THR _ NOISE = 0.5◊ (THR _ SIG)
 
             double thr1 = AUTOSENSE.THR1_INIT;
             double thr2 = 0.5 * thr1;
@@ -475,6 +549,14 @@ public class ECGFeatures {
         }
     }
 
+    /**
+     * Identfy peaks in the y5 nroamlized datastream
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param peaks Output datastream
+     * @param y5normalized Input datastream
+     */
     private void findpeaks(DataStream peaks, DataStream y5normalized) {
         try {
             for (int i = 2; i < y5normalized.data.size() - 2; i++) {
@@ -491,6 +573,15 @@ public class ECGFeatures {
     }
 
 
+    /**
+     * rr-ave (Average) update method
+     * <p>
+     *     Reference: Matlab code \\TODO
+     * </p>
+     * @param rpeak_temp1 Input datastream
+     * @param rr_ave Current rr average
+     * @return New rr average
+     */
     public DataPoint rr_ave_update(ArrayList<DataPoint> rpeak_temp1, DataStream rr_ave) { //TODO: Consider replacing this algorithm with something like and EWMA
         ArrayList<Long> peak_interval = new ArrayList<Long>();
         DataPoint result = new DataPoint(0, 0.0);

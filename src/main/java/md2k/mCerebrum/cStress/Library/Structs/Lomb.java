@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Library.Structs;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
@@ -26,7 +26,12 @@ package md2k.mCerebrum.cStress.Library.Structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * Data structure holding the results from Lomb-Scargle periodogram computation
+ * Reference: https://en.wikipedia.org/wiki/Least-squares_spectral_analysis#The_Lomb.E2.80.93Scargle_periodogram
+ */
 public class Lomb {
-        public double[] P;
-        public double[] f;
-    }
+    public double[] P;
+    public double[] f;
+}

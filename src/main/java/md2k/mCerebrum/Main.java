@@ -3,21 +3,21 @@ package md2k.mCerebrum;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,6 +31,10 @@ import java.util.concurrent.Executors;
  */
 public class Main {
 
+    /**
+     * Main driver class for replaying AutoSense data through cStress
+     * @param args Arguments to the program
+     */
     public static void main(String[] args) {
 
         String path = args[0];
@@ -39,12 +43,12 @@ public class Main {
         ExecutorService executor = Executors.newFixedThreadPool(4);
 
         for (int i = 1; i < 23; i++) {
-            String person = "SI"+String.format("%02d", i);
+            String person = "SI" + String.format("%02d", i);
             Runnable worker = new WorkerThread(path, person);
             executor.execute(worker);
         }
         executor.shutdown();
-        while(!executor.isTerminated()) {
+        while (!executor.isTerminated()) {
 
         }
         System.out.println("Finished all threads");

@@ -3,21 +3,21 @@ package md2k.mCerebrum.cStress.Library.SignalProcessing;
 import md2k.mCerebrum.cStress.Library.DataStream;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
-/**
+/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- * <p/>
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * <p/>
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- * <p/>
+ *
  * * Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- * <p/>
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,7 +29,20 @@ import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/**
+ * AutoSense specific signal processing algorithms.
+ */
 public class AutoSense {
+
+    /**
+     * Applies a filter and normalizes the result
+     * @param input Input DataStream
+     * @param output Output DataStream
+     * @param outputNormalized Output normalized DataStream
+     * @param filter Filter array
+     * @param normalizePercentile What percentile to utilize for normalization
+     */
     public static void applyFilterNormalize(DataStream input, DataStream output, DataStream outputNormalized, double[] filter, int normalizePercentile) {
         double[] sample = new double[input.data.size()];
         for (int i = 0; i < sample.length; i++) {
@@ -47,14 +60,23 @@ public class AutoSense {
         }
     }
 
-    public static void applySquareFilterNormalize(DataStream input, DataStream output, DataStream outputNormalized, int normalizePercentile) {
+    /**
+     * Applies the filter (n^2) and normalizes the result
+     * @param input Input DataStream
+     * @param output Output DataStream
+     * @param outputNormalized Output normalized DataStream
+     * @param normalizePercentile What percentile to utilize for normalization
+     */
+    public static void applySquareFilterNormalize(DataStream input, DataStream output, DataStream outputNormalized,
+                                                  int normalizePercentile) {
         //Add value to datastream for computing percentiles
         for (int i = 0; i < input.data.size(); i++) {
             output.add(new DataPoint(input.data.get(i).timestamp, input.data.get(i).value * input.data.get(i).value));
         }
         //Normalized based on percentiles
         for (int i = 0; i < output.data.size(); i++) {
-            outputNormalized.add(new DataPoint(output.data.get(i).timestamp, output.data.get(i).value / output.getPercentile(normalizePercentile)));
+            outputNormalized.add(new DataPoint(output.data.get(i).timestamp, output.data.get(i).value
+                    / output.getPercentile(normalizePercentile)));
         }
     }
 }
