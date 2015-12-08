@@ -40,7 +40,6 @@ public class Main {
 
         String path = args[0];
 
-
         ExecutorService executor = Executors.newFixedThreadPool(4);
 
         for (int i = 1; i < 23; i++) {
@@ -49,9 +48,8 @@ public class Main {
             executor.execute(worker);
         }
         executor.shutdown();
-        while (!executor.isTerminated()) {
+        while (!executor.isTerminated()) ;
 
-        }
         System.out.println("Finished all threads");
     }
 }
