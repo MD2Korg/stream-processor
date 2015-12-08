@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Features;
 
-import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
@@ -53,16 +53,16 @@ public class AccelerometerFeatures {
      */
     public AccelerometerFeatures(DataStreams datastreams, double ACTIVITY_THRESHOLD, int windowSize) {
         //Compute normalized accelerometer values
-        DataStream accelx = datastreams.get("org.md2k.cstress.data.accelx");
-        DataStream accelxNormalized = datastreams.get("org.md2k.cstress.data.accelx.normalized");
+        DataPointStream accelx = datastreams.get("org.md2k.cstress.data.accelx");
+        DataPointStream accelxNormalized = datastreams.get("org.md2k.cstress.data.accelx.normalized");
         Smoothing.normalize(accelxNormalized, accelx);
 
-        DataStream accely = datastreams.get("org.md2k.cstress.data.accely");
-        DataStream accelyNormalized = datastreams.get("org.md2k.cstress.data.accely.normalized");
+        DataPointStream accely = datastreams.get("org.md2k.cstress.data.accely");
+        DataPointStream accelyNormalized = datastreams.get("org.md2k.cstress.data.accely.normalized");
         Smoothing.normalize(accelyNormalized, accely);
 
-        DataStream accelz = datastreams.get("org.md2k.cstress.data.accelz");
-        DataStream accelzNormalized = datastreams.get("org.md2k.cstress.data.accelz.normalized");
+        DataPointStream accelz = datastreams.get("org.md2k.cstress.data.accelz");
+        DataPointStream accelzNormalized = datastreams.get("org.md2k.cstress.data.accelz.normalized");
         Smoothing.normalize(accelzNormalized, accelz);
 
 
@@ -94,7 +94,7 @@ public class AccelerometerFeatures {
             double highlimit = datastreams.get("org.md2k.cstress.data.accel.magnitude").getPercentile(99);
             double range = highlimit - lowlimit;
 
-            DataStream stdmag = datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
+            DataPointStream stdmag = datastreams.get("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
 
             boolean[] activityOrNot = new boolean[stdmag.data.size()];
             for (int i = 0; i < stdmag.data.size(); i++) {

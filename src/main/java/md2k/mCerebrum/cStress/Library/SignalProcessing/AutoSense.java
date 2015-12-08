@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Library.SignalProcessing;
 
-import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
 /*
@@ -37,13 +37,13 @@ public class AutoSense {
 
     /**
      * Applies a filter and normalizes the result
-     * @param input Input DataStream
-     * @param output Output DataStream
-     * @param outputNormalized Output normalized DataStream
+     * @param input Input DataPointStream
+     * @param output Output DataPointStream
+     * @param outputNormalized Output normalized DataPointStream
      * @param filter Filter array
      * @param normalizePercentile What percentile to utilize for normalization
      */
-    public static void applyFilterNormalize(DataStream input, DataStream output, DataStream outputNormalized, double[] filter, int normalizePercentile) {
+    public static void applyFilterNormalize(DataPointStream input, DataPointStream output, DataPointStream outputNormalized, double[] filter, int normalizePercentile) {
         double[] sample = new double[input.data.size()];
         for (int i = 0; i < sample.length; i++) {
             sample[i] = input.data.get(i).value;
@@ -62,12 +62,12 @@ public class AutoSense {
 
     /**
      * Applies the filter (n^2) and normalizes the result
-     * @param input Input DataStream
-     * @param output Output DataStream
-     * @param outputNormalized Output normalized DataStream
+     * @param input Input DataPointStream
+     * @param output Output DataPointStream
+     * @param outputNormalized Output normalized DataPointStream
      * @param normalizePercentile What percentile to utilize for normalization
      */
-    public static void applySquareFilterNormalize(DataStream input, DataStream output, DataStream outputNormalized,
+    public static void applySquareFilterNormalize(DataPointStream input, DataPointStream output, DataPointStream outputNormalized,
                                                   int normalizePercentile) {
         //Add value to datastream for computing percentiles
         for (int i = 0; i < input.data.size(); i++) {

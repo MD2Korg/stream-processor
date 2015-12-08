@@ -38,13 +38,11 @@ import java.util.HashMap;
  */
 
 /**
- * DataArray version of the DataStream object
+ * DataArray version of the DataPointStream object
  */
-public class DataArrayStream {
+public class DataArrayStream extends DataStream implements DataStreamInterface{
 
-    public HashMap<String, Object> metadata;
     public ArrayList<DataPointArray> data;
-    public boolean preserve;
 
     /**
      * Constructor

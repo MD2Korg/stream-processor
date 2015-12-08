@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.Library.SignalProcessing;
 
-import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
 /*
@@ -43,7 +43,7 @@ public class Smoothing {
      * @param input  Input datastream object
      * @param output Output datastream object
      */
-    public static void normalize(DataStream output, DataStream input) {
+    public static void normalize(DataPointStream output, DataPointStream input) {
         for (DataPoint dp : input.data) {
             output.add(new DataPoint(dp.timestamp, (dp.value - input.getMean()) / input.getStandardDeviation()));
         }
@@ -59,7 +59,7 @@ public class Smoothing {
      * @param input  Input datastream object
      * @param n      Windows size
      */
-    public static void smooth(DataStream output, DataStream input, int n) {
+    public static void smooth(DataPointStream output, DataPointStream input, int n) {
         int windowSize = 1;
         double sum;
         for (int i = 0; i < input.data.size(); i++) {

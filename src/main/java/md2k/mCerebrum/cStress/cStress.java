@@ -4,15 +4,13 @@ import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
-import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.FeatureVector;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
 import md2k.mCerebrum.cStress.Library.Time;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import java.util.Date;
 
 
 /*
@@ -207,16 +205,16 @@ public class cStress {
             double ECG_RR_Interval_Variance = RRint.getVariance();
             double ECG_RR_Interval_Quartile_Deviation = (RRint.getPercentile(75) - RRint.getPercentile(25)) / 2.0;
 
-            DataStream lombLE = datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy");
+            DataPointStream lombLE = datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy");
             double ECG_RR_Interval_Low_Frequency_Energy = (lombLE.data.get(0).value - lombLE.stats.getMean()) / lombLE.stats.getStandardDeviation();
 
-            DataStream lombME = datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy");
+            DataPointStream lombME = datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy");
             double ECG_RR_Interval_Medium_Frequency_Energy = (lombME.data.get(0).value - lombME.stats.getMean()) / lombME.stats.getStandardDeviation();
 
-            DataStream lombHE = datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy");
+            DataPointStream lombHE = datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy");
             double ECG_RR_Interval_High_Frequency_Energy = (lombHE.data.get(0).value - lombHE.stats.getMean()) / lombHE.stats.getStandardDeviation();
 
-            DataStream lombLH = datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio");
+            DataPointStream lombLH = datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio");
             double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = (lombLH.data.get(0).value - lombLH.stats.getMean()) / lombLH.stats.getStandardDeviation();
 
             double ECG_RR_Interval_Mean = RRint.getMean();
@@ -296,13 +294,13 @@ public class cStress {
          /*
          *RIP - Breath-rate
          */
-            DataStream breathRate = datastreams.get("org.md2k.cstress.data.rip.BreathRate");
+            DataPointStream breathRate = datastreams.get("org.md2k.cstress.data.rip.BreathRate");
             double RIP_Breath_Rate = (breathRate.data.get(0).value - breathRate.stats.getMean()) / breathRate.stats.getStandardDeviation();
 
          /*
          *RIP - Inspiration Minute Volume
          */
-            DataStream minVent = datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation");
+            DataPointStream minVent = datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation");
             double RIP_Inspiration_Minute_Ventilation = (minVent.data.get(0).value - minVent.stats.getMean()) / minVent.stats.getStandardDeviation();
 
          /*

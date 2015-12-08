@@ -1,7 +1,7 @@
 package md2k.mCerebrum.cStress.Features;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Library.DataStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
@@ -50,44 +50,44 @@ public class RIPFeatures {
     public RIPFeatures(DataStreams datastreams) {
 
 
-        DataStream rip = datastreams.get("org.md2k.cstress.data.rip");
-        DataStream rip_smooth = datastreams.get("org.md2k.cstress.data.rip.smooth");
+        DataPointStream rip = datastreams.get("org.md2k.cstress.data.rip");
+        DataPointStream rip_smooth = datastreams.get("org.md2k.cstress.data.rip.smooth");
         Smoothing.smooth(rip_smooth, rip, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
 
         int windowLength = (int) Math.round(AUTOSENSE.WINDOW_LENGTH_SECS * (Double) datastreams.get("org.md2k.cstress.data.rip").metadata.get("frequency"));
-        DataStream rip_mac = datastreams.get("org.md2k.cstress.data.rip.mac");
+        DataPointStream rip_mac = datastreams.get("org.md2k.cstress.data.rip.mac");
         Smoothing.smooth(rip_mac, rip_smooth, windowLength); //TWH: Replaced MAC with Smooth after discussion on 11/9/2015
 
-        DataStream upIntercepts = datastreams.get("org.md2k.cstress.data.rip.upIntercepts");
-        DataStream downIntercepts = datastreams.get("org.md2k.cstress.data.rip.downIntercepts");
+        DataPointStream upIntercepts = datastreams.get("org.md2k.cstress.data.rip.upIntercepts");
+        DataPointStream downIntercepts = datastreams.get("org.md2k.cstress.data.rip.downIntercepts");
         generateIntercepts(upIntercepts, downIntercepts, rip_smooth, rip_mac);
 
-        DataStream upInterceptsFiltered = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered");
-        DataStream downInterceptsFiltered = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered");
+        DataPointStream upInterceptsFiltered = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered");
+        DataPointStream downInterceptsFiltered = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered");
         filterIntercepts(upInterceptsFiltered, downInterceptsFiltered, upIntercepts, downIntercepts);
 
-        DataStream upInterceptsFiltered1sec = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec");
-        DataStream downInterceptsFiltered1sec = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec");
+        DataPointStream upInterceptsFiltered1sec = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec");
+        DataPointStream downInterceptsFiltered1sec = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec");
         filter1Second(upInterceptsFiltered1sec, downInterceptsFiltered1sec, upInterceptsFiltered, downInterceptsFiltered);
 
-        DataStream upInterceptsFiltered1sect20 = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec.t20");
-        DataStream downInterceptsFiltered1sect20 = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec.t20");
+        DataPointStream upInterceptsFiltered1sect20 = datastreams.get("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec.t20");
+        DataPointStream downInterceptsFiltered1sect20 = datastreams.get("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec.t20");
         filtert20second(upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, upInterceptsFiltered1sec, downInterceptsFiltered1sec);
 
-        DataStream peaks = datastreams.get("org.md2k.cstress.data.rip.peaks");
+        DataPointStream peaks = datastreams.get("org.md2k.cstress.data.rip.peaks");
         generatePeaks(peaks, upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, rip_smooth);
 
-        DataStream valleys = datastreams.get("org.md2k.cstress.data.rip.valleys");
+        DataPointStream valleys = datastreams.get("org.md2k.cstress.data.rip.valleys");
         generateValleys(valleys, upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, rip_smooth);
 
-        DataStream inspirationAmplitude = datastreams.get("org.md2k.cstress.data.rip.inspirationAmplitude");
+        DataPointStream inspirationAmplitude = datastreams.get("org.md2k.cstress.data.rip.inspirationAmplitude");
         double meanInspirationAmplitude = generateInspirationAmplitude(inspirationAmplitude, peaks, valleys);
 
-        DataStream respirationDuration = datastreams.get("org.md2k.cstress.data.rip.respirationDuration");
+        DataPointStream respirationDuration = datastreams.get("org.md2k.cstress.data.rip.respirationDuration");
         generateRespirationDuration(respirationDuration, valleys);
 
-        DataStream valleysFiltered = datastreams.get("org.md2k.cstress.data.rip.valleys.filtered");
-        DataStream peaksFiltered = datastreams.get("org.md2k.cstress.data.rip.peaks.filtered");
+        DataPointStream valleysFiltered = datastreams.get("org.md2k.cstress.data.rip.valleys.filtered");
+        DataPointStream peaksFiltered = datastreams.get("org.md2k.cstress.data.rip.peaks.filtered");
         filterPeaksAndValleys(peaksFiltered, valleysFiltered, respirationDuration, inspirationAmplitude, peaks, valleys, meanInspirationAmplitude);
 
 
@@ -144,7 +144,7 @@ public class RIPFeatures {
      * @param valleys Valley datastream
      * @param meanInspirationAmplitude Average inspiration amplitude
      */
-    private void filterPeaksAndValleys(DataStream peaksFiltered, DataStream valleysFiltered, DataStream respirationDuration, DataStream inspirationAmplitude, DataStream peaks, DataStream valleys, double meanInspirationAmplitude) {
+    private void filterPeaksAndValleys(DataPointStream peaksFiltered, DataPointStream valleysFiltered, DataPointStream respirationDuration, DataPointStream inspirationAmplitude, DataPointStream peaks, DataPointStream valleys, double meanInspirationAmplitude) {
         try {
             for (int i1 = 0; i1 < respirationDuration.data.size(); i1++) {
                 double duration = respirationDuration.data.get(i1).value / 1000.0;
@@ -169,7 +169,7 @@ public class RIPFeatures {
      * @param respirationDuration Output respiration durations
      * @param valleys Input valley datastream
      */
-    private void generateRespirationDuration(DataStream respirationDuration, DataStream valleys) {
+    private void generateRespirationDuration(DataPointStream respirationDuration, DataPointStream valleys) {
         try {
             for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
                 respirationDuration.add(new DataPoint(valleys.data.get(i1).timestamp, valleys.data.get(i1 + 1).timestamp - valleys.data.get(i1).timestamp));
@@ -189,7 +189,7 @@ public class RIPFeatures {
      * @param valleys Input valleys datastream
      * @return
      */
-    private double generateInspirationAmplitude(DataStream ia, DataStream peaks, DataStream valleys) {
+    private double generateInspirationAmplitude(DataPointStream ia, DataPointStream peaks, DataPointStream valleys) {
         SummaryStatistics inspirationAmplitude = new SummaryStatistics();
         try {
             for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
@@ -214,7 +214,7 @@ public class RIPFeatures {
      * @param downInterceptsFiltered1sect20 Down insercept datastream
      * @param rip_smooth Smoothed RIP datastream
      */
-    private void generateValleys(DataStream valleys, DataStream upInterceptsFiltered1sect20, DataStream downInterceptsFiltered1sect20, DataStream rip_smooth) {
+    private void generateValleys(DataPointStream valleys, DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream rip_smooth) {
         try {
             for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
                 DataPoint valley = findValley(downInterceptsFiltered1sect20.data.get(i1), upInterceptsFiltered1sect20.data.get(i1), rip_smooth);
@@ -237,7 +237,7 @@ public class RIPFeatures {
      * @param downInterceptsFiltered1sect20 Down insercept datastream
      * @param rip_smooth Smoothed RIP datastream
      */
-    private void generatePeaks(DataStream peaks, DataStream upInterceptsFiltered1sect20, DataStream downInterceptsFiltered1sect20, DataStream rip_smooth) {
+    private void generatePeaks(DataPointStream peaks, DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream rip_smooth) {
         try {
             for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
                 DataPoint peak = findPeak(upInterceptsFiltered1sect20.data.get(i1), downInterceptsFiltered1sect20.data.get(i1 + 1), rip_smooth);
@@ -260,7 +260,7 @@ public class RIPFeatures {
      * @param upInterceptsFiltered1sec Input up intercepts
      * @param downInterceptsFiltered1sec Input down intercepts
      */
-    private void filtert20second(DataStream upInterceptsFiltered1sect20, DataStream downInterceptsFiltered1sect20, DataStream upInterceptsFiltered1sec, DataStream downInterceptsFiltered1sec) {
+    private void filtert20second(DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream upInterceptsFiltered1sec, DataPointStream downInterceptsFiltered1sec) {
         try {
             if (downInterceptsFiltered1sec.data.size() > 0) {
                 downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(0));
@@ -286,7 +286,7 @@ public class RIPFeatures {
      * @param upInterceptsFiltered Input up intercepts
      * @param downInterceptsFiltered Input down intercepts
      */
-    private void filter1Second(DataStream upInterceptsFiltered1sec, DataStream downInterceptsFiltered1sec, DataStream upInterceptsFiltered, DataStream downInterceptsFiltered) {
+    private void filter1Second(DataPointStream upInterceptsFiltered1sec, DataPointStream downInterceptsFiltered1sec, DataPointStream upInterceptsFiltered, DataPointStream downInterceptsFiltered) {
         try {
             for (int i1 = 1; i1 < downInterceptsFiltered.data.size(); i1++) {
                 if ((downInterceptsFiltered.data.get(i1).timestamp - downInterceptsFiltered.data.get(i1 - 1).timestamp) > 1000.0) {
@@ -310,7 +310,7 @@ public class RIPFeatures {
      * @param upIntercepts Input up intercepts
      * @param downIntercepts Input down intercepts
      */
-    private void filterIntercepts(DataStream upInterceptsFiltered, DataStream downInterceptsFiltered, DataStream upIntercepts, DataStream downIntercepts) {
+    private void filterIntercepts(DataPointStream upInterceptsFiltered, DataPointStream downInterceptsFiltered, DataPointStream upIntercepts, DataPointStream downIntercepts) {
         int upPointer = 0;
         int downPointer = 0;
         boolean updownstate = true; //True check for up intercept
@@ -360,7 +360,7 @@ public class RIPFeatures {
      * @param rip_smooth Smoothed RIP datastream
      * @param rip_mac RIP datastream
      */
-    private void generateIntercepts(DataStream upIntercepts, DataStream downIntercepts, DataStream rip_smooth, DataStream rip_mac) {
+    private void generateIntercepts(DataPointStream upIntercepts, DataPointStream downIntercepts, DataPointStream rip_smooth, DataPointStream rip_mac) {
         for (int i1 = 1; i1 < rip_mac.data.size() - 1; i1++) {
             try {
                 if (rip_smooth.data.get(i1 - 1).value < rip_mac.data.get(i1).value && rip_smooth.data.get(i1 + 1).value > rip_mac.data.get(i1).value) {
@@ -386,7 +386,7 @@ public class RIPFeatures {
      * @param rrintervals Input rr-interval datastream
      * @return Max - min of the ECG signal within the RSA window
      */
-    private DataPoint rsaCalculateCycle(long starttime, long endtime, DataStream rrintervals) {
+    private DataPoint rsaCalculateCycle(long starttime, long endtime, DataPointStream rrintervals) {
         DataPoint result = new DataPoint(starttime, -1.0);
 
         DataPoint max = new DataPoint(0, 0.0);
@@ -427,7 +427,7 @@ public class RIPFeatures {
      * @param data Input datastream
      * @return Valley point from data located between the downIntercept and upIntercept
      */
-    private DataPoint findValley(DataPoint downIntercept, DataPoint upIntercept, DataStream data) {
+    private DataPoint findValley(DataPoint downIntercept, DataPoint upIntercept, DataPointStream data) {
         DataPoint result = new DataPoint(upIntercept);
 
         ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
@@ -488,7 +488,7 @@ public class RIPFeatures {
      * @param data Input datastream
      * @return Peak point from data located between the upIntercept and downIntercept
      */
-    public DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataStream data) {
+    public DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataPointStream data) {
 
         ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
         for (int i = 0; i < data.data.size(); i++) { //Identify potential data points
