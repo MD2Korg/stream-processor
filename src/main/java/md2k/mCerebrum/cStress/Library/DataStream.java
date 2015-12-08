@@ -8,6 +8,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -65,6 +66,13 @@ public class DataStream {
     public DataStream(String name, DataPoint[] data) {
         this(name);
         for(DataPoint dp: data) {
+            this.add(dp);
+        }
+    }
+
+    public DataStream(String name, List<DataPoint> dataPoints) {
+        this(name);
+        for(DataPoint dp: dataPoints) {
             this.add(dp);
         }
     }
