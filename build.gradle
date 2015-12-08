@@ -9,6 +9,5 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.+'
-    compile 'tw.edu.ntu.csie:libsvm:3.17'
     compile 'org.apache.commons:commons-math3:3.5'
 }

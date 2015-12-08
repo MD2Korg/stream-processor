@@ -16,3 +16,10 @@
 hs_err_pid*
 
 *.csv
+
+.idea/
+.gradle/
+build/
+gradle/
+gradlew
+gradlew.bat
