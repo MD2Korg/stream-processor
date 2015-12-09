@@ -58,8 +58,8 @@ public class Vector {
      * @param dp DataPoint array
      * @return Difference of each consecutive pair of DataPoints
      */
-    public static ArrayList<DataPoint> diff(ArrayList<DataPoint> dp) {
-        ArrayList<DataPoint> result = new ArrayList<DataPoint>();
+    public static List<DataPoint> diff(List<DataPoint> dp) {
+        List<DataPoint> result = new ArrayList<DataPoint>();
         if (dp.size() != 0) {
             for (int i = 0; i < dp.size() - 1; i++) {
                 result.add(new DataPoint(dp.get(i).timestamp, dp.get(i + 1).value - dp.get(i).value));

@@ -329,7 +329,7 @@ public class CoreTest {
 //
 //        int[] rawData = new int[] {3, 34, 64, 100, 130, 166, 202, 239, 277, 314, 350, 386, 421, 456};
 //
-//        ArrayList<Integer> inputData = new ArrayList<Integer>();
+//        List<Integer> inputData = new ArrayList<Integer>();
 //        for(int i: rawData) {
 //            inputData.add(i);
 //        }

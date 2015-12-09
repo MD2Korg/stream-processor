@@ -14,6 +14,7 @@ import md2k.mCerebrum.cStress.Library.Time;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /*
@@ -324,7 +325,7 @@ public class cStress {
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-            ArrayList<Double> featureVector = new ArrayList<Double>();
+            List<Double> featureVector = new ArrayList<Double>();
 
 
             featureVector.add(ECG_RR_Interval_Variance);// 1

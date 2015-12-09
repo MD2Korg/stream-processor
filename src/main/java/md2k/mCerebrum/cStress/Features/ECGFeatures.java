@@ -12,6 +12,7 @@ import md2k.mCerebrum.cStress.Library.Structs.Lomb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -167,7 +168,7 @@ public class ECGFeatures {
      */
     private void validRRinterval(DataPointStream outlierresult, DataPointStream valid_rr_interval, DataPointStream rr_value_diff, DataPointStream ds) {
         try {
-            ArrayList<Integer> outlier = new ArrayList<Integer>();
+            List<Integer> outlier = new ArrayList<Integer>();
 
             for (int i1 = 0; i1 < ds.data.size(); i1++) {
                 if (ds.data.get(i1).value > 0.3 && ds.data.get(i1).value < 2.0) {
@@ -370,14 +371,14 @@ public class ECGFeatures {
 
             while (!difference) {
                 int length_Rpeak_temp2 = Rpeak_temp2.data.size();
-                ArrayList<DataPoint> diffRpeak = new ArrayList<DataPoint>();
+                List<DataPoint> diffRpeak = new ArrayList<DataPoint>();
                 for (int j = 1; j < Rpeak_temp2.data.size(); j++) {
                     diffRpeak.add(new DataPoint(Rpeak_temp2.data.get(j).timestamp - Rpeak_temp2.data.get(j - 1).timestamp, Rpeak_temp2.data.get(j).value - Rpeak_temp2.data.get(j - 1).value));
                 }
 
-                ArrayList<DataPoint> comp1 = new ArrayList<DataPoint>();
-                ArrayList<DataPoint> comp2 = new ArrayList<DataPoint>();
-                ArrayList<Integer> eli_index = new ArrayList<Integer>();
+                List<DataPoint> comp1 = new ArrayList<DataPoint>();
+                List<DataPoint> comp2 = new ArrayList<DataPoint>();
+                List<Integer> eli_index = new ArrayList<Integer>();
 
                 for (int j = 0; j < diffRpeak.size(); j++) {
                     if (diffRpeak.get(j).timestamp < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER * frequency)) {
@@ -462,9 +463,9 @@ public class ECGFeatures {
 
 
             int c1 = 0;
-            ArrayList<Integer> c2 = new ArrayList<Integer>();
+            List<Integer> c2 = new ArrayList<Integer>();
 
-            ArrayList<DataPoint> Rpeak_temp1 = temp1.data;
+            List<DataPoint> Rpeak_temp1 = temp1.data;
 
 
             for (int i1 = 0; i1 < peaks.data.size(); i1++) {
@@ -490,8 +491,8 @@ public class ECGFeatures {
                     rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
                 } else {
                     if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
-                        ArrayList<Double> searchback_array_inrange = new ArrayList<Double>();
-                        ArrayList<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
+                        List<Double> searchback_array_inrange = new ArrayList<Double>();
+                        List<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
 
                         for (int j = c2.get(c1 - 1) + 1; j < i1 - 1; j++) {
                             if (peaks.data.get(i1).value < 3.0 * sig_lev && peaks.data.get(i1).value > thr2) {
@@ -584,8 +585,8 @@ public class ECGFeatures {
      * @param rr_ave      Current rr average
      * @return New rr average
      */
-    public DataPoint rr_ave_update(ArrayList<DataPoint> rpeak_temp1, DataPointStream rr_ave) { //TODO: Consider replacing this algorithm with something like and EWMA
-        ArrayList<Long> peak_interval = new ArrayList<Long>();
+    public DataPoint rr_ave_update(List<DataPoint> rpeak_temp1, DataPointStream rr_ave) { //TODO: Consider replacing this algorithm with something like and EWMA
+        List<Long> peak_interval = new ArrayList<Long>();
         DataPoint result = new DataPoint(0, 0.0);
         if (rpeak_temp1.size() != 0) {
             for (int i = 1; i < rpeak_temp1.size(); i++) {

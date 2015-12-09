@@ -162,7 +162,7 @@ public class RipQualityCalculation {
 
 //    public boolean computeQuality(DataPoint[] rip, int windowSize, double threshold) {
 //
-//        ArrayList<DataPoint[]> windowedRIP = window(rip, windowSize);
+//        List<DataPoint[]> windowedRIP = window(rip, windowSize);
 //
 //        double resultCount = 0;
 //

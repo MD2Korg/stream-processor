@@ -4,10 +4,7 @@ import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Scanner;
+import java.util.*;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -37,7 +34,7 @@ import java.util.Scanner;
  */
 public class CSVParser implements Iterable<CSVDataPoint> {
 
-    private final ArrayList<CSVDataPoint> data;
+    private final List<CSVDataPoint> data;
 
 
     public CSVParser() {
