@@ -174,7 +174,7 @@ public class cStress {
         DataPointArray fv = computeStressFeatures(datastreams);
 
         if (fv != null) {
-            DataArrayStream fvStream = (DataArrayStream) datastreams.get("org.md2k.cstress.fv");
+            DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
             fvStream.add(fv);
         }
 
@@ -324,7 +324,7 @@ public class cStress {
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-            ArrayList<Double> featureVector = new ArrayList<>();
+            ArrayList<Double> featureVector = new ArrayList<Double>();
 
 
             featureVector.add(ECG_RR_Interval_Variance);// 1

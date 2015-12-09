@@ -254,7 +254,7 @@ public class PuffMarker {
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-            ArrayList<Double> featureVector = new ArrayList<>();
+            ArrayList<Double> featureVector = new ArrayList<Double>();
 
 
 //            featureVector.add(ECG_RR_Interval_Variance);// 1
