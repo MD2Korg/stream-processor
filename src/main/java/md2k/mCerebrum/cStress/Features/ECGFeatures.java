@@ -109,49 +109,44 @@ public class ECGFeatures {
         DataPointStream rr_value_filtered = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value.filtered");
         rpeakFilter(rr_value, rr_value_filtered, rr_outlier);
 
-        try {
+        double activity = datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").data.get(0).value;
+        //Decide if we should add the RR intervals from this minute to the running stats
+        if (activity == 0.0) {
 
-            double activity = datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").data.get(0).value;
-            //Decide if we should add the RR intervals from this minute to the running stats
-            if (activity == 0.0) {
-
-                for (int i = 0; i < (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.size(); i++) {
-                    if (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.outlier").data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
-                        datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").add((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i));
-                        DataPoint hr = new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i).timestamp, 60.0 / (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i).value);
-                        datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.heartrate").add(hr);
-                    }
-                }
-
-                DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").data.size()];
-                for (int i = 0; i < rrDatapoints.length; i++) {
-                    rrDatapoints[i] = new DataPoint(i, datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").data.get(i).value);
-                }
-
-                if (rrDatapoints.length > 0) {
-                    Lomb HRLomb = ECG.lomb(rrDatapoints);
-
-                    double lfhf = ECG.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
-                    double lf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
-                    double mf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
-                    double hf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
-
-                    if (!Double.isInfinite(lfhf) && !Double.isNaN(lfhf)) {
-                        (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, lfhf));
-                    }
-                    if (!Double.isInfinite(lf) && !Double.isNaN(lf)) {
-                        (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, lf));
-                    }
-                    if (!Double.isInfinite(mf) && !Double.isNaN(mf)) {
-                        (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, mf));
-                    }
-                    if (!Double.isInfinite(hf) && !Double.isNaN(hf)) {
-                        (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, hf));
-                    }
+            for (int i = 0; i < (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.size(); i++) {
+                if (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.outlier").data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
+                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").add((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i));
+                    DataPoint hr = new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i).timestamp, 60.0 / (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i).value);
+                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.heartrate").add(hr);
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+
+            DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").data.size()];
+            for (int i = 0; i < rrDatapoints.length; i++) {
+                rrDatapoints[i] = new DataPoint(i, datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").data.get(i).value);
+            }
+
+            if (rrDatapoints.length > 0) {
+                Lomb HRLomb = ECG.lomb(rrDatapoints);
+
+                double lfhf = ECG.heartRateLFHF(HRLomb.P, HRLomb.f, 0.09, 0.15);
+                double lf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.1, 0.2);
+                double mf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.2, 0.3);
+                double hf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
+
+                if (!Double.isInfinite(lfhf) && !Double.isNaN(lfhf)) {
+                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, lfhf));
+                }
+                if (!Double.isInfinite(lf) && !Double.isNaN(lf)) {
+                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, lf));
+                }
+                if (!Double.isInfinite(mf) && !Double.isNaN(mf)) {
+                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, mf));
+                }
+                if (!Double.isInfinite(hf) && !Double.isNaN(hf)) {
+                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, hf));
+                }
+            }
         }
     }
 
@@ -167,77 +162,73 @@ public class ECGFeatures {
      * @param ds                Input datastream
      */
     private void validRRinterval(DataPointStream outlierresult, DataPointStream valid_rr_interval, DataPointStream rr_value_diff, DataPointStream ds) {
-        try {
-            List<Integer> outlier = new ArrayList<Integer>();
+        List<Integer> outlier = new ArrayList<Integer>();
 
-            for (int i1 = 0; i1 < ds.data.size(); i1++) {
-                if (ds.data.get(i1).value > 0.3 && ds.data.get(i1).value < 2.0) {
-                    valid_rr_interval.add(ds.data.get(i1));
-                }
+        for (int i1 = 0; i1 < ds.data.size(); i1++) {
+            if (ds.data.get(i1).value > 0.3 && ds.data.get(i1).value < 2.0) {
+                valid_rr_interval.add(ds.data.get(i1));
             }
+        }
 
-            for (int i1 = 1; i1 < valid_rr_interval.data.size(); i1++) {
-                rr_value_diff.add(new DataPoint(valid_rr_interval.data.get(i1).timestamp, Math.abs(valid_rr_interval.data.get(i1).value - valid_rr_interval.data.get(i1 - 1).value)));
-            }
+        for (int i1 = 1; i1 < valid_rr_interval.data.size(); i1++) {
+            rr_value_diff.add(new DataPoint(valid_rr_interval.data.get(i1).timestamp, Math.abs(valid_rr_interval.data.get(i1).value - valid_rr_interval.data.get(i1 - 1).value)));
+        }
 
-            double MED = AUTOSENSE.MED_CONSTANT * 0.5 * (rr_value_diff.getPercentile(75) - rr_value_diff.getPercentile(25));
-            double MAD = (valid_rr_interval.getPercentile(50) - AUTOSENSE.MAD_CONSTANT * 0.5 * (rr_value_diff.getPercentile(75) - rr_value_diff.getPercentile(25))) / 3.0;
-            double CBD = (MED + MAD) / 2.0;
-            if (CBD < AUTOSENSE.CBD_THRESHOLD) {
-                CBD = AUTOSENSE.CBD_THRESHOLD;
-            }
+        double MED = AUTOSENSE.MED_CONSTANT * 0.5 * (rr_value_diff.getPercentile(75) - rr_value_diff.getPercentile(25));
+        double MAD = (valid_rr_interval.getPercentile(50) - AUTOSENSE.MAD_CONSTANT * 0.5 * (rr_value_diff.getPercentile(75) - rr_value_diff.getPercentile(25))) / 3.0;
+        double CBD = (MED + MAD) / 2.0;
+        if (CBD < AUTOSENSE.CBD_THRESHOLD) {
+            CBD = AUTOSENSE.CBD_THRESHOLD;
+        }
 
-            for (DataPoint aSample : ds.data) {
-                outlier.add(AUTOSENSE.QUALITY_BAD);
-            }
-            outlier.set(0, AUTOSENSE.QUALITY_GOOD);
+        for (DataPoint aSample : ds.data) {
+            outlier.add(AUTOSENSE.QUALITY_BAD);
+        }
+        outlier.set(0, AUTOSENSE.QUALITY_GOOD);
 
-            double standard_rrInterval;
-            if (valid_rr_interval.data.size() > 0) {
-                standard_rrInterval = valid_rr_interval.data.get(0).value;
-            } else {
-                standard_rrInterval = valid_rr_interval.getMean();
-            }
-            boolean prev_beat_bad = false;
+        double standard_rrInterval;
+        if (valid_rr_interval.data.size() > 0) {
+            standard_rrInterval = valid_rr_interval.data.get(0).value;
+        } else {
+            standard_rrInterval = valid_rr_interval.getMean();
+        }
+        boolean prev_beat_bad = false;
 
-            for (int i1 = 1; i1 < valid_rr_interval.data.size() - 1; i1++) {
-                double ref = valid_rr_interval.data.get(i1).value;
-                if (ref > AUTOSENSE.REF_MINIMUM && ref < AUTOSENSE.REF_MAXIMUM) {
-                    double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rr_interval.data.get(i1).value);
-                    double beat_diff_pre = Math.abs(valid_rr_interval.data.get(i1 - 1).value - valid_rr_interval.data.get(i1).value);
-                    double beat_diff_post = Math.abs(valid_rr_interval.data.get(i1).value - valid_rr_interval.data.get(i1 + 1).value);
+        for (int i1 = 1; i1 < valid_rr_interval.data.size() - 1; i1++) {
+            double ref = valid_rr_interval.data.get(i1).value;
+            if (ref > AUTOSENSE.REF_MINIMUM && ref < AUTOSENSE.REF_MAXIMUM) {
+                double beat_diff_prevGood = Math.abs(standard_rrInterval - valid_rr_interval.data.get(i1).value);
+                double beat_diff_pre = Math.abs(valid_rr_interval.data.get(i1 - 1).value - valid_rr_interval.data.get(i1).value);
+                double beat_diff_post = Math.abs(valid_rr_interval.data.get(i1).value - valid_rr_interval.data.get(i1 + 1).value);
 
-                    if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
-                        for (int j = 0; j < ds.data.size(); j++) {
-                            if (ds.data.get(j).timestamp == valid_rr_interval.data.get(i1).timestamp) {
-                                outlier.set(j, AUTOSENSE.QUALITY_GOOD);
-                            }
+                if ((prev_beat_bad && beat_diff_prevGood < CBD) || (prev_beat_bad && beat_diff_prevGood > CBD && beat_diff_pre <= CBD && beat_diff_post <= CBD)) {
+                    for (int j = 0; j < ds.data.size(); j++) {
+                        if (ds.data.get(j).timestamp == valid_rr_interval.data.get(i1).timestamp) {
+                            outlier.set(j, AUTOSENSE.QUALITY_GOOD);
                         }
-                        prev_beat_bad = false;
-                        standard_rrInterval = valid_rr_interval.data.get(i1).value;
-                    } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
-                        prev_beat_bad = true;
-                    } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
-                        for (int j = 0; j < ds.data.size(); j++) {
-                            if (ds.data.get(j).timestamp == valid_rr_interval.data.get(i1).timestamp) {
-                                outlier.set(j, AUTOSENSE.QUALITY_GOOD);
-                            }
-                        }
-                        prev_beat_bad = false;
-                        standard_rrInterval = valid_rr_interval.data.get(i1).value;
-                    } else if (!prev_beat_bad && beat_diff_pre > CBD) {
-                        prev_beat_bad = true;
                     }
-
+                    prev_beat_bad = false;
+                    standard_rrInterval = valid_rr_interval.data.get(i1).value;
+                } else if (prev_beat_bad && beat_diff_prevGood > CBD && (beat_diff_pre > CBD || beat_diff_post > CBD)) {
+                    prev_beat_bad = true;
+                } else if (!prev_beat_bad && beat_diff_pre <= CBD) {
+                    for (int j = 0; j < ds.data.size(); j++) {
+                        if (ds.data.get(j).timestamp == valid_rr_interval.data.get(i1).timestamp) {
+                            outlier.set(j, AUTOSENSE.QUALITY_GOOD);
+                        }
+                    }
+                    prev_beat_bad = false;
+                    standard_rrInterval = valid_rr_interval.data.get(i1).value;
+                } else if (!prev_beat_bad && beat_diff_pre > CBD) {
+                    prev_beat_bad = true;
                 }
+
             }
+        }
 
 
-            for (int i1 = 0; i1 < outlier.size(); i1++) {
-                outlierresult.add(new DataPoint(ds.data.get(i1).timestamp, outlier.get(i1)));
-            }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+        for (int i1 = 0; i1 < outlier.size(); i1++) {
+            outlierresult.add(new DataPoint(ds.data.get(i1).timestamp, outlier.get(i1)));
         }
     }
 
@@ -251,13 +242,10 @@ public class ECGFeatures {
      * @param rpeaks   Input r-peak datastream
      */
     private void computeRRValue(DataPointStream rr_value, DataPointStream rpeaks) {
-        try {
-            for (int i1 = 0; i1 < rpeaks.data.size() - 1; i1++) {
-                rr_value.add(new DataPoint(rpeaks.data.get(i1).timestamp, (rpeaks.data.get(i1 + 1).timestamp - rpeaks.data.get(i1).timestamp) / 1000.0));
-            }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+        for (int i1 = 0; i1 < rpeaks.data.size() - 1; i1++) {
+            rr_value.add(new DataPoint(rpeaks.data.get(i1).timestamp, (rpeaks.data.get(i1 + 1).timestamp - rpeaks.data.get(i1).timestamp) / 1000.0));
         }
+
     }
 
     /**
@@ -271,26 +259,22 @@ public class ECGFeatures {
      * @param rr_outlier        Input outlier identification of rr-interval datastream
      */
     private void rpeakFilter(DataPointStream rr_value, DataPointStream rr_value_filtered, DataPointStream rr_outlier) {
-        try {
-            for (int i1 = 0; i1 < rr_value.data.size(); i1++) {
-                if (rr_outlier.data.get(i1).value == AUTOSENSE.QUALITY_GOOD) {
-                    rr_value_filtered.add(rr_value.data.get(i1));
-                }
+        for (int i1 = 0; i1 < rr_value.data.size(); i1++) {
+            if (rr_outlier.data.get(i1).value == AUTOSENSE.QUALITY_GOOD) {
+                rr_value_filtered.add(rr_value.data.get(i1));
             }
+        }
 
-            double mu = rr_value_filtered.getMean();
-            double sigma = rr_value_filtered.getStandardDeviation();
-            for (int i1 = 0; i1 < rr_outlier.data.size(); i1++) {
-                if (rr_outlier.data.get(i1).value == AUTOSENSE.QUALITY_GOOD) {
-                    if (Math.abs(rr_value.data.get(i1).value - mu) > (3.0 * sigma)) {
-                        rr_outlier.data.get(i1).value = AUTOSENSE.QUALITY_NOISE;
-                    } else {
-                        rr_outlier.data.get(i1).value = AUTOSENSE.QUALITY_GOOD;
-                    }
+        double mu = rr_value_filtered.getMean();
+        double sigma = rr_value_filtered.getStandardDeviation();
+        for (int i1 = 0; i1 < rr_outlier.data.size(); i1++) {
+            if (rr_outlier.data.get(i1).value == AUTOSENSE.QUALITY_GOOD) {
+                if (Math.abs(rr_value.data.get(i1).value - mu) > (3.0 * sigma)) {
+                    rr_outlier.data.get(i1).value = AUTOSENSE.QUALITY_NOISE;
+                } else {
+                    rr_outlier.data.get(i1).value = AUTOSENSE.QUALITY_GOOD;
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
     }
 
@@ -306,50 +290,46 @@ public class ECGFeatures {
      * @param frequency   Sampling frequence
      */
     private void filterRpeaks(DataPointStream Rpeaks, DataPointStream Rpeak_temp2, DataPointStream peaks, double frequency) {
-        try {
-            DataPointStream Rpeak_temp3 = new DataPointStream("temp3");
-            if (Rpeak_temp2.data.size() > 0) {
-                Rpeak_temp3.add(Rpeak_temp2.data.get(0));
+        DataPointStream Rpeak_temp3 = new DataPointStream("temp3");
+        if (Rpeak_temp2.data.size() > 0) {
+            Rpeak_temp3.add(Rpeak_temp2.data.get(0));
 
 
-                for (int k = 1; k < Rpeak_temp2.data.size() - 1; k++) {
-                    double maxValue = -1e9;
+            for (int k = 1; k < Rpeak_temp2.data.size() - 1; k++) {
+                double maxValue = -1e9;
 
 
-                    double peaktime = Rpeak_temp2.data.get(k).timestamp;
-                    int windowStart = 0;
-                    int windowStop = peaks.data.size();
-                    for (int i1 = 0; i1 < peaks.data.size(); i1++) {
-                        if (peaks.data.get(i1).timestamp < (peaktime - (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR))) {
-                            windowStart = i1;
-                        }
-                        if (peaks.data.get(i1).timestamp > (peaktime + (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR))) {
-                            windowStop = i1;
-                            break;
-                        }
+                double peaktime = Rpeak_temp2.data.get(k).timestamp;
+                int windowStart = 0;
+                int windowStop = peaks.data.size();
+                for (int i1 = 0; i1 < peaks.data.size(); i1++) {
+                    if (peaks.data.get(i1).timestamp < (peaktime - (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR))) {
+                        windowStart = i1;
                     }
-
-                    DataPoint maxDP = new DataPoint(0, 0.0);
-                    try {
-                        for (int j = windowStart + 1; j < windowStop; j++) {
-                            if (peaks.data.get(j).value > maxValue) {
-                                maxValue = peaks.data.get(j).value;
-                                maxDP = new DataPoint(peaks.data.get(j));
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        Rpeak_temp3.add(maxDP);
+                    if (peaks.data.get(i1).timestamp > (peaktime + (int) Math.ceil(frequency / AUTOSENSE.RPEAK_BIN_FACTOR))) {
+                        windowStop = i1;
+                        break;
                     }
                 }
-            }
 
-            for (DataPoint dp : Rpeak_temp3.data) {
-                Rpeaks.add(new DataPoint(dp));
+                DataPoint maxDP = new DataPoint(0, 0.0);
+                try {
+                    for (int j = windowStart + 1; j < windowStop; j++) {
+                        if (peaks.data.get(j).value > maxValue) {
+                            maxValue = peaks.data.get(j).value;
+                            maxDP = new DataPoint(peaks.data.get(j));
+                        }
+                    }
+                } catch (Exception e) {
+                    //Do nothing here
+                } finally {
+                    Rpeak_temp3.add(maxDP);
+                }
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+        }
+
+        for (DataPoint dp : Rpeak_temp3.data) {
+            Rpeaks.add(new DataPoint(dp));
         }
     }
 
@@ -364,53 +344,49 @@ public class ECGFeatures {
      * @param frequency   Sampling frequency
      */
     private void filterPeaksTemp2(DataPointStream Rpeak_temp2, DataPointStream Rpeak_temp1, double frequency) {
-        try {
-            Rpeak_temp2.data.addAll(Rpeak_temp1.data);
+        Rpeak_temp2.data.addAll(Rpeak_temp1.data);
 
-            boolean difference = false;
+        boolean difference = false;
 
-            while (!difference) {
-                int length_Rpeak_temp2 = Rpeak_temp2.data.size();
-                List<DataPoint> diffRpeak = new ArrayList<DataPoint>();
-                for (int j = 1; j < Rpeak_temp2.data.size(); j++) {
-                    diffRpeak.add(new DataPoint(Rpeak_temp2.data.get(j).timestamp - Rpeak_temp2.data.get(j - 1).timestamp, Rpeak_temp2.data.get(j).value - Rpeak_temp2.data.get(j - 1).value));
-                }
-
-                List<DataPoint> comp1 = new ArrayList<DataPoint>();
-                List<DataPoint> comp2 = new ArrayList<DataPoint>();
-                List<Integer> eli_index = new ArrayList<Integer>();
-
-                for (int j = 0; j < diffRpeak.size(); j++) {
-                    if (diffRpeak.get(j).timestamp < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER * frequency)) {
-                        comp1.add(Rpeak_temp2.data.get(j));
-                        comp2.add(Rpeak_temp2.data.get(j + 1));
-                        if (comp1.get(comp1.size() - 1).value < comp2.get(comp2.size() - 1).value) {
-                            eli_index.add(0);
-                        } else {
-                            eli_index.add(1);
-                        }
-                    } else {
-                        eli_index.add(-999999);
-                    }
-                }
-
-                for (int j = 0; j < diffRpeak.size(); j++) {
-                    if (diffRpeak.get(j).timestamp < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER * frequency)) {
-                        Rpeak_temp2.data.set(j + eli_index.get(j), new DataPoint(0, -999999));
-                    }
-                }
-
-                for (Iterator<DataPoint> it = Rpeak_temp2.data.iterator(); it.hasNext(); ) {
-                    if (it.next().value == -999999) {
-                        it.remove();
-                    }
-                }
-
-                difference = (length_Rpeak_temp2 == Rpeak_temp2.data.size());
-
+        while (!difference) {
+            int length_Rpeak_temp2 = Rpeak_temp2.data.size();
+            List<DataPoint> diffRpeak = new ArrayList<DataPoint>();
+            for (int j = 1; j < Rpeak_temp2.data.size(); j++) {
+                diffRpeak.add(new DataPoint(Rpeak_temp2.data.get(j).timestamp - Rpeak_temp2.data.get(j - 1).timestamp, Rpeak_temp2.data.get(j).value - Rpeak_temp2.data.get(j - 1).value));
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+
+            List<DataPoint> comp1 = new ArrayList<DataPoint>();
+            List<DataPoint> comp2 = new ArrayList<DataPoint>();
+            List<Integer> eli_index = new ArrayList<Integer>();
+
+            for (int j = 0; j < diffRpeak.size(); j++) {
+                if (diffRpeak.get(j).timestamp < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER * frequency)) {
+                    comp1.add(Rpeak_temp2.data.get(j));
+                    comp2.add(Rpeak_temp2.data.get(j + 1));
+                    if (comp1.get(comp1.size() - 1).value < comp2.get(comp2.size() - 1).value) {
+                        eli_index.add(0);
+                    } else {
+                        eli_index.add(1);
+                    }
+                } else {
+                    eli_index.add(-999999);
+                }
+            }
+
+            for (int j = 0; j < diffRpeak.size(); j++) {
+                if (diffRpeak.get(j).timestamp < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER * frequency)) {
+                    Rpeak_temp2.data.set(j + eli_index.get(j), new DataPoint(0, -999999));
+                }
+            }
+
+            for (Iterator<DataPoint> it = Rpeak_temp2.data.iterator(); it.hasNext(); ) {
+                if (it.next().value == -999999) {
+                    it.remove();
+                }
+            }
+
+            difference = (length_Rpeak_temp2 == Rpeak_temp2.data.size());
+
         }
     }
 
@@ -440,113 +416,108 @@ public class ECGFeatures {
      * @param ECG       Input ECG datastream
      */
     private void filterPeaks(DataPointStream rrAverage, DataPointStream temp1, DataPointStream peaks, DataPointStream ECG) {
-        try {
+        double thr1 = AUTOSENSE.THR1_INIT;
+        double thr2 = 0.5 * thr1;
+        double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
+        double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
 
-            double thr1 = AUTOSENSE.THR1_INIT;
-            double thr2 = 0.5 * thr1;
-            double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
-            double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
+        DataPoint rr_ave;
 
-            DataPoint rr_ave;
-
-            if (rrAverage.stats.getN() == 0) {
-                rrAverage.setPreservedLastInsert(true);
-                double rr_avg = 0.0;
-                for (int i1 = 1; i1 < peaks.data.size(); i1++) {
-                    rr_avg += peaks.data.get(i1).value - peaks.data.get(i1 - 1).value;
-                }
-                rr_avg /= (peaks.data.size() - 1);
-                rr_ave = new DataPoint(ECG.data.get(0).timestamp, rr_avg);
-                rrAverage.add(rr_ave);
+        if (rrAverage.stats.getN() == 0) {
+            rrAverage.setPreservedLastInsert(true);
+            double rr_avg = 0.0;
+            for (int i1 = 1; i1 < peaks.data.size(); i1++) {
+                rr_avg += peaks.data.get(i1).value - peaks.data.get(i1 - 1).value;
             }
-            rr_ave = rrAverage.data.get(rrAverage.data.size() - 1);
+            rr_avg /= (peaks.data.size() - 1);
+            rr_ave = new DataPoint(ECG.data.get(0).timestamp, rr_avg);
+            rrAverage.add(rr_ave);
+        }
+        rr_ave = rrAverage.data.get(rrAverage.data.size() - 1);
 
 
-            int c1 = 0;
-            List<Integer> c2 = new ArrayList<Integer>();
+        int c1 = 0;
+        List<Integer> c2 = new ArrayList<Integer>();
 
-            List<DataPoint> Rpeak_temp1 = temp1.data;
+        List<DataPoint> Rpeak_temp1 = temp1.data;
 
 
-            for (int i1 = 0; i1 < peaks.data.size(); i1++) {
-                if (Rpeak_temp1.size() == 0) {
-                    if (peaks.data.get(i1).value > thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
-                        if (Rpeak_temp1.size() <= c1) {
-                            Rpeak_temp1.add(new DataPoint(0, 0.0));
+        for (int i1 = 0; i1 < peaks.data.size(); i1++) {
+            if (Rpeak_temp1.size() == 0) {
+                if (peaks.data.get(i1).value > thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                    if (Rpeak_temp1.size() <= c1) {
+                        Rpeak_temp1.add(new DataPoint(0, 0.0));
+                    }
+                    Rpeak_temp1.set(c1, peaks.data.get(i1));
+                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    if (c2.size() <= c1) {
+                        c2.add(0);
+                    }
+                    c2.set(c1, i1);
+                    c1 += 1;
+                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
+                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                }
+
+                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
+                thr2 = 0.5 * thr1; //TODO: Candidate for datastream
+
+                rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
+            } else {
+                if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
+                    List<Double> searchback_array_inrange = new ArrayList<Double>();
+                    List<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
+
+                    for (int j = c2.get(c1 - 1) + 1; j < i1 - 1; j++) {
+                        if (peaks.data.get(i1).value < 3.0 * sig_lev && peaks.data.get(i1).value > thr2) {
+                            searchback_array_inrange.add(peaks.data.get(i1).value);
+                            searchback_array_inrange_index.add(j - c2.get(c1 - 1));
                         }
-                        Rpeak_temp1.set(c1, peaks.data.get(i1));
-                        sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
-                        if (c2.size() <= c1) {
-                            c2.add(0);
-                        }
-                        c2.set(c1, i1);
-                        c1 += 1;
-                    } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                        noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                     }
 
-                    thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
-                    thr2 = 0.5 * thr1; //TODO: Candidate for datastream
-
-                    rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
-                } else {
-                    if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
-                        List<Double> searchback_array_inrange = new ArrayList<Double>();
-                        List<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
-
-                        for (int j = c2.get(c1 - 1) + 1; j < i1 - 1; j++) {
-                            if (peaks.data.get(i1).value < 3.0 * sig_lev && peaks.data.get(i1).value > thr2) {
-                                searchback_array_inrange.add(peaks.data.get(i1).value);
-                                searchback_array_inrange_index.add(j - c2.get(c1 - 1));
+                    if (searchback_array_inrange.size() > 0) {
+                        double searchback_max = searchback_array_inrange.get(0);
+                        int searchback_max_index = 0;
+                        for (int j = 0; j < searchback_array_inrange.size(); j++) {
+                            if (searchback_array_inrange.get(j) > searchback_max) {
+                                searchback_max = searchback_array_inrange.get(i1);
+                                searchback_max_index = j;
                             }
                         }
-
-                        if (searchback_array_inrange.size() > 0) {
-                            double searchback_max = searchback_array_inrange.get(0);
-                            int searchback_max_index = 0;
-                            for (int j = 0; j < searchback_array_inrange.size(); j++) {
-                                if (searchback_array_inrange.get(j) > searchback_max) {
-                                    searchback_max = searchback_array_inrange.get(i1);
-                                    searchback_max_index = j;
-                                }
-                            }
-                            if (Rpeak_temp1.size() >= c1) {
-                                Rpeak_temp1.add(new DataPoint(0, 0.0));
-                            }
-                            Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                            sig_lev = Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
-                            if (c1 >= c2.size()) {
-                                c2.add(0);
-                            }
-                            c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
-                            i1 = c2.get(c1 - 1) + 1;
-                            c1 += 1;
-                            thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                            thr2 = 0.5 * thr1;
-                            rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
-                            continue;
-                        }
-                    } else if (peaks.data.get(i1).value >= thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
                         if (Rpeak_temp1.size() >= c1) {
                             Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
-                        Rpeak_temp1.set(c1, peaks.data.get(i1));
-                        sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
-                        if (c2.size() <= c1) {
+                        Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
+                        sig_lev = Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                        if (c1 >= c2.size()) {
                             c2.add(0);
                         }
-                        c2.set(c1, i1);
+                        c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
+                        i1 = c2.get(c1 - 1) + 1;
                         c1 += 1;
-                    } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                        noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                        thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                        thr2 = 0.5 * thr1;
+                        rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
+                        continue;
                     }
-                    thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                    thr2 = 0.5 * thr1;
-                    rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
+                } else if (peaks.data.get(i1).value >= thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                    if (Rpeak_temp1.size() >= c1) {
+                        Rpeak_temp1.add(new DataPoint(0, 0.0));
+                    }
+                    Rpeak_temp1.set(c1, peaks.data.get(i1));
+                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    if (c2.size() <= c1) {
+                        c2.add(0);
+                    }
+                    c2.set(c1, i1);
+                    c1 += 1;
+                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
+                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
                 }
+                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
+                thr2 = 0.5 * thr1;
+                rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
     }
 
@@ -560,17 +531,13 @@ public class ECGFeatures {
      * @param y5normalized Input datastream
      */
     private void findpeaks(DataPointStream peaks, DataPointStream y5normalized) {
-        try {
-            for (int i = 2; i < y5normalized.data.size() - 2; i++) {
-                if (y5normalized.data.get(i - 2).value < y5normalized.data.get(i - 1).value &&
-                        y5normalized.data.get(i - 1).value < y5normalized.data.get(i).value &&
-                        y5normalized.data.get(i).value >= y5normalized.data.get(i + 1).value &&
-                        y5normalized.data.get(i + 1).value > y5normalized.data.get(i + 2).value) { //TODO: Why is this hard-coded to five samples to examine?
-                    peaks.add(new DataPoint(y5normalized.data.get(i)));
-                }
+        for (int i = 2; i < y5normalized.data.size() - 2; i++) {
+            if (y5normalized.data.get(i - 2).value < y5normalized.data.get(i - 1).value &&
+                    y5normalized.data.get(i - 1).value < y5normalized.data.get(i).value &&
+                    y5normalized.data.get(i).value >= y5normalized.data.get(i + 1).value &&
+                    y5normalized.data.get(i + 1).value > y5normalized.data.get(i + 2).value) { //TODO: Why is this hard-coded to five samples to examine?
+                peaks.add(new DataPoint(y5normalized.data.get(i)));
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
     }
 

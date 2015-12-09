@@ -93,43 +93,41 @@ public class RIPFeatures {
 
 
         //Key features
-        try {
-            double activity = datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").data.get(0).value;
-            if (activity == 0.0) {
-                for (int i = 0; i < valleys.data.size() - 1; i++) {
 
-                    datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).timestamp - valleys.data.get(i).timestamp));
-                    datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").add(new DataPoint(peaks.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - peaks.data.get(i).timestamp));
-                    datastreams.getDataPointStream("org.md2k.cstress.data.rip.respduration").add(new DataPoint(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - valleys.data.get(i).timestamp));
+        double activity = datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").data.get(0).value;
+        if (activity == 0.0) {
+            for (int i = 0; i < valleys.data.size() - 1; i++) {
 
-                    datastreams.getDataPointStream("org.md2k.cstress.data.rip.stretch").add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).value - valleys.data.get(i).value));
+                datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).timestamp - valleys.data.get(i).timestamp));
+                datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").add(new DataPoint(peaks.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - peaks.data.get(i).timestamp));
+                datastreams.getDataPointStream("org.md2k.cstress.data.rip.respduration").add(new DataPoint(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - valleys.data.get(i).timestamp));
 
-                    DataPoint inratio = datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").data.size() - 1);
-                    DataPoint exratio = datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").data.size() - 1);
+                datastreams.getDataPointStream("org.md2k.cstress.data.rip.stretch").add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).value - valleys.data.get(i).value));
 
-                    (datastreams.getDataPointStream("org.md2k.cstress.data.rip.IERatio")).add(new DataPoint(valleys.data.get(i).timestamp, inratio.value / exratio.value));
+                DataPoint inratio = datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").data.size() - 1);
+                DataPoint exratio = datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").data.size() - 1);
 
-                    DataPoint rsa = rsaCalculateCycle(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp, datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr"));
-                    if (rsa.value != -1.0) { //Only add if a valid value
-                        (datastreams.getDataPointStream("org.md2k.cstress.data.rip.RSA")).add(rsa);
-                    }
+                (datastreams.getDataPointStream("org.md2k.cstress.data.rip.IERatio")).add(new DataPoint(valleys.data.get(i).timestamp, inratio.value / exratio.value));
 
+                DataPoint rsa = rsaCalculateCycle(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp, datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr"));
+                if (rsa.value != -1.0) { //Only add if a valid value
+                    (datastreams.getDataPointStream("org.md2k.cstress.data.rip.RSA")).add(rsa);
                 }
 
-
-                (datastreams.getDataPointStream("org.md2k.cstress.data.rip.BreathRate")).add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.size() - 1).timestamp, valleys.data.size() - 1));
-
-                double minuteVentilation = 0.0;
-                for (int i = 0; i < valleys.data.size() - 1; i++) {
-                    minuteVentilation += (peaks.data.get(i).timestamp - valleys.data.get(i).timestamp) / 1000.0 * (peaks.data.get(i).value - valleys.data.get(i).value) / 2.0;
-                }
-                //minuteVentilation *= (valleys.data.size()-1); //TODO: Check with experts that this should not be there
-
-                (datastreams.getDataPointStream("org.md2k.cstress.data.rip.MinuteVentilation")).add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.size() - 1).timestamp, minuteVentilation));
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+
+
+            (datastreams.getDataPointStream("org.md2k.cstress.data.rip.BreathRate")).add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.size() - 1).timestamp, valleys.data.size() - 1));
+
+            double minuteVentilation = 0.0;
+            for (int i = 0; i < valleys.data.size() - 1; i++) {
+                minuteVentilation += (peaks.data.get(i).timestamp - valleys.data.get(i).timestamp) / 1000.0 * (peaks.data.get(i).value - valleys.data.get(i).value) / 2.0;
+            }
+            //minuteVentilation *= (valleys.data.size()-1); //TODO: Check with experts that this should not be there
+
+            (datastreams.getDataPointStream("org.md2k.cstress.data.rip.MinuteVentilation")).add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.size() - 1).timestamp, minuteVentilation));
         }
+
     }
 
     /**
@@ -147,20 +145,18 @@ public class RIPFeatures {
      * @param meanInspirationAmplitude Average inspiration amplitude
      */
     private void filterPeaksAndValleys(DataPointStream peaksFiltered, DataPointStream valleysFiltered, DataPointStream respirationDuration, DataPointStream inspirationAmplitude, DataPointStream peaks, DataPointStream valleys, double meanInspirationAmplitude) {
-        try {
-            for (int i1 = 0; i1 < respirationDuration.data.size(); i1++) {
-                double duration = respirationDuration.data.get(i1).value / 1000.0;
-                if (duration > 1.0 && duration < 12.0) { //Passes length test
-                    if (inspirationAmplitude.data.get(i1).value > (AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanInspirationAmplitude)) { //Passes amplitude test
-                        valleysFiltered.add(valleys.data.get(i1));
-                        peaksFiltered.add(peaks.data.get(i1));
-                    }
+
+        for (int i1 = 0; i1 < respirationDuration.data.size(); i1++) {
+            double duration = respirationDuration.data.get(i1).value / 1000.0;
+            if (duration > 1.0 && duration < 12.0) { //Passes length test
+                if (inspirationAmplitude.data.get(i1).value > (AUTOSENSE.INSPIRATION_EXPIRATION_AMPLITUDE_THRESHOLD_FACTOR * meanInspirationAmplitude)) { //Passes amplitude test
+                    valleysFiltered.add(valleys.data.get(i1));
+                    peaksFiltered.add(peaks.data.get(i1));
                 }
             }
-            valleysFiltered.add(valleys.data.get(valleys.data.size() - 1)); //Add last valley that was skipped by loop
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+        valleysFiltered.add(valleys.data.get(valleys.data.size() - 1)); //Add last valley that was skipped by loop
+
     }
 
     /**
@@ -173,13 +169,11 @@ public class RIPFeatures {
      * @param valleys             Input valley datastream
      */
     private void generateRespirationDuration(DataPointStream respirationDuration, DataPointStream valleys) {
-        try {
-            for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
-                respirationDuration.add(new DataPoint(valleys.data.get(i1).timestamp, valleys.data.get(i1 + 1).timestamp - valleys.data.get(i1).timestamp));
-            }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+
+        for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
+            respirationDuration.add(new DataPoint(valleys.data.get(i1).timestamp, valleys.data.get(i1 + 1).timestamp - valleys.data.get(i1).timestamp));
         }
+
     }
 
     /**
@@ -195,15 +189,13 @@ public class RIPFeatures {
      */
     private double generateInspirationAmplitude(DataPointStream ia, DataPointStream peaks, DataPointStream valleys) {
         SummaryStatistics inspirationAmplitude = new SummaryStatistics();
-        try {
-            for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
-                double inspAmp = (peaks.data.get(i1).value - valleys.data.get(i1).value);
-                ia.add(new DataPoint(valleys.data.get(i1).timestamp, inspAmp));
-                inspirationAmplitude.addValue(inspAmp);
-            }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
+
+        for (int i1 = 0; i1 < valleys.data.size() - 1; i1++) {
+            double inspAmp = (peaks.data.get(i1).value - valleys.data.get(i1).value);
+            ia.add(new DataPoint(valleys.data.get(i1).timestamp, inspAmp));
+            inspirationAmplitude.addValue(inspAmp);
         }
+
         return inspirationAmplitude.getMean();
     }
 
@@ -220,16 +212,14 @@ public class RIPFeatures {
      * @param rip_smooth                    Smoothed RIP datastream
      */
     private void generateValleys(DataPointStream valleys, DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream rip_smooth) {
-        try {
-            for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
-                DataPoint valley = findValley(downInterceptsFiltered1sect20.data.get(i1), upInterceptsFiltered1sect20.data.get(i1), rip_smooth);
-                if (valley.timestamp != 0) {
-                    valleys.add(valley);
-                }
+
+        for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
+            DataPoint valley = findValley(downInterceptsFiltered1sect20.data.get(i1), upInterceptsFiltered1sect20.data.get(i1), rip_smooth);
+            if (valley.timestamp != 0) {
+                valleys.add(valley);
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+
     }
 
     /**
@@ -244,16 +234,14 @@ public class RIPFeatures {
      * @param rip_smooth                    Smoothed RIP datastream
      */
     private void generatePeaks(DataPointStream peaks, DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream rip_smooth) {
-        try {
-            for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
-                DataPoint peak = findPeak(upInterceptsFiltered1sect20.data.get(i1), downInterceptsFiltered1sect20.data.get(i1 + 1), rip_smooth);
-                if (peak.timestamp != 0) {
-                    peaks.add(peak);
-                }
+
+        for (int i1 = 0; i1 < upInterceptsFiltered1sect20.data.size() - 1; i1++) {
+            DataPoint peak = findPeak(upInterceptsFiltered1sect20.data.get(i1), downInterceptsFiltered1sect20.data.get(i1 + 1), rip_smooth);
+            if (peak.timestamp != 0) {
+                peaks.add(peak);
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+
     }
 
     /**
@@ -268,19 +256,17 @@ public class RIPFeatures {
      * @param downInterceptsFiltered1sec    Input down intercepts
      */
     private void filtert20second(DataPointStream upInterceptsFiltered1sect20, DataPointStream downInterceptsFiltered1sect20, DataPointStream upInterceptsFiltered1sec, DataPointStream downInterceptsFiltered1sec) {
-        try {
-            if (downInterceptsFiltered1sec.data.size() > 0) {
-                downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(0));
-                for (int i1 = 0; i1 < upInterceptsFiltered1sec.data.size(); i1++) {
-                    if ((downInterceptsFiltered1sec.data.get(i1 + 1).timestamp - upInterceptsFiltered1sec.data.get(i1).timestamp) > (2.0 / 20.0)) {
-                        downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(i1 + 1));
-                        upInterceptsFiltered1sect20.add(upInterceptsFiltered1sec.data.get(i1));
-                    }
+
+        if (downInterceptsFiltered1sec.data.size() > 0) {
+            downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(0));
+            for (int i1 = 0; i1 < upInterceptsFiltered1sec.data.size(); i1++) {
+                if ((downInterceptsFiltered1sec.data.get(i1 + 1).timestamp - upInterceptsFiltered1sec.data.get(i1).timestamp) > (2.0 / 20.0)) {
+                    downInterceptsFiltered1sect20.add(downInterceptsFiltered1sec.data.get(i1 + 1));
+                    upInterceptsFiltered1sect20.add(upInterceptsFiltered1sec.data.get(i1));
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+
     }
 
     /**
@@ -295,17 +281,15 @@ public class RIPFeatures {
      * @param downInterceptsFiltered     Input down intercepts
      */
     private void filter1Second(DataPointStream upInterceptsFiltered1sec, DataPointStream downInterceptsFiltered1sec, DataPointStream upInterceptsFiltered, DataPointStream downInterceptsFiltered) {
-        try {
-            for (int i1 = 1; i1 < downInterceptsFiltered.data.size(); i1++) {
-                if ((downInterceptsFiltered.data.get(i1).timestamp - downInterceptsFiltered.data.get(i1 - 1).timestamp) > 1000.0) {
-                    downInterceptsFiltered1sec.add(downInterceptsFiltered.data.get(i1 - 1));
-                    upInterceptsFiltered1sec.add(upInterceptsFiltered.data.get(i1 - 1));
-                }
+
+        for (int i1 = 1; i1 < downInterceptsFiltered.data.size(); i1++) {
+            if ((downInterceptsFiltered.data.get(i1).timestamp - downInterceptsFiltered.data.get(i1 - 1).timestamp) > 1000.0) {
+                downInterceptsFiltered1sec.add(downInterceptsFiltered.data.get(i1 - 1));
+                upInterceptsFiltered1sec.add(upInterceptsFiltered.data.get(i1 - 1));
             }
-            downInterceptsFiltered1sec.add(downInterceptsFiltered.data.get(downInterceptsFiltered.data.size() - 1));
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+        downInterceptsFiltered1sec.add(downInterceptsFiltered.data.get(downInterceptsFiltered.data.size() - 1));
+
     }
 
     /**
@@ -324,39 +308,37 @@ public class RIPFeatures {
         int downPointer = 0;
         boolean updownstate = true; //True check for up intercept
 
-        try {
-            downInterceptsFiltered.add(downIntercepts.data.get(downPointer)); //Initialize with starting point
 
-            while (downPointer != downIntercepts.data.size() && upPointer != upIntercepts.data.size()) {
-                if (updownstate) { //Check for up intercept
-                    if (downIntercepts.data.get(downPointer).timestamp < upIntercepts.data.get(upPointer).timestamp) {
-                        //Replace down intercept
-                        downInterceptsFiltered.data.get(downInterceptsFiltered.data.size() - 1).timestamp = downIntercepts.data.get(downPointer).timestamp;
-                        downInterceptsFiltered.data.get(downInterceptsFiltered.data.size() - 1).value = downIntercepts.data.get(downPointer).value;
-                        downPointer++;
-                    } else {
-                        //Found up intercept
-                        upInterceptsFiltered.add(upIntercepts.data.get(upPointer));
-                        upPointer++;
-                        updownstate = false;
-                    }
-                } else { //Check for down intercept
-                    if (downIntercepts.data.get(downPointer).timestamp > upIntercepts.data.get(upPointer).timestamp) {
-                        //Replace up intercept
-                        upInterceptsFiltered.data.get(upInterceptsFiltered.data.size() - 1).timestamp = upIntercepts.data.get(upPointer).timestamp;
-                        upInterceptsFiltered.data.get(upInterceptsFiltered.data.size() - 1).value = upIntercepts.data.get(upPointer).value;
-                        upPointer++;
-                    } else {
-                        //Found down intercept
-                        downInterceptsFiltered.add(downIntercepts.data.get(downPointer));
-                        downPointer++;
-                        updownstate = true;
-                    }
+        downInterceptsFiltered.add(downIntercepts.data.get(downPointer)); //Initialize with starting point
+
+        while (downPointer != downIntercepts.data.size() && upPointer != upIntercepts.data.size()) {
+            if (updownstate) { //Check for up intercept
+                if (downIntercepts.data.get(downPointer).timestamp < upIntercepts.data.get(upPointer).timestamp) {
+                    //Replace down intercept
+                    downInterceptsFiltered.data.get(downInterceptsFiltered.data.size() - 1).timestamp = downIntercepts.data.get(downPointer).timestamp;
+                    downInterceptsFiltered.data.get(downInterceptsFiltered.data.size() - 1).value = downIntercepts.data.get(downPointer).value;
+                    downPointer++;
+                } else {
+                    //Found up intercept
+                    upInterceptsFiltered.add(upIntercepts.data.get(upPointer));
+                    upPointer++;
+                    updownstate = false;
+                }
+            } else { //Check for down intercept
+                if (downIntercepts.data.get(downPointer).timestamp > upIntercepts.data.get(upPointer).timestamp) {
+                    //Replace up intercept
+                    upInterceptsFiltered.data.get(upInterceptsFiltered.data.size() - 1).timestamp = upIntercepts.data.get(upPointer).timestamp;
+                    upInterceptsFiltered.data.get(upInterceptsFiltered.data.size() - 1).value = upIntercepts.data.get(upPointer).value;
+                    upPointer++;
+                } else {
+                    //Found down intercept
+                    downInterceptsFiltered.add(downIntercepts.data.get(downPointer));
+                    downPointer++;
+                    updownstate = true;
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+
     }
 
     /**
@@ -372,15 +354,13 @@ public class RIPFeatures {
      */
     private void generateIntercepts(DataPointStream upIntercepts, DataPointStream downIntercepts, DataPointStream rip_smooth, DataPointStream rip_mac) {
         for (int i1 = 1; i1 < rip_mac.data.size() - 1; i1++) {
-            try {
-                if (rip_smooth.data.get(i1 - 1).value < rip_mac.data.get(i1).value && rip_smooth.data.get(i1 + 1).value > rip_mac.data.get(i1).value) {
-                    upIntercepts.add(rip_mac.data.get(i1));
-                } else if (rip_smooth.data.get(i1 - 1).value > rip_mac.data.get(i1).value && rip_smooth.data.get(i1 + 1).value < rip_mac.data.get(i1).value) {
-                    downIntercepts.add(rip_mac.data.get(i1));
-                }
-            } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
+
+            if (rip_smooth.data.get(i1 - 1).value < rip_mac.data.get(i1).value && rip_smooth.data.get(i1 + 1).value > rip_mac.data.get(i1).value) {
+                upIntercepts.add(rip_mac.data.get(i1));
+            } else if (rip_smooth.data.get(i1 - 1).value > rip_mac.data.get(i1).value && rip_smooth.data.get(i1 + 1).value < rip_mac.data.get(i1).value) {
+                downIntercepts.add(rip_mac.data.get(i1));
             }
+
         }
     }
 
@@ -503,7 +483,7 @@ public class RIPFeatures {
      */
     public DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataPointStream data) {
 
-        List<DataPoint> temp = new ArrayList<DataPoint>();
+        ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
         for (int i = 0; i < data.data.size(); i++) { //Identify potential data points
             if (upIntercept.timestamp < data.data.get(i).timestamp && data.data.get(i).timestamp < downIntercept.timestamp) {
                 temp.add(data.data.get(i));
