@@ -4,6 +4,7 @@ import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -56,12 +57,12 @@ public class Time {
      * @param size Time window size in milliseconds
      * @return ArrayList of data split by size
      */
-    public static ArrayList<DataPoint[]> window(ArrayList<DataPoint> data, long size) {
-        ArrayList<DataPoint[]> result = new ArrayList<DataPoint[]>();
+    public static List<DataPoint[]> window(List<DataPoint> data, long size) {
+        List<DataPoint[]> result = new ArrayList<DataPoint[]>();
 
         if (data.size() > 0) {
             long startTime = nextEpochTimestamp(data.get(0).timestamp, size) - size; //Get next minute window and subtract a minute to arrive at the appropriate startTime
-            ArrayList<DataPoint> tempArray = new ArrayList<DataPoint>();
+            List<DataPoint> tempArray = new ArrayList<DataPoint>();
             DataPoint[] temp;
             for (DataPoint dp : data) {
                 if (dp.timestamp < startTime + size) {

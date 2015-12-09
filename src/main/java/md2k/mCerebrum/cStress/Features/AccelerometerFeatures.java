@@ -8,7 +8,7 @@ import md2k.mCerebrum.cStress.Library.Time;
 import md2k.mCerebrum.cStress.Library.Vector;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -67,9 +67,9 @@ public class AccelerometerFeatures {
 
 
         //Window accel data streams
-        ArrayList<DataPoint[]> segxWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accelx").data, windowSize);
-        ArrayList<DataPoint[]> segyWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accely").data, windowSize);
-        ArrayList<DataPoint[]> segzWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accelz").data, windowSize);
+        List<DataPoint[]> segxWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accelx").data, windowSize);
+        List<DataPoint[]> segyWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accely").data, windowSize);
+        List<DataPoint[]> segzWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accelz").data, windowSize);
 
         try {
             //Compute magnitude and stdev from windowed datastreams

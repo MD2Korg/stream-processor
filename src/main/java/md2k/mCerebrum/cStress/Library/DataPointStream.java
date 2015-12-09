@@ -45,7 +45,7 @@ import java.util.List;
  */
 public class DataPointStream extends DataStream {
 
-    public ArrayList<DataPoint> data;
+    public List<DataPoint> data;
 
     public SummaryStatistics stats;
     public DescriptiveStatistics descriptiveStats;

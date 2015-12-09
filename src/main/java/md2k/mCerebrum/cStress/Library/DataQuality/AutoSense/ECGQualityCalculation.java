@@ -144,7 +144,7 @@ public class ECGQualityCalculation {
 
 //    public boolean computeQuality(DataPoint[] ecg, int windowSize, double threshold) {
 //
-//        ArrayList<DataPoint[]> windowedECG = window(ecg, windowSize);
+//        List<DataPoint[]> windowedECG = window(ecg, windowSize);
 //
 //        int resultCount = 0;
 //

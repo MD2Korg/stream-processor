@@ -1,6 +1,7 @@
 package md2k.mCerebrum.cStress.Library.Structs;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -33,7 +34,7 @@ import java.util.ArrayList;
  * Array version of DataPoint
  */
 public class DataPointArray {
-    public ArrayList<Double> value;
+    public List<Double> value;
     public long timestamp;
 
 
@@ -43,7 +44,7 @@ public class DataPointArray {
      * @param timestamp Time in milliseconds since Jan 1st, 1970
      * @param value     Array of floating point values
      */
-    public DataPointArray(long timestamp, ArrayList<Double> value) {
+    public DataPointArray(long timestamp, List<Double> value) {
         this.value = new ArrayList<Double>(value);
         this.timestamp = timestamp;
     }

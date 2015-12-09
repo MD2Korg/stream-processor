@@ -9,6 +9,7 @@ import md2k.mCerebrum.cStress.Library.Vector;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -441,20 +442,20 @@ public class RIPFeatures {
     private DataPoint findValley(DataPoint downIntercept, DataPoint upIntercept, DataPointStream data) {
         DataPoint result = new DataPoint(upIntercept);
 
-        ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
+        List<DataPoint> temp = new ArrayList<DataPoint>();
         for (int i = 0; i < data.data.size(); i++) { //Identify potential data points
             if (downIntercept.timestamp < data.data.get(i).timestamp && data.data.get(i).timestamp < upIntercept.timestamp) {
                 temp.add(data.data.get(i));
             }
         }
         if (temp.size() > 1) {
-            ArrayList<DataPoint> diff = Vector.diff(temp);
+            List<DataPoint> diff = Vector.diff(temp);
             boolean positiveSlope = false;
             if (diff.get(0).value > 0) {
                 positiveSlope = true;
             }
 
-            ArrayList<Integer> localMinCandidates = new ArrayList<Integer>();
+            List<Integer> localMinCandidates = new ArrayList<Integer>();
             for (int i = 1; i < diff.size(); i++) {
                 if (positiveSlope) {
                     if (diff.get(i).value < 0) {
@@ -502,7 +503,7 @@ public class RIPFeatures {
      */
     public DataPoint findPeak(DataPoint upIntercept, DataPoint downIntercept, DataPointStream data) {
 
-        ArrayList<DataPoint> temp = new ArrayList<DataPoint>();
+        List<DataPoint> temp = new ArrayList<DataPoint>();
         for (int i = 0; i < data.data.size(); i++) { //Identify potential data points
             if (upIntercept.timestamp < data.data.get(i).timestamp && data.data.get(i).timestamp < downIntercept.timestamp) {
                 temp.add(data.data.get(i));

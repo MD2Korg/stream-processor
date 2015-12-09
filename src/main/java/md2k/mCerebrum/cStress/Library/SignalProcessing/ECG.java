@@ -9,6 +9,7 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -253,7 +254,7 @@ public class ECG {
      * @return Array containing the indexes of x that are cross mean
      */
     public static double[] crossing(DataPoint[] x, double mean) {
-        ArrayList<Double> crossings = new ArrayList<Double>();
+        List<Double> crossings = new ArrayList<Double>();
 
         for (int i = 0; i < x.length - 1; i++) {
             if ((x[i].value > mean && x[i + 1].value <= mean) || x[i].value < mean && x[i + 1].value >= mean) {
