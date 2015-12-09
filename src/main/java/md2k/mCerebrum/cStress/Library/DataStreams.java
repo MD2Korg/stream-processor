@@ -52,11 +52,26 @@ public class DataStreams {
      * @param stream String identifier of the stream to retrieve
      * @return DataPointStream
      */
-    public DataStream get(String stream) {
-//        if (!datastreams.containsKey(stream)) {
-//            datastreams.put(stream, new DataStream(stream));
-//        }
-        return datastreams.get(stream);
+    public DataPointStream getDataPointStream(String stream) {
+        if (!datastreams.containsKey(stream)) {
+            datastreams.put(stream, new DataPointStream(stream));
+        }
+        return (DataPointStream) datastreams.get(stream);
+    }
+
+    /**
+     * Retrieve a DataArrayStream from the DataStreams object
+     * <p/>
+     * Will create the DataArrayStream if it does not exist
+     *
+     * @param stream String identifier of the stream to retrieve
+     * @return DataArrayStream
+     */
+    public DataArrayStream getDataArrayStream(String stream) {
+        if (!datastreams.containsKey(stream)) {
+            datastreams.put(stream, new DataArrayStream(stream));
+        }
+        return (DataArrayStream) datastreams.get(stream);
     }
 
 

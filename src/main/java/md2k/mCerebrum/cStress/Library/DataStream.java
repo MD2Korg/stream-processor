@@ -30,14 +30,10 @@ import java.util.HashMap;
  */
 
 
-public abstract class DataStream {
+public abstract class DataStream implements DataStreamInterface {
 
     public HashMap<String, Object> metadata;
     public boolean preserve;
-
-    public abstract void persist(String filename);
-
-    public abstract void reset();
 
     /**
      * Retrieve stream name

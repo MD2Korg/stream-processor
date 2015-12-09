@@ -71,20 +71,20 @@ public class cStress {
         this.path = path;
 
         //Configure Data Streams
-        datastreams.get("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
-        datastreams.get("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
+        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
 
-        datastreams.get("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
-        datastreams.get("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
+        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
 
-        datastreams.get("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.get("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.get("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.get("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.get("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.get("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
         resetDataStreams();
 
@@ -174,7 +174,7 @@ public class cStress {
         DataPointArray fv = computeStressFeatures(datastreams);
 
         if (fv != null) {
-            DataArrayStream fvStream = (DataArrayStream) datastreams.get("org.md2k.cstress.fv");
+            DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
             fvStream.add(fv);
         }
 
@@ -208,20 +208,20 @@ public class cStress {
          ECG - RR interval heart-rate
          */
 
-            DescriptiveStatistics RRint = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.ecg.rr_value")).getNormalizedValues());
+            DescriptiveStatistics RRint = new DescriptiveStatistics((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).getNormalizedValues());
             double ECG_RR_Interval_Variance = RRint.getVariance();
             double ECG_RR_Interval_Quartile_Deviation = (RRint.getPercentile(75) - RRint.getPercentile(25)) / 2.0;
 
-            DataPointStream lombLE = (DataPointStream) datastreams.get("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy");
+            DataPointStream lombLE = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy");
             double ECG_RR_Interval_Low_Frequency_Energy = (lombLE.data.get(0).value - lombLE.stats.getMean()) / lombLE.stats.getStandardDeviation();
 
-            DataPointStream lombME = (DataPointStream) datastreams.get("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy");
+            DataPointStream lombME = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy");
             double ECG_RR_Interval_Medium_Frequency_Energy = (lombME.data.get(0).value - lombME.stats.getMean()) / lombME.stats.getStandardDeviation();
 
-            DataPointStream lombHE = (DataPointStream) datastreams.get("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy");
+            DataPointStream lombHE = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy");
             double ECG_RR_Interval_High_Frequency_Energy = (lombHE.data.get(0).value - lombHE.stats.getMean()) / lombHE.stats.getStandardDeviation();
 
-            DataPointStream lombLH = (DataPointStream) datastreams.get("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio");
+            DataPointStream lombLH = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio");
             double ECG_RR_Interval_Low_High_Frequency_Energy_Ratio = (lombLH.data.get(0).value - lombLH.stats.getMean()) / lombLH.stats.getStandardDeviation();
 
             double ECG_RR_Interval_Mean = RRint.getMean();
@@ -229,7 +229,7 @@ public class cStress {
             double ECG_RR_Interval_80thPercentile = RRint.getPercentile(80);
             double ECG_RR_Interval_20thPercentile = RRint.getPercentile(20);
 
-            DescriptiveStatistics heartrate = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.ecg.rr.heartrate")).getNormalizedValues());
+            DescriptiveStatistics heartrate = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.heartrate").getNormalizedValues());
             double ECG_RR_Interval_Heart_Rate = heartrate.getMean();
 
          /*
@@ -239,7 +239,7 @@ public class cStress {
          RIP - Inspiration Duration - 80th percentile
          */
 
-            DescriptiveStatistics InspDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.inspduration")).getNormalizedValues());
+            DescriptiveStatistics InspDuration = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").getNormalizedValues());
 
             double RIP_Inspiration_Duration_Quartile_Deviation = (InspDuration.getPercentile(75) - InspDuration.getPercentile(25)) / 2.0;
             double RIP_Inspiration_Duration_Mean = InspDuration.getMean();
@@ -253,7 +253,7 @@ public class cStress {
          RIP - Expiration Duration - 80th percentile
          */
 
-            DescriptiveStatistics ExprDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.exprduration")).getNormalizedValues());
+            DescriptiveStatistics ExprDuration = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").getNormalizedValues());
 
             double RIP_Expiration_Duration_Quartile_Deviation = (ExprDuration.getPercentile(75) - ExprDuration.getPercentile(25)) / 2.0;
             double RIP_Expiration_Duration_Mean = ExprDuration.getMean();
@@ -266,7 +266,7 @@ public class cStress {
          RIP - Respiration Duration - 80th percentile
          */
 
-            DescriptiveStatistics RespDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.respduration")).getNormalizedValues());
+            DescriptiveStatistics RespDuration = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.respduration").getNormalizedValues());
 
             double RIP_Respiration_Duration_Quartile_Deviation = (RespDuration.getPercentile(75) - RespDuration.getPercentile(25)) / 2.0;
             double RIP_Respiration_Duration_Mean = RespDuration.getMean();
@@ -279,7 +279,7 @@ public class cStress {
          RIP - Inspiration-Expiration Duration Ratio - median
          RIP - Inspiration-Expiration Duration Ratio - 80th percentile
          */
-            DescriptiveStatistics InspExprDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.IERatio")).getNormalizedValues());
+            DescriptiveStatistics InspExprDuration = new DescriptiveStatistics((datastreams.getDataPointStream("org.md2k.cstress.data.rip.IERatio")).getNormalizedValues());
 
             double RIP_Inspiration_Expiration_Duration_Quartile_Deviation = (InspExprDuration.getPercentile(75) - InspExprDuration.getPercentile(25)) / 2.0;
             double RIP_Inspiration_Expiration_Duration_Mean = InspExprDuration.getMean();
@@ -292,7 +292,7 @@ public class cStress {
          *RIP - Stretch - median
          RIP - Stretch - 80th percentile
          */
-            DescriptiveStatistics Stretch = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.stretch")).getNormalizedValues());
+            DescriptiveStatistics Stretch = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.stretch").getNormalizedValues());
 
             double RIP_Stretch_Quartile_Deviation = (Stretch.getPercentile(75) - Stretch.getPercentile(25)) / 2.0;
             double RIP_Stretch_Mean = Stretch.getMean();
@@ -301,13 +301,13 @@ public class cStress {
          /*
          *RIP - Breath-rate
          */
-            DataPointStream breathRate = (DataPointStream) datastreams.get("org.md2k.cstress.data.rip.BreathRate");
+            DataPointStream breathRate = datastreams.getDataPointStream("org.md2k.cstress.data.rip.BreathRate");
             double RIP_Breath_Rate = (breathRate.data.get(0).value - breathRate.stats.getMean()) / breathRate.stats.getStandardDeviation();
 
          /*
          *RIP - Inspiration Minute Volume
          */
-            DataPointStream minVent = (DataPointStream) datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation");
+            DataPointStream minVent = datastreams.getDataPointStream("org.md2k.cstress.data.rip.MinuteVentilation");
             double RIP_Inspiration_Minute_Ventilation = (minVent.data.get(0).value - minVent.stats.getMean()) / minVent.stats.getStandardDeviation();
 
          /*
@@ -317,14 +317,14 @@ public class cStress {
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
          */
 
-            DescriptiveStatistics RSA = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.RSA")).getNormalizedValues());
+            DescriptiveStatistics RSA = new DescriptiveStatistics((datastreams.getDataPointStream("org.md2k.cstress.data.rip.RSA")).getNormalizedValues());
 
             double RSA_Quartile_Deviation = (RSA.getPercentile(75) - RSA.getPercentile(25)) / 2.0;
             double RSA_Mean = RSA.getMean();
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-            ArrayList<Double> featureVector = new ArrayList<>();
+            ArrayList<Double> featureVector = new ArrayList<Double>();
 
 
             featureVector.add(ECG_RR_Interval_Variance);// 1
@@ -415,23 +415,23 @@ public class cStress {
         if (dp.timestamp >= this.windowStartTime) {
             switch (channel) {
                 case AUTOSENSE.CHEST_ECG:
-                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.ecg")).add(dp);
+                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg").add(dp);
                     break;
 
                 case AUTOSENSE.CHEST_RIP:
-                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.rip")).add(dp);
+                    datastreams.getDataPointStream("org.md2k.cstress.data.rip").add(dp);
                     break;
 
                 case AUTOSENSE.CHEST_ACCEL_X:
-                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.accelx")).add(dp);
+                    datastreams.getDataPointStream("org.md2k.cstress.data.accelx").add(dp);
                     break;
 
                 case AUTOSENSE.CHEST_ACCEL_Y:
-                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.accely")).add(dp);
+                    datastreams.getDataPointStream("org.md2k.cstress.data.accely").add(dp);
                     break;
 
                 case AUTOSENSE.CHEST_ACCEL_Z:
-                    ((DataPointStream) datastreams.get("org.md2k.cstress.data.accelz")).add(dp);
+                    datastreams.getDataPointStream("org.md2k.cstress.data.accelz").add(dp);
                     break;
 
                 default:

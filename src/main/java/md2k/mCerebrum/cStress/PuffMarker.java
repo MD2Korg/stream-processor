@@ -54,20 +54,20 @@ public class PuffMarker {
         this.participant = participant;
 
         //Configure Data Streams
-        datastreams.get("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
-        datastreams.get("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
+        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
 
-        datastreams.get("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
-        datastreams.get("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
+        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
 
-        datastreams.get("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.get("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.get("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.get("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.get("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.get("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
         resetDataStreams();
 
@@ -83,7 +83,7 @@ public class PuffMarker {
         String[] wristList = new String[]{PuffMarkerUtils.LEFT_WRIST, PuffMarkerUtils.RIGHT_WRIST};
         for (String wrist : wristList) {
             AccelGyroFeatures agf = new AccelGyroFeatures(datastreams, wrist);
-            DataPointStream gyr_intersections = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.intersections" + wrist);
+            DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
             for (int i = 0; i < gyr_intersections.data.size(); i++) {
                 int startIndex = (int) gyr_intersections.data.get(i).timestamp;
                 int endIndex = (int) gyr_intersections.data.get(i).value;
@@ -112,12 +112,12 @@ public class PuffMarker {
         /* List of features for SVM model
         */
             /////////////// WRIST FEATURES ////////////////////////
-            DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex));
-            DataPointStream gyr_mag_800 = new DataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex));
-            DataPointStream gyr_mag_8000 = new DataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream gyr_mag_800 = new DataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream gyr_mag_8000 = new DataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex));
 
-            DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex));
-            DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist + ".segment", ((DataPointStream) datastreams.get("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex));
+            DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex));
 
             /*
             Three filtering criteria
@@ -169,7 +169,7 @@ public class PuffMarker {
          RIP - Inspiration Duration - 80th percentile
          */
 
-            DescriptiveStatistics InspDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.inspduration")).getNormalizedValues());
+            DescriptiveStatistics InspDuration = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").getNormalizedValues());
 
             double RIP_Inspiration_Duration_Quartile_Deviation = (InspDuration.getPercentile(75) - InspDuration.getPercentile(25)) / 2.0;
             double RIP_Inspiration_Duration_Mean = InspDuration.getMean();
@@ -183,7 +183,7 @@ public class PuffMarker {
          RIP - Expiration Duration - 80th percentile
          */
 
-            DescriptiveStatistics ExprDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.exprduration")).getNormalizedValues());
+            DescriptiveStatistics ExprDuration = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").getNormalizedValues());
 
             double RIP_Expiration_Duration_Quartile_Deviation = (ExprDuration.getPercentile(75) - ExprDuration.getPercentile(25)) / 2.0;
             double RIP_Expiration_Duration_Mean = ExprDuration.getMean();
@@ -196,7 +196,7 @@ public class PuffMarker {
          RIP - Respiration Duration - 80th percentile
          */
 
-            DescriptiveStatistics RespDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.respduration")).getNormalizedValues());
+            DescriptiveStatistics RespDuration = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.respduration").getNormalizedValues());
 
             double RIP_Respiration_Duration_Quartile_Deviation = (RespDuration.getPercentile(75) - RespDuration.getPercentile(25)) / 2.0;
             double RIP_Respiration_Duration_Mean = RespDuration.getMean();
@@ -209,7 +209,7 @@ public class PuffMarker {
          RIP - Inspiration-Expiration Duration Ratio - median
          RIP - Inspiration-Expiration Duration Ratio - 80th percentile
          */
-            DescriptiveStatistics InspExprDuration = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.IERatio")).getNormalizedValues());
+            DescriptiveStatistics InspExprDuration = new DescriptiveStatistics((datastreams.getDataPointStream("org.md2k.cstress.data.rip.IERatio")).getNormalizedValues());
 
             double RIP_Inspiration_Expiration_Duration_Quartile_Deviation = (InspExprDuration.getPercentile(75) - InspExprDuration.getPercentile(25)) / 2.0;
             double RIP_Inspiration_Expiration_Duration_Mean = InspExprDuration.getMean();
@@ -222,7 +222,7 @@ public class PuffMarker {
          *RIP - Stretch - median
          RIP - Stretch - 80th percentile
          */
-            DescriptiveStatistics Stretch = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.stretch")).getNormalizedValues());
+            DescriptiveStatistics Stretch = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.rip.stretch").getNormalizedValues());
 
             double RIP_Stretch_Quartile_Deviation = (Stretch.getPercentile(75) - Stretch.getPercentile(25)) / 2.0;
             double RIP_Stretch_Mean = Stretch.getMean();
@@ -231,13 +231,13 @@ public class PuffMarker {
          /*
          *RIP - Breath-rate
          */
-            DataPointStream breathRate = (DataPointStream) datastreams.get("org.md2k.cstress.data.rip.BreathRate");
+            DataPointStream breathRate = datastreams.getDataPointStream("org.md2k.cstress.data.rip.BreathRate");
             double RIP_Breath_Rate = (breathRate.data.get(0).value - breathRate.stats.getMean()) / breathRate.stats.getStandardDeviation();
 
          /*
          *RIP - Inspiration Minute Volume
          */
-            DataPointStream minVent = (DataPointStream) datastreams.get("org.md2k.cstress.data.rip.MinuteVentilation");
+            DataPointStream minVent = datastreams.getDataPointStream("org.md2k.cstress.data.rip.MinuteVentilation");
             double RIP_Inspiration_Minute_Ventilation = (minVent.data.get(0).value - minVent.stats.getMean()) / minVent.stats.getStandardDeviation();
 
          /*
@@ -247,14 +247,14 @@ public class PuffMarker {
          RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
          */
 
-            DescriptiveStatistics RSA = new DescriptiveStatistics(((DataPointStream) datastreams.get("org.md2k.cstress.data.rip.RSA")).getNormalizedValues());
+            DescriptiveStatistics RSA = new DescriptiveStatistics((datastreams.getDataPointStream("org.md2k.cstress.data.rip.RSA")).getNormalizedValues());
 
             double RSA_Quartile_Deviation = (RSA.getPercentile(75) - RSA.getPercentile(25)) / 2.0;
             double RSA_Mean = RSA.getMean();
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-            ArrayList<Double> featureVector = new ArrayList<>();
+            ArrayList<Double> featureVector = new ArrayList<Double>();
 
 
 //            featureVector.add(ECG_RR_Interval_Variance);// 1
@@ -339,56 +339,56 @@ public class PuffMarker {
 //        if (dp.timestamp >= this.windowStartTime) {
         switch (channel) {
             case PuffMarkerUtils.RIP:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIP)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIP)).add(dp);
                 break;
 
             case PuffMarkerUtils.LEFTWRIST_ACCEL_X:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_LEFTWRIST_ACCEL_X)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_LEFTWRIST_ACCEL_X)).add(dp);
                 break;
 
             case PuffMarkerUtils.LEFTWRIST_ACCEL_Y:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
                 break;
 
             case PuffMarkerUtils.LEFTWRIST_ACCEL_Z:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
                 break;
 
             case PuffMarkerUtils.LEFTWRIST_GYRO_X:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_LEFTWRIST_GYRO_X)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_LEFTWRIST_GYRO_X)).add(dp);
                 break;
 
             case PuffMarkerUtils.LEFTWRIST_GYRO_Y:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_LEFTWRIST_GYRO_Y)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_LEFTWRIST_GYRO_Y)).add(dp);
                 break;
 
             case PuffMarkerUtils.LEFTWRIST_GYRO_Z:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_LEFTWRIST_GYRO_Z)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_LEFTWRIST_GYRO_Z)).add(dp);
                 break;
 
 
             case PuffMarkerUtils.RIGHTWRIST_ACCEL_X:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
                 break;
 
             case PuffMarkerUtils.RIGHTWRIST_ACCEL_Y:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
                 break;
 
             case PuffMarkerUtils.RIGHTWRIST_ACCEL_Z:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
                 break;
 
             case PuffMarkerUtils.RIGHTWRIST_GYRO_X:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_GYRO_X)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_GYRO_X)).add(dp);
                 break;
 
             case PuffMarkerUtils.RIGHTWRIST_GYRO_Y:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
                 break;
 
             case PuffMarkerUtils.RIGHTWRIST_GYRO_Z:
-                ((DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
+                (datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
                 break;
 
 

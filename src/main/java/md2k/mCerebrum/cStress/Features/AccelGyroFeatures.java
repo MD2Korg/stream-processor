@@ -41,25 +41,25 @@ public class AccelGyroFeatures {
 
 //        String[] wristList = new String[]{PuffMarkerUtils.LEFT_WRIST, PuffMarkerUtils.RIGHT_WRIST};
 //        for (String wrist : wristList) {
-        DataPointStream gyrox = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_X + wrist);
-        DataPointStream gyroy = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_Y + wrist);
-        DataPointStream gyroz = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_GYRO_Z + wrist);
+        DataPointStream gyrox = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_GYRO_X + wrist);
+        DataPointStream gyroy = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_GYRO_Y + wrist);
+        DataPointStream gyroz = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_GYRO_Z + wrist);
 
-        DataPointStream accelx = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_X + wrist);
-        DataPointStream accely = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_Y + wrist);
-        DataPointStream accelz = (DataPointStream) datastreams.get(PuffMarkerUtils.KEY_DATA_ACCEL_Z + wrist);
+        DataPointStream accelx = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_ACCEL_X + wrist);
+        DataPointStream accely = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_ACCEL_Y + wrist);
+        DataPointStream accelz = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_ACCEL_Z + wrist);
 
-        DataPointStream gyr_mag = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag" + wrist);
+        DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
         System.out.println("gyr_mag=" + gyr_mag.data.size());
 
-        DataPointStream gyr_mag_800 = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag800" + wrist);
+        DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag800" + wrist);
         Smoothing.smooth(gyr_mag_800, gyr_mag, PuffMarkerUtils.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
-        DataPointStream gyr_mag_8000 = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.mag8000" + wrist);
+        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag8000" + wrist);
         Smoothing.smooth(gyr_mag_8000, gyr_mag, PuffMarkerUtils.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
 
-        DataPointStream roll = (DataPointStream) datastreams.get("org.md2k.cstress.data.roll" + wrist);
-        DataPointStream pitch = (DataPointStream) datastreams.get("org.md2k.cstress.data.pitch" + wrist);
+        DataPointStream roll = datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist);
+        DataPointStream pitch = datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist);
         //TODO: add yew
 
         if (PuffMarkerUtils.LEFT_WRIST.equals(wrist))
@@ -67,7 +67,7 @@ public class AccelGyroFeatures {
         else
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, 1);
 
-        DataPointStream gyr_intersections = (DataPointStream) datastreams.get("org.md2k.cstress.data.gyr.intersections" + wrist);
+        DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
 
         int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
         System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
