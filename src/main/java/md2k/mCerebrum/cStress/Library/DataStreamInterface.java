@@ -31,4 +31,5 @@ public interface DataStreamInterface {
 
     void reset();
 
+
 }

@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -46,9 +47,9 @@ import java.util.List;
 public class DataPointStream extends DataStream {
 
     public List<DataPoint> data;
-
     public SummaryStatistics stats;
     public DescriptiveStatistics descriptiveStats;
+    private List<DataPoint> history;
 
 
     /**
@@ -58,6 +59,7 @@ public class DataPointStream extends DataStream {
      */
     public DataPointStream(String name) {
         data = new ArrayList<DataPoint>();
+        history = new ArrayList<DataPoint>();
         metadata = new HashMap<String, Object>();
         metadata.put("name", name);
         preserve = false;
@@ -79,6 +81,7 @@ public class DataPointStream extends DataStream {
      */
     public DataPointStream(DataPointStream other) {
         this.data = new ArrayList<DataPoint>(other.data);
+        this.history = new ArrayList<DataPoint>(other.history);
         this.metadata = other.metadata;
         this.stats = other.stats;
         this.descriptiveStats = other.descriptiveStats;
@@ -132,6 +135,25 @@ public class DataPointStream extends DataStream {
 
 
     /**
+     * Retrieve historical data including the current window of data
+     *
+     * @param starttime The time from which to get data to the present
+     * @return List of data that is within the time window
+     */
+    public List<DataPoint> getHistoricalValues(long starttime) {
+        List<DataPoint> result = new ArrayList<DataPoint>();
+
+        for (DataPoint dpa : history) {
+            if (dpa.timestamp > starttime) {
+                result.add(dpa);
+            }
+        }
+
+        Collections.reverse(result);
+        return result;
+    }
+
+    /**
      * Main method to add DataPoint to the data stream.  Updates stats and descriptiveStats and checks for invalid data
      * values.
      *
@@ -140,6 +162,7 @@ public class DataPointStream extends DataStream {
     public void add(DataPoint dp) {
         if (!Double.isNaN(dp.value) && !Double.isInfinite(dp.value)) {
             data.add(new DataPoint(dp));
+            history.add(0, new DataPoint(dp));
             stats.addValue(dp.value);
             descriptiveStats.addValue(dp.value);
         }
