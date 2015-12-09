@@ -181,7 +181,6 @@ public class cStress {
             }
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Stress Exception Handler: IndexOutOfBoundsException");
-            e.
             //e.printStackTrace();
         }
 
