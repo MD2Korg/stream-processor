@@ -44,7 +44,7 @@ public class DataPointArray {
      * @param value     Array of floating point values
      */
     public DataPointArray(long timestamp, ArrayList<Double> value) {
-        this.value = new ArrayList<Double>(value);
+        this.value = new ArrayList<>(value);
         this.timestamp = timestamp;
     }
 

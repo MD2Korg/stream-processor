@@ -4,12 +4,13 @@ import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.Features.AccelGyroFeatures;
 import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
-import md2k.mCerebrum.cStress.Library.FeatureVector;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
+import md2k.mCerebrum.cStress.Library.Structs.DataPointArray;
 import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
 import md2k.mCerebrum.cStress.util.PuffMarkerUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /*
@@ -86,16 +87,9 @@ public class PuffMarker {
             for (int i = 0; i < gyr_intersections.data.size(); i++) {
                 int startIndex = (int) gyr_intersections.data.get(i).timestamp;
                 int endIndex = (int) gyr_intersections.data.get(i).value;
-                FeatureVector fv = computeStressFeatures(datastreams, wrist, startIndex, endIndex);
+                DataPointArray fv = computeStressFeatures(datastreams, wrist, startIndex, endIndex);
             }
         }
-/*
-        FeatureVector fv = computeStressFeatures(datastreams);
-
-        if (fv != null) {
-            fv.persist("/Users/hnat/Downloads/processedrawdata/" + participant + "/org.md2k.cstress.fv.csv");
-        }
-*/
 
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
@@ -112,7 +106,7 @@ public class PuffMarker {
         return true;
     }
 
-    private FeatureVector computeStressFeatures(DataStreams datastreams, String wrist, int startIndex, int endIndex) {
+    private DataPointArray computeStressFeatures(DataStreams datastreams, String wrist, int startIndex, int endIndex) {
 
         try {
         /* List of features for SVM model
@@ -260,64 +254,65 @@ public class PuffMarker {
             double RSA_Median = RSA.getPercentile(50);
             double RSA_80thPercentile = RSA.getPercentile(80);
 
-            double[] featureVector = {
-                    // 2
-                    // 4
-                    // 1
-                    // 3
-                    // 6
-                    // 5
-                    // 7
-                    // 8
-                    // 9
-                    // 10
-                    // 11
+            ArrayList<Double> featureVector = new ArrayList<>();
 
-                    RIP_Breath_Rate,                                        // 12
-                    RIP_Inspiration_Minute_Ventilation,                          // 13
 
-                    RIP_Inspiration_Duration_Quartile_Deviation,            // 14
-                    RIP_Inspiration_Duration_Mean,                          // 15
-                    RIP_Inspiration_Duration_Median,                        // 16
-                    RIP_Inspiration_Duration_80thPercentile,                // 17
+//            featureVector.add(ECG_RR_Interval_Variance);// 1
+//            featureVector.add(ECG_RR_Interval_Low_High_Frequency_Energy_Ratio);// 2
+//            featureVector.add(ECG_RR_Interval_High_Frequency_Energy);// 3
+//            featureVector.add(ECG_RR_Interval_Medium_Frequency_Energy);// 4
+//            featureVector.add(ECG_RR_Interval_Low_Frequency_Energy);// 5
+//            featureVector.add(ECG_RR_Interval_Mean);// 6
+//            featureVector.add(ECG_RR_Interval_Median);// 7
+//            featureVector.add(ECG_RR_Interval_Quartile_Deviation);// 8
+//            featureVector.add(ECG_RR_Interval_80thPercentile);// 9
+//            featureVector.add(ECG_RR_Interval_20thPercentile);// 10
+//            featureVector.add(ECG_RR_Interval_Heart_Rate);// 11
 
-                    RIP_Expiration_Duration_Quartile_Deviation,             // 18
-                    RIP_Expiration_Duration_Mean,                           // 19
-                    RIP_Expiration_Duration_Median,                         // 20
-                    RIP_Expiration_Duration_80thPercentile,                 // 21
+            featureVector.add(RIP_Breath_Rate);// 12
+            featureVector.add(RIP_Inspiration_Minute_Ventilation);// 13
 
-                    RIP_Respiration_Duration_Quartile_Deviation,            // 22
-                    RIP_Respiration_Duration_Mean,                          // 23
-                    RIP_Respiration_Duration_Median,                        // 24
-                    RIP_Respiration_Duration_80thPercentile,                // 25
+            featureVector.add(RIP_Inspiration_Duration_Quartile_Deviation);// 14
+            featureVector.add(RIP_Inspiration_Duration_Mean);// 15
+            featureVector.add(RIP_Inspiration_Duration_Median);// 16
+            featureVector.add(RIP_Inspiration_Duration_80thPercentile);// 17
 
-                    RIP_Inspiration_Expiration_Duration_Quartile_Deviation, // 26
-                    RIP_Inspiration_Expiration_Duration_Mean,               // 27
-                    RIP_Inspiration_Expiration_Duration_Median,             // 28
-                    RIP_Inspiration_Expiration_Duration_80thPercentile,     // 29
+            featureVector.add(RIP_Expiration_Duration_Quartile_Deviation);// 18
+            featureVector.add(RIP_Expiration_Duration_Mean);// 19
+            featureVector.add(RIP_Expiration_Duration_Median);// 20
+            featureVector.add(RIP_Expiration_Duration_80thPercentile);// 21
 
-                    RIP_Stretch_Quartile_Deviation,                         // 30
-                    RIP_Stretch_Mean,                                       // 31
-                    RIP_Stretch_Median,                                     // 32
-                    RIP_Stretch_80thPercentile,                             // 33
+            featureVector.add(RIP_Respiration_Duration_Quartile_Deviation);// 22
+            featureVector.add(RIP_Respiration_Duration_Mean);// 23
+            featureVector.add(RIP_Respiration_Duration_Median);// 24
+            featureVector.add(RIP_Respiration_Duration_80thPercentile);// 25
 
-                    RSA_Quartile_Deviation,                                 // 34
-                    RSA_Mean,                                               // 35
-                    RSA_Median,                                             // 36
-                    RSA_80thPercentile                                      // 37
-            };
+            featureVector.add(RIP_Inspiration_Expiration_Duration_Quartile_Deviation);// 26
+            featureVector.add(RIP_Inspiration_Expiration_Duration_Mean);// 27
+            featureVector.add(RIP_Inspiration_Expiration_Duration_Median);// 28
+            featureVector.add(RIP_Inspiration_Expiration_Duration_80thPercentile);// 29
+
+            featureVector.add(RIP_Stretch_Quartile_Deviation);// 30
+            featureVector.add(RIP_Stretch_Mean);// 31
+            featureVector.add(RIP_Stretch_Median);// 32
+            featureVector.add(RIP_Stretch_80thPercentile);// 33
+
+            featureVector.add(RSA_Quartile_Deviation);// 34
+            featureVector.add(RSA_Mean);// 35
+            featureVector.add(RSA_Median);// 36
+            featureVector.add(RSA_80thPercentile);// 37
 
 
             boolean valid = true;
-            for (int i = 0; i < featureVector.length; i++) {
-                if (Double.isNaN(featureVector[i])) {
+            for (int i = 0; i < featureVector.size(); i++) {
+                if (Double.isNaN(featureVector.get(i))) {
                     valid = false;
                     break;
                 }
             }
 
             if (valid) {
-                FeatureVector fv = new FeatureVector(windowStartTime, featureVector);
+                DataPointArray fv = new DataPointArray(windowStartTime, featureVector);
                 return fv;
             }
         } catch (IndexOutOfBoundsException e) {
