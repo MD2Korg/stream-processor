@@ -1,12 +1,11 @@
 package md2k.mCerebrum.cStress.Features;
 
+import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Library.Vector;
-import md2k.mCerebrum.cStress.util.PuffMarkerUtils;
-
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -39,39 +38,36 @@ public class AccelGyroFeatures {
 
     public AccelGyroFeatures(DataStreams datastreams, String wrist) {
 
-//        String[] wristList = new String[]{PuffMarkerUtils.LEFT_WRIST, PuffMarkerUtils.RIGHT_WRIST};
-//        for (String wrist : wristList) {
-        DataPointStream gyrox = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_GYRO_X + wrist);
-        DataPointStream gyroy = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_GYRO_Y + wrist);
-        DataPointStream gyroz = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_GYRO_Z + wrist);
+        DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_X + wrist);
+        DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Y + wrist);
+        DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Z + wrist);
 
-        DataPointStream accelx = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_ACCEL_X + wrist);
-        DataPointStream accely = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_ACCEL_Y + wrist);
-        DataPointStream accelz = datastreams.getDataPointStream(PuffMarkerUtils.KEY_DATA_ACCEL_Z + wrist);
+        DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_X + wrist);
+        DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_Y + wrist);
+        DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_Z + wrist);
 
         DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
-        System.out.println("gyr_mag=" + gyr_mag.data.size());
 
         DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag800" + wrist);
-        Smoothing.smooth(gyr_mag_800, gyr_mag, PuffMarkerUtils.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
         DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag8000" + wrist);
-        Smoothing.smooth(gyr_mag_8000, gyr_mag, PuffMarkerUtils.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
 
         DataPointStream roll = datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist);
         DataPointStream pitch = datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist);
-        //TODO: add yew
+        //TODO: add yaw
 
-        if (PuffMarkerUtils.LEFT_WRIST.equals(wrist))
+        if (PUFFMARKER.LEFT_WRIST.equals(wrist)) {
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, -1);
-        else
+        } else {
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, 1);
+        }
 
         DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
 
-        int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
-        System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
-//        }
+//        int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
+//        System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
     }
 
 

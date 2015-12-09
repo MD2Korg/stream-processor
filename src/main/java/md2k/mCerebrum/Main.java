@@ -32,7 +32,7 @@ import java.util.concurrent.Executors;
 public class Main {
 
     /**
-     * Main driver class for replaying AutoSense data through cStress
+     * Main driver class for replaying AutoSense data through StreamProcessor
      *
      * @param args Arguments to the program
      */

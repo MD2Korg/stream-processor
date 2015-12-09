@@ -1,38 +1,20 @@
-package md2k.mCerebrum.cStress;
-
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
-import md2k.mCerebrum.cStress.Features.ECGFeatures;
-import md2k.mCerebrum.cStress.Features.RIPFeatures;
-import md2k.mCerebrum.cStress.Library.DataArrayStream;
-import md2k.mCerebrum.cStress.Library.DataPointStream;
-import md2k.mCerebrum.cStress.Library.DataStreams;
-import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Library.Structs.DataPointArray;
-import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
-import md2k.mCerebrum.cStress.Library.Time;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import java.util.ArrayList;
-import java.util.List;
-
+package md2k.mCerebrum.cStress.Features;
 
 /*
- * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * Copyright (c) 2015, The University of Memphis, MD2K Center 
  * - Timothy Hnat <twhnat@memphis.edu>
- * - Karen Hovsepian <karoaper@gmail.com>
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
+ *   list of conditions and the following disclaimer.
+ * 
  * * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,152 +27,33 @@ import java.util.List;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Main class that implements cStress and controls the data processing pipeline
- */
+import md2k.mCerebrum.cStress.Library.DataArrayStream;
+import md2k.mCerebrum.cStress.Library.DataPointStream;
+import md2k.mCerebrum.cStress.Library.DataStreams;
+import md2k.mCerebrum.cStress.Library.Structs.DataPointArray;
+import org.apache.commons.math3.exception.NotANumberException;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class cStress {
 
-    long windowStartTime = -1;
+    private final long windowStartTime;
 
-    long windowSize;
-    private String participant;
-    private String path;
-
-    private DataStreams datastreams = new DataStreams();
-
-
-    /**
-     * Main constructor for cStress
-     *
-     * @param windowSize  Time in milliseconds to segment and buffer data before processing
-     * @param path        Location where data will be persisted on disk
-     * @param participant A participant identifier that should identify a directory within 'path'
-     */
-    public cStress(long windowSize, String path, String participant) {
-        this.windowSize = windowSize;
-        this.participant = participant;
-        this.path = path;
-
-        //Configure Data Streams
-        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
-
-        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
-
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
-
-        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
-
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
-
-        resetDataStreams();
-
-    }
-
-
-//    private StressProbability evaluteStressModel(AccelerometerFeatures accelFeatures, ECGFeatures ecgFeatures, RIPFeatures ripFeatures, double bias) {
-//
-//        StressProbability stressResult = new StressProbability(-1, 0.0);
-//
-
-
-//
-//        featureVector = normalizeFV(featureVector);
-//
-//        boolean invalid = false;
-//        for(double d: featureVector) {
-//            if (Double.isInfinite(d) || Double.isNaN(d)) {
-//                invalid = true;
-//            }
-//        }
-//
-//        if (!activityCheck(accelFeatures) && !invalid) {
-//            //SVM evaluation
-//            svm_node[] data = new svm_node[featureVector.length];
-//            for (int i = 0; i < featureVector.length; i++) {
-//                data[i] = new svm_node();
-//                data[i].index = i;
-//                data[i].value = featureVector[i];
-//            }
-//
-//            stressResult.probability = svm.svm_predict(Model, data);
-//            if (stressResult.probability < bias) {
-//                stressResult.label = AUTOSENSE.NOT_STRESSED;
-//            } else {
-//                stressResult.label = AUTOSENSE.STRESSED;
-//            }
-//        }
-//
-//        //Basic Features
-//        DataPoint[] af = accelFeatures.rawFeatures();
-//        DataPoint[] rr_intervals = ecgFeatures.rawFeatures();
-//        DataPoint[] peaks = ripFeatures.rawPeakFeatures();
-//        DataPoint[] valleys = ripFeatures.rawValleyFeatures();
-//
-//        return stressResult;
-//    }
-//
-//    private double[] normalizeFV(double[] featureVector) {
-//        double[] result = new double[featureVector.length];
-//
-//        for (int i = 0; i < featureVector.length; i++) {
-//            result[i] = (featureVector[i] - this.featureVectorMean[i]) / this.featureVectorStd[i];
-//        }
-//        return result;
-//    }
-//
-//    private boolean activityCheck(AccelerometerFeatures accelFeatures) {
-//        return accelFeatures.Activity;
-//    }
-
-
-    /**
-     * Main computation loop that processes all buffered data, computes a feature vector, and evaluates stress
-     *
-     * @return Probability of stress
-     */
-    public StressProbability process() {
-
-        StressProbability probabilityOfStress = null;
-
-        //TODO: This should be moved outside of the stress applications to intercept data before arriving here
-//            //This check must happen before any normalization.  It operates on the RAW signals.
-//            RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
-//            ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
-//
-//            if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
-//                return probabilityOfStress; //data quality failure
-//            }
-//
-//
-
+    public cStress(DataStreams datastreams, long windowStartTime) {
+        this.windowStartTime = windowStartTime;
         try {
-            AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
-            ECGFeatures ef = new ECGFeatures(datastreams);
-            RIPFeatures rf = new RIPFeatures(datastreams);
-
             DataPointArray fv = computeStressFeatures(datastreams);
-
-            if (fv != null) {
-                DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
-                fvStream.add(fv);
-            }
+            DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
+            fvStream.add(fv);
         } catch (IndexOutOfBoundsException e) {
-            System.err.println("Stress Exception Handler: IndexOutOfBoundsException");
-            //e.printStackTrace();
+            //Ignore this error
         }
-
-//                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
-
-        return probabilityOfStress;
     }
 
     /**
-     * Extract and compute the 37 features that are needed for cStress's model
+     * Extract and compute the 37 features that are needed for StreamProcessor's model
      *
      * @param datastreams Global DataStreams object
      * @return FV
@@ -277,7 +140,7 @@ public class cStress {
         double RIP_Respiration_Duration_Mean = RespDuration.getMean();
         double RIP_Respiration_Duration_Median = RespDuration.getPercentile(50);
         double RIP_Respiration_Duration_80thPercentile = RespDuration.getPercentile(80);
-        
+
          /*
          RIP - Inspiration-Expiration Duration Ratio - quartile deviation
          *RIP - Inspiration-Expiration Duration Ratio - mean
@@ -378,80 +241,11 @@ public class cStress {
         featureVector.add(RSA_80thPercentile);// 37
 
 
-        boolean valid = true;
-        for (int i = 0; i < featureVector.size(); i++) {
-            if (Double.isNaN(featureVector.get(i))) {
-                valid = false;
-                break;
+        for (Double aFeatureVector : featureVector) {
+            if (Double.isNaN(aFeatureVector)) {
+                throw new NotANumberException();
             }
         }
-
-        if (valid) {
-            return new DataPointArray(windowStartTime, featureVector);
-        }
-
-
-        return null;
+        return new DataPointArray(windowStartTime, featureVector);
     }
-
-
-    /**
-     * Add new DataPoint to the buffers
-     *
-     * @param channel Identifies which sensor stream the DataPoint is associated with
-     * @param dp      DataPoint containing a timestamp and value
-     * @return Stress probability if it is computed, otherwise Null
-     */
-    public StressProbability add(int channel, DataPoint dp) {
-        StressProbability result = null;
-
-        if (this.windowStartTime < 0)
-            this.windowStartTime = Time.nextEpochTimestamp(dp.timestamp, this.windowSize);
-
-        if ((dp.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
-            result = process();
-            resetDataStreams();
-            this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS * 1000; //Add 60 seconds to the timestamp
-        }
-
-        if (dp.timestamp >= this.windowStartTime) {
-            switch (channel) {
-                case AUTOSENSE.CHEST_ECG:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_RIP:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.rip").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_ACCEL_X:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accelx").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_ACCEL_Y:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accely").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_ACCEL_Z:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accelz").add(dp);
-                    break;
-
-                default:
-                    System.out.println("NOT INTERESTED: " + dp);
-                    break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Persist and reset all datastreams
-     */
-    private void resetDataStreams() {
-        datastreams.persist(path + participant + "/");
-        datastreams.reset();
-    }
-
-
 }

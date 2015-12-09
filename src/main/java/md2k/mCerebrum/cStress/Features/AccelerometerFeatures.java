@@ -45,7 +45,7 @@ import java.util.List;
 public class AccelerometerFeatures {
 
     /**
-     * Accelerometer feature processor for cStress-Autosense
+     * Accelerometer feature processor for StreamProcessor-Autosense
      *
      * @param datastreams        object
      * @param ACTIVITY_THRESHOLD threshold based on accelerometer magnitude
