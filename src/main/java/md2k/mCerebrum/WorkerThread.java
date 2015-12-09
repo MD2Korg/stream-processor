@@ -1,10 +1,10 @@
 package md2k.mCerebrum;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
-import md2k.mCerebrum.cStress.cStress;
+import md2k.mCerebrum.cStress.StreamProcessor;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -53,17 +53,27 @@ public class WorkerThread implements Runnable {
         tp.importData(path + id + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
         tp.importData(path + id + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
+        tp.importData(path + id + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
+        tp.importData(path + id + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
+        tp.importData(path + id + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
+        tp.importData(path + id + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
+        tp.importData(path + id + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
+        tp.importData(path + id + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
+
+        tp.importData(path + id + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
+        tp.importData(path + id + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
+        tp.importData(path + id + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
+        tp.importData(path + id + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
+        tp.importData(path + id + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
+        tp.importData(path + id + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
+        
         tp.sort();
 
-        cStress stress = new cStress(60 * 1000, path, id);
+        StreamProcessor stress = new StreamProcessor(60 * 1000, path, id);
 
-        StressProbability output;
         for (CSVDataPoint ap : tp) {
             DataPoint dp = new DataPoint(ap.timestamp, ap.value);
-            output = stress.add(ap.channel, dp);
-            if (output != null) {
-                System.out.println(output.label + " " + output.probability);
-            }
+            stress.add(ap.channel, dp);
         }
     }
 }

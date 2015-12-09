@@ -1,6 +1,8 @@
 package md2k.mCerebrum.cStress;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
+import md2k.mCerebrum.cStress.Features.AccelGyroFeatures;
 import md2k.mCerebrum.cStress.Features.AccelerometerFeatures;
 import md2k.mCerebrum.cStress.Features.ECGFeatures;
 import md2k.mCerebrum.cStress.Features.RIPFeatures;
@@ -9,8 +11,8 @@ import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Library.Structs.DataPointArray;
-import md2k.mCerebrum.cStress.Library.Structs.StressProbability;
 import md2k.mCerebrum.cStress.Library.Time;
+import org.apache.commons.math3.exception.NotANumberException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.List;
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
  * - Karen Hovsepian <karoaper@gmail.com>
+ * - Nazir Saleneen <nsleheen@memphis.edu>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,9 +49,9 @@ import java.util.List;
  */
 
 /**
- * Main class that implements cStress and controls the data processing pipeline
+ * Main class that implements StreamProcessor and controls the data processing pipeline
  */
-public class cStress {
+public class StreamProcessor {
 
     long windowStartTime = -1;
 
@@ -60,13 +63,13 @@ public class cStress {
 
 
     /**
-     * Main constructor for cStress
+     * Main constructor for StreamProcessor
      *
      * @param windowSize  Time in milliseconds to segment and buffer data before processing
      * @param path        Location where data will be persisted on disk
      * @param participant A participant identifier that should identify a directory within 'path'
      */
-    public cStress(long windowSize, String path, String participant) {
+    public StreamProcessor(long windowSize, String path, String participant) {
         this.windowSize = windowSize;
         this.participant = participant;
         this.path = path;
@@ -91,71 +94,12 @@ public class cStress {
 
     }
 
-
-//    private StressProbability evaluteStressModel(AccelerometerFeatures accelFeatures, ECGFeatures ecgFeatures, RIPFeatures ripFeatures, double bias) {
-//
-//        StressProbability stressResult = new StressProbability(-1, 0.0);
-//
-
-
-//
-//        featureVector = normalizeFV(featureVector);
-//
-//        boolean invalid = false;
-//        for(double d: featureVector) {
-//            if (Double.isInfinite(d) || Double.isNaN(d)) {
-//                invalid = true;
-//            }
-//        }
-//
-//        if (!activityCheck(accelFeatures) && !invalid) {
-//            //SVM evaluation
-//            svm_node[] data = new svm_node[featureVector.length];
-//            for (int i = 0; i < featureVector.length; i++) {
-//                data[i] = new svm_node();
-//                data[i].index = i;
-//                data[i].value = featureVector[i];
-//            }
-//
-//            stressResult.probability = svm.svm_predict(Model, data);
-//            if (stressResult.probability < bias) {
-//                stressResult.label = AUTOSENSE.NOT_STRESSED;
-//            } else {
-//                stressResult.label = AUTOSENSE.STRESSED;
-//            }
-//        }
-//
-//        //Basic Features
-//        DataPoint[] af = accelFeatures.rawFeatures();
-//        DataPoint[] rr_intervals = ecgFeatures.rawFeatures();
-//        DataPoint[] peaks = ripFeatures.rawPeakFeatures();
-//        DataPoint[] valleys = ripFeatures.rawValleyFeatures();
-//
-//        return stressResult;
-//    }
-//
-//    private double[] normalizeFV(double[] featureVector) {
-//        double[] result = new double[featureVector.length];
-//
-//        for (int i = 0; i < featureVector.length; i++) {
-//            result[i] = (featureVector[i] - this.featureVectorMean[i]) / this.featureVectorStd[i];
-//        }
-//        return result;
-//    }
-//
-//    private boolean activityCheck(AccelerometerFeatures accelFeatures) {
-//        return accelFeatures.Activity;
-//    }
-
-
     /**
      * Main computation loop that processes all buffered data, computes a feature vector, and evaluates stress
      *
      * @return Probability of stress
      */
-    public StressProbability process() {
-
-        StressProbability probabilityOfStress = null;
+    public void process() {
 
         //TODO: This should be moved outside of the stress applications to intercept data before arriving here
 //            //This check must happen before any normalization.  It operates on the RAW signals.
@@ -173,24 +117,53 @@ public class cStress {
             ECGFeatures ef = new ECGFeatures(datastreams);
             RIPFeatures rf = new RIPFeatures(datastreams);
 
-            DataPointArray fv = computeStressFeatures(datastreams);
 
-            if (fv != null) {
-                DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
-                fvStream.add(fv);
+            String[] wristList = new String[]{PUFFMARKER.LEFT_WRIST, PUFFMARKER.RIGHT_WRIST};
+            for (String wrist : wristList) {
+                AccelGyroFeatures agf = new AccelGyroFeatures(datastreams, wrist);
+                DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
+                for (int i = 0; i < gyr_intersections.data.size(); i++) {
+                    int startIndex = (int) gyr_intersections.data.get(i).timestamp;
+                    int endIndex = (int) gyr_intersections.data.get(i).value;
+                    DataPointArray fv = computePuffMarkerFeatures(datasreams, wrist, startIndex, endIndex);
+                }
             }
+
+
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Stress Exception Handler: IndexOutOfBoundsException");
             //e.printStackTrace();
         }
 
+
+    }
+
+    public boolean checkValidRollPitch(DataPointStream rolls, DataPointStream pitchs) {
+        double x = (pitchs.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
+        double y = (rolls.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD;
+        double error = x * x; //;
+//        double error = Math.sqrt(x * x+y*y); //;
+        if (error > PUFFMARKER.PUFFMARKER_TH[0])
+            return false;
+        return true;
+    }
+
+    public void generateResults() {
+        try {
+            DataPointArray fv = computeStressFeatures(datastreams);
+            DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
+            fvStream.add(fv);
+        } catch (NotANumberException e) {
+            System.err.println("Feature vector generation error");
+        }
+
+        //TODO Stress should be written out as a datastream
 //                probabilityOfStress = evaluteStressModel(accelFeatures, ecgFeatures, ripFeatures, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
-        return probabilityOfStress;
     }
 
     /**
-     * Extract and compute the 37 features that are needed for cStress's model
+     * Extract and compute the 37 features that are needed for StreamProcessor's model
      *
      * @param datastreams Global DataStreams object
      * @return FV
@@ -382,18 +355,64 @@ public class cStress {
         for (int i = 0; i < featureVector.size(); i++) {
             if (Double.isNaN(featureVector.get(i))) {
                 valid = false;
-                break;
+                throw new NotANumberException();
             }
         }
-
-        if (valid) {
-            return new DataPointArray(windowStartTime, featureVector);
-        }
-
-
-        return null;
+        return new DataPointArray(windowStartTime, featureVector);
     }
 
+
+    private DataPointArray computePuffMarkerFeatures(DataStreams datastreams) {
+
+        /////////////// WRIST FEATURES ////////////////////////
+        DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex));
+        DataPointStream gyr_mag_800 = new DataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex));
+        DataPointStream gyr_mag_8000 = new DataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex));
+
+        DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex));
+        DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex));
+
+            /*
+            Three filtering criteria
+             */
+        double meanHeight = gyr_mag_800.descriptiveStats.getMean() - gyr_mag_8000.descriptiveStats.getMean();
+        double duration = gyr_mag_8000.data.get(gyr_mag_8000.data.size() - 1).timestamp - gyr_mag_8000.data.get(0).timestamp;
+        boolean isValidRollPitch = checkValidRollPitch(rolls, pitchs);
+
+
+            /*
+                WRIST - GYRO MAGNITUDE - mean
+                WRIST - GYRO MAGNITUDE - median
+                WRIST - GYRO MAGNITUDE - std deviation
+                WRIST - GYRO MAGNITUDE - quartile deviation
+             */
+        double GYRO_Magnitude_Mean = gyr_mag.descriptiveStats.getMean();
+        double GYRO_Magnitude_Median = gyr_mag.descriptiveStats.getPercentile(50);
+        double GYRO_Magnitude_SD = gyr_mag.descriptiveStats.getStandardDeviation();
+        double GYRO_Magnitude_Quartile_Deviation = gyr_mag.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
+
+             /*
+                WRIST - PITCH - mean
+                WRIST - PITCH - median
+                WRIST - PITCH - std deviation
+                WRIST - PITCH - quartile deviation
+             */
+        double Pitch_Mean = pitchs.descriptiveStats.getMean();
+        double Pitch_Median = pitchs.descriptiveStats.getPercentile(50);
+        double Pitch_SD = pitchs.descriptiveStats.getStandardDeviation();
+        double Pitch_Quartile_Deviation = pitchs.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
+
+             /*
+                WRIST - ROLL - mean
+                WRIST - ROLL - median
+                WRIST - ROLL - std deviation
+                WRIST - ROLL - quartile deviation
+             */
+        double Roll_Mean = rolls.descriptiveStats.getMean();
+        double Roll_Median = rolls.descriptiveStats.getPercentile(50);
+        double Roll_SD = rolls.descriptiveStats.getStandardDeviation();
+        double Roll_Quartile_Deviation = rolls.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
+    }
 
     /**
      * Add new DataPoint to the buffers
@@ -402,14 +421,14 @@ public class cStress {
      * @param dp      DataPoint containing a timestamp and value
      * @return Stress probability if it is computed, otherwise Null
      */
-    public StressProbability add(int channel, DataPoint dp) {
-        StressProbability result = null;
+    public void add(int channel, DataPoint dp) {
 
         if (this.windowStartTime < 0)
             this.windowStartTime = Time.nextEpochTimestamp(dp.timestamp, this.windowSize);
 
         if ((dp.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
-            result = process();
+            process();
+            generateResults();
             resetDataStreams();
             this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS * 1000; //Add 60 seconds to the timestamp
         }
@@ -436,13 +455,63 @@ public class cStress {
                     datastreams.getDataPointStream("org.md2k.cstress.data.accelz").add(dp);
                     break;
 
+
+                case PUFFMARKER.LEFTWRIST_ACCEL_X:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_X)).add(dp);
+                    break;
+
+                case PUFFMARKER.LEFTWRIST_ACCEL_Y:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
+                    break;
+
+                case PUFFMARKER.LEFTWRIST_ACCEL_Z:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
+                    break;
+
+                case PUFFMARKER.LEFTWRIST_GYRO_X:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_X)).add(dp);
+                    break;
+
+                case PUFFMARKER.LEFTWRIST_GYRO_Y:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Y)).add(dp);
+                    break;
+
+                case PUFFMARKER.LEFTWRIST_GYRO_Z:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Z)).add(dp);
+                    break;
+
+
+                case PUFFMARKER.RIGHTWRIST_ACCEL_X:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
+                    break;
+
+                case PUFFMARKER.RIGHTWRIST_ACCEL_Y:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
+                    break;
+
+                case PUFFMARKER.RIGHTWRIST_ACCEL_Z:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
+                    break;
+
+                case PUFFMARKER.RIGHTWRIST_GYRO_X:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_X)).add(dp);
+                    break;
+
+                case PUFFMARKER.RIGHTWRIST_GYRO_Y:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
+                    break;
+
+                case PUFFMARKER.RIGHTWRIST_GYRO_Z:
+                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
+                    break;
+
+
                 default:
                     System.out.println("NOT INTERESTED: " + dp);
                     break;
             }
         }
 
-        return result;
     }
 
     /**
