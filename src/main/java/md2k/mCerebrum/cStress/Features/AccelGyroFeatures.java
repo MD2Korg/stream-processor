@@ -7,7 +7,6 @@ import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
 import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.Library.Vector;
 
-
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Nazir Saleneen <nsleheen@memphis.edu>
@@ -39,8 +38,6 @@ public class AccelGyroFeatures {
 
     public AccelGyroFeatures(DataStreams datastreams, String wrist) {
 
-//        String[] wristList = new String[]{PuffMarkerUtils.LEFT_WRIST, PuffMarkerUtils.RIGHT_WRIST};
-//        for (String wrist : wristList) {
         DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_X + wrist);
         DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Y + wrist);
         DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Z + wrist);
@@ -51,7 +48,6 @@ public class AccelGyroFeatures {
 
         DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
-        System.out.println("gyr_mag=" + gyr_mag.data.size());
 
         DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag800" + wrist);
         Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
@@ -60,18 +56,18 @@ public class AccelGyroFeatures {
 
         DataPointStream roll = datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist);
         DataPointStream pitch = datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist);
-        //TODO: add yew
+        //TODO: add yaw
 
-        if (PUFFMARKER.LEFT_WRIST.equals(wrist))
+        if (PUFFMARKER.LEFT_WRIST.equals(wrist)) {
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, -1);
-        else
+        } else {
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, 1);
+        }
 
         DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
 
-        int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
-        System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
-//        }
+//        int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
+//        System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
     }
 
 
