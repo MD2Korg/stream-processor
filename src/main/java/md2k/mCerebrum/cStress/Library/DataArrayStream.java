@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import java.util.List;
 public class DataArrayStream extends DataStream {
 
     public List<DataPointArray> data;
+    private List<DataPointArray> history;
 
     /**
      * Constructor
@@ -52,6 +54,7 @@ public class DataArrayStream extends DataStream {
      */
     public DataArrayStream(String name) {
         data = new ArrayList<DataPointArray>();
+        history = new ArrayList<DataPointArray>();
         metadata = new HashMap<String, Object>();
         metadata.put("name", name);
         preserve = false;
@@ -65,6 +68,7 @@ public class DataArrayStream extends DataStream {
      */
     public DataArrayStream(DataArrayStream other) {
         this.data = new ArrayList<DataPointArray>(other.data);
+        this.history = new ArrayList<DataPointArray>(other.history);
         this.metadata = other.metadata;
         this.preserve = other.preserve;
     }
@@ -77,6 +81,26 @@ public class DataArrayStream extends DataStream {
      */
     public void setPreservedLastInsert(boolean state) {
         preserve = state;
+    }
+
+
+    /**
+     * Retrieve historical data including the current window of data
+     *
+     * @param starttime The time from which to get data to the present
+     * @return List of data that is within the time window
+     */
+    public List<DataPointArray> getHistoricalValues(long starttime) {
+        List<DataPointArray> result = new ArrayList<DataPointArray>();
+
+        for (DataPointArray dpa : history) {
+            if (dpa.timestamp > starttime) {
+                result.add(dpa);
+            }
+        }
+
+        Collections.reverse(result);
+        return result;
     }
 
 
@@ -127,6 +151,7 @@ public class DataArrayStream extends DataStream {
      */
     public void add(DataPointArray dp) {
         data.add(new DataPointArray(dp));
+        history.add(0, new DataPointArray(dp)); //Add in reverse to make looking through the array easier
     }
 
     /**
