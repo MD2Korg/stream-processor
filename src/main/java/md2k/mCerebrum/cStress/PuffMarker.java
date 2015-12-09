@@ -1,6 +1,7 @@
 package md2k.mCerebrum.cStress;
 
 import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.Features.AccelGyroFeatures;
 import md2k.mCerebrum.cStress.Library.DataPointStream;
 import md2k.mCerebrum.cStress.Library.DataStreams;
@@ -98,11 +99,11 @@ public class PuffMarker {
     }
 
     public boolean checkValidRollPitch(DataPointStream rolls, DataPointStream pitchs) {
-        double x = (pitchs.descriptiveStats.getPercentile(50) - RP.PITCH_MEAN) / RP.PITCH_STD;
-        double y = (rolls.descriptiveStats.getPercentile(50) - RP.ROLL_MEAN) / RP.ROLL_STD;
+        double x = (pitchs.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
+        double y = (rolls.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD;
         double error = x * x; //;
 //        double error = Math.sqrt(x * x+y*y); //;
-        if (error > RP.TH[0])
+        if (error > PUFFMARKER.PUFFMARKER_TH[0])
             return false;
         return true;
     }
@@ -410,23 +411,4 @@ public class PuffMarker {
     }
 }
 
-
-class RP {
-    public static final double ROLL_MEAN = 26.7810;
-    public static final double PITCH_MEAN = -80.3673;
-    public static final double ROLL_STD = 13.9753;
-    public static final double PITCH_STD = 13.4698;
-    public static final double MEAN = 26.7810;
-    public static final double[][] SIGMA = new double[][]{{195.3085, -92.7786}, {-92.7786, 181.4359}};
-    public static final double[] TH = new double[]{10.1511, 7.8746, 11.7729, 11.2226};
-/*
-    public static final double ROLL_MEAN=30.3067;
-    public static final double PITCH_MEAN=-79.8684;
-    public static final double ROLL_STD=11.6764;
-    public static final double PITCH_STD=13.3340;
-    public static final double MEAN=13.3340;
-    public static final double[][] SIGMA = new double[][]{{136.3388, -51.6343}, {-51.6343, 177.7954}};
-    public static final double[] TH = new double[]{13.9489, 8.3384, 17.3435, 14.2775};
-*/
-}
 
