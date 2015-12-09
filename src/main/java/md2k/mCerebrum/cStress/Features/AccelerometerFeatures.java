@@ -71,52 +71,49 @@ public class AccelerometerFeatures {
         List<DataPoint[]> segyWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accely").data, windowSize);
         List<DataPoint[]> segzWindowed = Time.window(datastreams.getDataPointStream("org.md2k.cstress.data.accelz").data, windowSize);
 
-        try {
-            //Compute magnitude and stdev from windowed datastreams
-            for (int i = 0; i < segxWindowed.size(); i++) {
-                DataPoint[] wx = segxWindowed.get(i);
-                DataPoint[] wy = segyWindowed.get(i);
-                DataPoint[] wz = segzWindowed.get(i);
-                double[] magnitude = Vector.magnitude(wx, wy, wz);
-                for (int j = 0; j < magnitude.length; j++) {
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").add(new DataPoint(wx[j].timestamp, magnitude[j]));
-                }
-                DescriptiveStatistics sd = new DescriptiveStatistics(magnitude);
 
-                if (wx.length > 0) {
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accel.windowed.magnitude.stdev").add(new DataPoint(wx[0].timestamp, sd.getStandardDeviation()));
-                }
+        //Compute magnitude and stdev from windowed datastreams
+        for (int i = 0; i < segxWindowed.size(); i++) {
+            DataPoint[] wx = segxWindowed.get(i);
+            DataPoint[] wy = segyWindowed.get(i);
+            DataPoint[] wz = segzWindowed.get(i);
+            double[] magnitude = Vector.magnitude(wx, wy, wz);
+            for (int j = 0; j < magnitude.length; j++) {
+                datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").add(new DataPoint(wx[j].timestamp, magnitude[j]));
             }
+            DescriptiveStatistics sd = new DescriptiveStatistics(magnitude);
 
-
-            //Compute Activity from datastreams
-            double lowlimit = datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").getPercentile(1);
-            double highlimit = datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").getPercentile(99);
-            double range = highlimit - lowlimit;
-
-            DataPointStream stdmag = datastreams.getDataPointStream("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
-
-            boolean[] activityOrNot = new boolean[stdmag.data.size()];
-            for (int i = 0; i < stdmag.data.size(); i++) {
-                activityOrNot[i] = stdmag.data.get(i).value > (lowlimit + ACTIVITY_THRESHOLD * range);
+            if (wx.length > 0) {
+                datastreams.getDataPointStream("org.md2k.cstress.data.accel.windowed.magnitude.stdev").add(new DataPoint(wx[0].timestamp, sd.getStandardDeviation()));
             }
-
-            int minActive = 0;
-            for (boolean b : activityOrNot) {
-                if (b) {
-                    minActive += 1;
-                }
-            }
-            int active = 0;
-            if (minActive > (stdmag.data.size() / 2)) {
-                active = 1;
-            }
-
-            datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.accelx").data.get(0).timestamp, active));
-
-        } catch (IndexOutOfBoundsException e) {
-            e.printStackTrace();
         }
+
+
+        //Compute Activity from datastreams
+        double lowlimit = datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").getPercentile(1);
+        double highlimit = datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").getPercentile(99);
+        double range = highlimit - lowlimit;
+
+        DataPointStream stdmag = datastreams.getDataPointStream("org.md2k.cstress.data.accel.windowed.magnitude.stdev");
+
+        boolean[] activityOrNot = new boolean[stdmag.data.size()];
+        for (int i = 0; i < stdmag.data.size(); i++) {
+            activityOrNot[i] = stdmag.data.get(i).value > (lowlimit + ACTIVITY_THRESHOLD * range);
+        }
+
+        int minActive = 0;
+        for (boolean b : activityOrNot) {
+            if (b) {
+                minActive += 1;
+            }
+        }
+        int active = 0;
+        if (minActive > (stdmag.data.size() / 2)) {
+            active = 1;
+        }
+
+        datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.accelx").data.get(0).timestamp, active));
+
     }
 
 
