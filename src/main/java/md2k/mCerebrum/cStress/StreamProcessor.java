@@ -1,11 +1,11 @@
 package md2k.mCerebrum.cStress;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.Features.*;
-import md2k.mCerebrum.cStress.Library.DataStreams;
-import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Library.Time;
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
+import md2k.mCerebrum.cStress.features.*;
+import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.Time;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import org.apache.commons.math3.exception.NotANumberException;
 
 
@@ -93,27 +93,23 @@ public class StreamProcessor {
     public void process() {
 
         try {
+            //Data quality computations
+            ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
+            RIPDataQuality ripDQ = new RIPDataQuality(datastreams, AUTOSENSE.AUTOSENSE_RIP_QUALITY);
 
-            //TODO: This should be coded here
-//            //This check must happen before any normalization.  It operates on the RAW signals.
-//            RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
-//            ECGQualityCalculation ecgQuality = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
-//
-//            if (!ripQuality.computeQuality(rip, 5 * 1000, 0.67) || !ecgQuality.computeQuality(ecg, 5 * 1000, 0.67)) { //Check for 67% of the data to be of Quality within 5 second windows.
-//                return probabilityOfStress; //data quality failure
-//            }
-
-
+            //AutoSense features
             AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
             ECGFeatures ef = new ECGFeatures(datastreams);
             RIPFeatures rf = new RIPFeatures(datastreams);
 
+            //AutoSense wrist features
             AccelGyroFeatures leftWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
             AccelGyroFeatures rightWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
 
 
         } catch (IndexOutOfBoundsException e) {
             System.err.println("Stress Exception Handler: IndexOutOfBoundsException");
+            e.printStackTrace();
         }
 
 

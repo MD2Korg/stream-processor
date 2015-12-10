@@ -1,10 +1,10 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.Library.Structs.CSVDataPoint;
-import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
 import md2k.mCerebrum.cStress.StreamProcessor;
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
+import md2k.mCerebrum.cStress.library.structs.CSVDataPoint;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -66,7 +66,7 @@ public class WorkerThread implements Runnable {
         tp.importData(path + id + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
         tp.importData(path + id + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
         tp.importData(path + id + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
-        
+
         tp.sort();
 
         StreamProcessor stress = new StreamProcessor(60 * 1000, path, id);

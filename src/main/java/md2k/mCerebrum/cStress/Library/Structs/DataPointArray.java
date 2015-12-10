@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Library.Structs;
+package md2k.mCerebrum.cStress.library.structs;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
-package md2k.mCerebrum.cStress.Library.SignalProcessing;
+package md2k.mCerebrum.cStress.library.signalprocessing;
 
-import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Library.Structs.Lomb;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mCerebrum.cStress.library.structs.Lomb;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.transform.DftNormalization;

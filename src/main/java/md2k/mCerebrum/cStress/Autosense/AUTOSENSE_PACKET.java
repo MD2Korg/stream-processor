@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Autosense;
+package md2k.mCerebrum.cStress.autosense;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

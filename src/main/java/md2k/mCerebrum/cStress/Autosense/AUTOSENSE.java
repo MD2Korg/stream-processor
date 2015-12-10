@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Autosense;
+package md2k.mCerebrum.cStress.autosense;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -79,4 +79,10 @@ public class AUTOSENSE {
 
     public static final double ACTIVITY_THRESHOLD = 0.35;
     public static final int ACCEL_WINDOW_SIZE = 10000;
+    public static final double AUTOSENSE_ECG_QUALITY = 0.67;
+    public static final double AUTOSENSE_RIP_QUALITY = 0.67;
+
+    //Data Quality
+    public static int SEGMENT_GOOD = 0;
+    public static int SEGMENT_BAD = 1;
 }
