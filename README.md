@@ -1,6 +1,6 @@
 # cStress - A real-time stress probability library
 
-[![Build Status](https://travis-ci.org/MD2Korg/cStress_Android.svg)](https://travis-ci.org/MD2Korg/cStress_Android)
+[![Build Status](https://travis-ci.org/MD2Korg/stream-processor.svg)](https://travis-ci.org/MD2Korg/stream-processor)
 
 ## Reference
 [UbiComp 2015](http://ubicomp.org/ubicomp2015/program/accepted-papers.html)
