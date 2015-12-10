@@ -66,7 +66,7 @@ public class WorkerThread implements Runnable {
         tp.importData(path + id + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
         tp.importData(path + id + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
         tp.importData(path + id + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
-        
+
         tp.sort();
 
         StreamProcessor stress = new StreamProcessor(60 * 1000, path, id);
