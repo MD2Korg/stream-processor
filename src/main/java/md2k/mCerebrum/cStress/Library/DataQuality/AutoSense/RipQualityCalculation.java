@@ -1,7 +1,12 @@
-package md2k.mCerebrum.cStress.Library.DataQuality.AutoSense;
+package md2k.mCerebrum.cStress.library.dataquality.autosense;
 
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.library.Time;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -160,25 +165,27 @@ public class RipQualityCalculation {
         return AUTOSENSE.QUALITY_GOOD;
     }
 
-//    public boolean computeQuality(DataPoint[] rip, int windowSize, double threshold) {
-//
-//        List<DataPoint[]> windowedRIP = window(rip, windowSize);
-//
-//        double resultCount = 0;
-//
-//        for(DataPoint[] dpA: windowedRIP) {
-//            int[] data = new int[dpA.length];
-//            int i=0;
-//            for(DataPoint s: dpA) {
-//                data[i++] = (int) s.value;
-//            }
-//            if (data.length > 0 && currentQuality(data) == AUTOSENSE.QUALITY_GOOD) {
-//                resultCount++;
-//            }
-//        }
-//
-//        return ((resultCount/windowedRIP.size()) > threshold);
-//
-//    }
+
+    public List<DataPoint> computeQuality(List<DataPoint> rip, long windowSize) {
+
+        List<DataPoint[]> windowedECG = Time.window(rip, windowSize);
+        List<DataPoint> result = new ArrayList<DataPoint>();
+
+        for (DataPoint[] dpA : windowedECG) {
+            int[] data = new int[dpA.length];
+            int i = 0;
+            for (DataPoint s : dpA) {
+                data[i++] = (int) s.value;
+            }
+            if (data.length > 0) {
+                result.add(new DataPoint(dpA[0].timestamp, currentQuality(data)));
+            }
+        }
+
+
+        return result;
+
+    }
+
 }
 

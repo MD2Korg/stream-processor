@@ -27,10 +27,38 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.library.DataPointStream;
 import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.dataquality.autosense.RipQualityCalculation;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
-public class Stress {
-    public Stress(DataStreams datastreams, double stressProbabiltyThreshold) {
-        //Do something with stress here
+import java.util.List;
+
+public class RIPDataQuality {
+
+    public RIPDataQuality(DataStreams datastreams, double qualityThreshold) {
+        DataPointStream ecg = datastreams.getDataPointStream("org.md2k.cstress.data.rip");
+        DataPointStream ecgQuality = datastreams.getDataPointStream("org.md2k.cstress.data.rip.quality");
+
+        RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
+        List<DataPoint> quality = ripQuality.computeQuality(ecg.data, 5000);
+
+        double count = 0;
+        for (DataPoint dp : quality) {
+            ecgQuality.add(dp);
+            if (dp.value == AUTOSENSE.QUALITY_GOOD) {
+                count++;
+            }
+        }
+
+        DataPointStream ecgWindowQuality = datastreams.getDataPointStream("org.md2k.cstress.data.rip.window.quality");
+
+        if ((count / quality.size()) > qualityThreshold)
+            ecgWindowQuality.add(new DataPoint(quality.get(0).timestamp, AUTOSENSE.QUALITY_GOOD));
+        else
+            ecgWindowQuality.add(new DataPoint(quality.get(0).timestamp, AUTOSENSE.QUALITY_BAD));
+
+
     }
 }

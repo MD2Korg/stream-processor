@@ -1,11 +1,11 @@
-package md2k.mCerebrum.cStress.Features;
+package md2k.mCerebrum.cStress.features;
 
-import md2k.mCerebrum.cStress.Autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.Library.DataPointStream;
-import md2k.mCerebrum.cStress.Library.DataStreams;
-import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
-import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Library.Vector;
+import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
+import md2k.mCerebrum.cStress.library.DataPointStream;
+import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.Vector;
+import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

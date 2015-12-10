@@ -1,6 +1,6 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE_PACKET;
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE_PACKET;
 
 import java.io.File;
 import java.io.FileNotFoundException;

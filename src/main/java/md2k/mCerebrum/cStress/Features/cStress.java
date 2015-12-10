@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.Features;
+package md2k.mCerebrum.cStress.features;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
@@ -27,10 +27,10 @@ package md2k.mCerebrum.cStress.Features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import md2k.mCerebrum.cStress.Library.DataArrayStream;
-import md2k.mCerebrum.cStress.Library.DataPointStream;
-import md2k.mCerebrum.cStress.Library.DataStreams;
-import md2k.mCerebrum.cStress.Library.Structs.DataPointArray;
+import md2k.mCerebrum.cStress.library.DataArrayStream;
+import md2k.mCerebrum.cStress.library.DataPointStream;
+import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 

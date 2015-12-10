@@ -1,14 +1,14 @@
-package md2k.mCerebrum.cStress.Features;
+package md2k.mCerebrum.cStress.features;
 
-import md2k.mCerebrum.cStress.Autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.Library.DataPointStream;
-import md2k.mCerebrum.cStress.Library.DataStreams;
-import md2k.mCerebrum.cStress.Library.SignalProcessing.AutoSense;
-import md2k.mCerebrum.cStress.Library.SignalProcessing.ECG;
-import md2k.mCerebrum.cStress.Library.SignalProcessing.Filter;
-import md2k.mCerebrum.cStress.Library.SignalProcessing.Smoothing;
-import md2k.mCerebrum.cStress.Library.Structs.DataPoint;
-import md2k.mCerebrum.cStress.Library.Structs.Lomb;
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.library.DataPointStream;
+import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.signalprocessing.AutoSense;
+import md2k.mCerebrum.cStress.library.signalprocessing.ECG;
+import md2k.mCerebrum.cStress.library.signalprocessing.Filter;
+import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mCerebrum.cStress.library.structs.Lomb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
