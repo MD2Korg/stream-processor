@@ -1,5 +1,7 @@
 package md2k.mCerebrum.cStress.library;
 
+import md2k.mCerebrum.cStress.DataPointInterface;
+
 import java.util.HashMap;
 
 /*
@@ -34,6 +36,7 @@ public abstract class DataStream implements DataStreamInterface {
 
     public HashMap<String, Object> metadata;
     public boolean preserve;
+    public DataPointInterface dataPointInterface;
 
     /**
      * Retrieve stream name

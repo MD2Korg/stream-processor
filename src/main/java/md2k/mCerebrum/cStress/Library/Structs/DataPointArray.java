@@ -59,6 +59,11 @@ public class DataPointArray {
         this.timestamp = other.timestamp;
     }
 
+    public DataPointArray(DataPoint dp) {
+        this.timestamp = dp.timestamp;
+        this.value.add(dp.value);
+    }
+
     /**
      * @return String representation of a DataPoint object
      */

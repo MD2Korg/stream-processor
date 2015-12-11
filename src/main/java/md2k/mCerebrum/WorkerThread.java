@@ -1,10 +1,13 @@
 package md2k.mCerebrum;
 
+import md2k.mCerebrum.cStress.DataPointInterface;
 import md2k.mCerebrum.cStress.StreamProcessor;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
+import md2k.mCerebrum.cStress.library.Time;
 import md2k.mCerebrum.cStress.library.structs.CSVDataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -35,45 +38,66 @@ import md2k.mCerebrum.cStress.library.structs.DataPoint;
 public class WorkerThread implements Runnable {
 
     private String path;
-    private String id;
 
 
-    public WorkerThread(String path, String id) {
+    public WorkerThread(String path) {
         this.path = path;
-        this.id = id;
     }
 
     @Override
     public void run() {
 
         CSVParser tp = new CSVParser();
-        tp.importData(path + id + "/rip.txt", AUTOSENSE.CHEST_RIP);
-        tp.importData(path + id + "/ecg.txt", AUTOSENSE.CHEST_ECG);
-        tp.importData(path + id + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
-        tp.importData(path + id + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
-        tp.importData(path + id + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
+        tp.importData(path + "/rip.txt", AUTOSENSE.CHEST_RIP);
+        tp.importData(path + "/ecg.txt", AUTOSENSE.CHEST_ECG);
+        tp.importData(path + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
+        tp.importData(path + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
+        tp.importData(path + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
-        tp.importData(path + id + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
-        tp.importData(path + id + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
-        tp.importData(path + id + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
-        tp.importData(path + id + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
-        tp.importData(path + id + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
-        tp.importData(path + id + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
+        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
+        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
+        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
+        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
+        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
+        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
 
-        tp.importData(path + id + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
-        tp.importData(path + id + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
-        tp.importData(path + id + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
-        tp.importData(path + id + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
-        tp.importData(path + id + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
-        tp.importData(path + id + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
+        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
+        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
+        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
+        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
+        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
+        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
 
         tp.sort();
 
-        StreamProcessor stress = new StreamProcessor(60 * 1000, path, id);
+        int windowSize = 60000;
 
+        StreamProcessor streamProcessor = new StreamProcessor(windowSize);
+        streamProcessor.setPath(path);
+
+        streamProcessor.dkInterface = new DataPointInterface() {
+            @Override
+            public void dataPointHandler(String stream, DataPointArray dp) {
+                System.out.println(stream + " " + dp);
+            }
+        };
+
+        streamProcessor.registerCallbackDataStream("org.md2k.cstress.fv");
+
+        long windowStartTime = -1;
         for (CSVDataPoint ap : tp) {
             DataPoint dp = new DataPoint(ap.timestamp, ap.value);
-            stress.add(ap.channel, dp);
+            streamProcessor.add(ap.channel, dp);
+
+            if (windowStartTime < 0)
+                windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
+
+            if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
+                streamProcessor.go();
+                windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
+            }
         }
     }
+
+
 }

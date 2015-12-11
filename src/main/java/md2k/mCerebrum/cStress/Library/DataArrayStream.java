@@ -103,7 +103,6 @@ public class DataArrayStream extends DataStream {
         return result;
     }
 
-
     /**
      * Persist the data stream to the local file system
      *
@@ -144,6 +143,7 @@ public class DataArrayStream extends DataStream {
         }
     }
 
+
     /**
      * Main method to add DatapointArrays to the data stream
      *
@@ -152,6 +152,10 @@ public class DataArrayStream extends DataStream {
     public void add(DataPointArray dp) {
         data.add(new DataPointArray(dp));
         history.add(0, new DataPointArray(dp)); //Add in reverse to make looking through the array easier
+
+        if (dataPointInterface != null) {
+            dataPointInterface.dataPointHandler((String) metadata.get("name"), dp);
+        }
     }
 
     /**

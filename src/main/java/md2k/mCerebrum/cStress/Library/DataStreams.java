@@ -1,5 +1,7 @@
 package md2k.mCerebrum.cStress.library;
 
+import md2k.mCerebrum.cStress.DataPointInterface;
+
 import java.util.TreeMap;
 
 /*
@@ -35,18 +37,20 @@ import java.util.TreeMap;
 public class DataStreams {
 
     private TreeMap<String, DataStream> datastreams;
+    private TreeMap<String, DataPointInterface> callbackRegistration;
 
     /**
      * Constructor
      */
     public DataStreams() {
         datastreams = new TreeMap<String, DataStream>();
+        callbackRegistration = new TreeMap<String, DataPointInterface>();
     }
 
 
     /**
      * Retrieve a DataPointStream from the DataStreams object
-     * <p/>
+     *
      * Will create the DataPointStream if it does not exist
      *
      * @param stream String identifier of the stream to retrieve
@@ -55,13 +59,16 @@ public class DataStreams {
     public DataPointStream getDataPointStream(String stream) {
         if (!datastreams.containsKey(stream)) {
             datastreams.put(stream, new DataPointStream(stream));
+            if (callbackRegistration.containsKey(stream)) {
+                datastreams.get(stream).dataPointInterface = callbackRegistration.get(stream);
+            }
         }
         return (DataPointStream) datastreams.get(stream);
     }
 
     /**
      * Retrieve a DataArrayStream from the DataStreams object
-     * <p/>
+     *
      * Will create the DataArrayStream if it does not exist
      *
      * @param stream String identifier of the stream to retrieve
@@ -70,6 +77,9 @@ public class DataStreams {
     public DataArrayStream getDataArrayStream(String stream) {
         if (!datastreams.containsKey(stream)) {
             datastreams.put(stream, new DataArrayStream(stream));
+            if (callbackRegistration.containsKey(stream)) {
+                datastreams.get(stream).dataPointInterface = callbackRegistration.get(stream);
+            }
         }
         return (DataArrayStream) datastreams.get(stream);
     }
@@ -92,6 +102,13 @@ public class DataStreams {
     public void reset() {
         for (String key : datastreams.keySet()) {
             datastreams.get(key).reset();
+        }
+    }
+
+    public void registerDataPointInterface(String key, DataPointInterface dki) {
+        callbackRegistration.put(key, dki);
+        if (datastreams.containsKey(key)) {
+            datastreams.get(key).dataPointInterface = callbackRegistration.get(key);
         }
     }
 }
