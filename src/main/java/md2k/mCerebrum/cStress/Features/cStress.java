@@ -39,10 +39,7 @@ import java.util.List;
 
 public class cStress {
 
-    private final long windowStartTime;
-
-    public cStress(DataStreams datastreams, long windowStartTime) {
-        this.windowStartTime = windowStartTime;
+    public cStress(DataStreams datastreams) {
         try {
             DataPointArray fv = computeStressFeatures(datastreams);
             DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
@@ -76,7 +73,7 @@ public class cStress {
          ECG - RR interval heart-rate
          */
 
-        DescriptiveStatistics RRint = new DescriptiveStatistics((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).getNormalizedValues());
+        DescriptiveStatistics RRint = new DescriptiveStatistics(datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value").getNormalizedValues());
         double ECG_RR_Interval_Variance = RRint.getVariance();
         double ECG_RR_Interval_Quartile_Deviation = (RRint.getPercentile(75) - RRint.getPercentile(25)) / 2.0;
 
@@ -246,6 +243,6 @@ public class cStress {
                 throw new NotANumberException();
             }
         }
-        return new DataPointArray(windowStartTime, featureVector);
+        return new DataPointArray(datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value").data.get(0).timestamp, featureVector);
     }
 }

@@ -2,6 +2,7 @@ package md2k.mCerebrum.cStress.library;
 
 
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
@@ -165,6 +166,10 @@ public class DataPointStream extends DataStream {
             history.add(0, new DataPoint(dp));
             stats.addValue(dp.value);
             descriptiveStats.addValue(dp.value);
+
+            if (dataPointInterface != null) {
+                dataPointInterface.dataPointHandler((String) metadata.get("name"), new DataPointArray(dp));
+            }
         }
     }
 

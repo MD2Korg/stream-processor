@@ -4,7 +4,6 @@ import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.features.*;
 import md2k.mCerebrum.cStress.library.DataStreams;
-import md2k.mCerebrum.cStress.library.Time;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import org.apache.commons.math3.exception.NotANumberException;
 
@@ -43,15 +42,10 @@ import org.apache.commons.math3.exception.NotANumberException;
  */
 public class StreamProcessor {
 
-    long windowStartTime = -1;
-
-    long windowSize;
-    private String participant;
+    public DataPointInterface dkInterface;
+    private long windowSize;
     private String path;
-
     private DataStreams datastreams = new DataStreams();
-
-
     /**
      * Main constructor for StreamProcessor
      *
@@ -59,14 +53,10 @@ public class StreamProcessor {
      * @param path        Location where data will be persisted on disk
      * @param participant A participant identifier that should identify a directory within 'path'
      */
-    public StreamProcessor(long windowSize, String path, String participant) {
+    public StreamProcessor(long windowSize) {
         this.windowSize = windowSize;
-        this.participant = participant;
-        this.path = path;
 
         configureDataStreams();
-        resetDataStreams();
-
     }
 
     private void configureDataStreams() {
@@ -85,6 +75,11 @@ public class StreamProcessor {
 
         datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
         datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+    }
+
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     /**
@@ -120,16 +115,20 @@ public class StreamProcessor {
      */
     public void generateResults() {
         try {
-            cStress cs = new cStress(datastreams, windowStartTime);
+            cStress cs = new cStress(datastreams);
             PuffMarker pm = new PuffMarker(datastreams);
-            Stress s = new Stress(datastreams, AUTOSENSE.STRESS_PROBABILTY_THRESHOLD);
 
         } catch (NotANumberException e) {
             System.err.println("Generate result error");
         }
-
-
     }
+
+    public void go() {
+        process();
+        generateResults();
+        resetDataStreams();
+    }
+
 
 
     /**
@@ -137,108 +136,96 @@ public class StreamProcessor {
      *
      * @param channel Identifies which sensor stream the DataPoint is associated with
      * @param dp      DataPoint containing a timestamp and value
-     * @return Stress probability if it is computed, otherwise Null
      */
     public void add(int channel, DataPoint dp) {
+        switch (channel) {
+            case AUTOSENSE.CHEST_ECG:
+                datastreams.getDataPointStream("org.md2k.cstress.data.ecg").add(dp);
+                break;
 
-        if (this.windowStartTime < 0)
-            this.windowStartTime = Time.nextEpochTimestamp(dp.timestamp, this.windowSize);
+            case AUTOSENSE.CHEST_RIP:
+                datastreams.getDataPointStream("org.md2k.cstress.data.rip").add(dp);
+                break;
 
-        if ((dp.timestamp - windowStartTime) >= this.windowSize) { //Process the buffer every windowSize milliseconds
-            process();
-            generateResults();
-            resetDataStreams();
-            this.windowStartTime += AUTOSENSE.SAMPLE_LENGTH_SECS * 1000; //Add 60 seconds to the timestamp
+            case AUTOSENSE.CHEST_ACCEL_X:
+                datastreams.getDataPointStream("org.md2k.cstress.data.accelx").add(dp);
+                break;
+
+            case AUTOSENSE.CHEST_ACCEL_Y:
+                datastreams.getDataPointStream("org.md2k.cstress.data.accely").add(dp);
+                break;
+
+            case AUTOSENSE.CHEST_ACCEL_Z:
+                datastreams.getDataPointStream("org.md2k.cstress.data.accelz").add(dp);
+                break;
+
+
+            case PUFFMARKER.LEFTWRIST_ACCEL_X:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_X)).add(dp);
+                break;
+
+            case PUFFMARKER.LEFTWRIST_ACCEL_Y:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
+                break;
+
+            case PUFFMARKER.LEFTWRIST_ACCEL_Z:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
+                break;
+
+            case PUFFMARKER.LEFTWRIST_GYRO_X:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_X)).add(dp);
+                break;
+
+            case PUFFMARKER.LEFTWRIST_GYRO_Y:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Y)).add(dp);
+                break;
+
+            case PUFFMARKER.LEFTWRIST_GYRO_Z:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Z)).add(dp);
+                break;
+
+
+            case PUFFMARKER.RIGHTWRIST_ACCEL_X:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
+                break;
+
+            case PUFFMARKER.RIGHTWRIST_ACCEL_Y:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
+                break;
+
+            case PUFFMARKER.RIGHTWRIST_ACCEL_Z:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
+                break;
+
+            case PUFFMARKER.RIGHTWRIST_GYRO_X:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_X)).add(dp);
+                break;
+
+            case PUFFMARKER.RIGHTWRIST_GYRO_Y:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
+                break;
+
+            case PUFFMARKER.RIGHTWRIST_GYRO_Z:
+                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
+                break;
+
+
+            default:
+                System.out.println("NOT INTERESTED: " + dp);
+                break;
         }
-
-        if (dp.timestamp >= this.windowStartTime) {
-            switch (channel) {
-                case AUTOSENSE.CHEST_ECG:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_RIP:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.rip").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_ACCEL_X:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accelx").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_ACCEL_Y:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accely").add(dp);
-                    break;
-
-                case AUTOSENSE.CHEST_ACCEL_Z:
-                    datastreams.getDataPointStream("org.md2k.cstress.data.accelz").add(dp);
-                    break;
-
-
-                case PUFFMARKER.LEFTWRIST_ACCEL_X:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_X)).add(dp);
-                    break;
-
-                case PUFFMARKER.LEFTWRIST_ACCEL_Y:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
-                    break;
-
-                case PUFFMARKER.LEFTWRIST_ACCEL_Z:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
-                    break;
-
-                case PUFFMARKER.LEFTWRIST_GYRO_X:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_X)).add(dp);
-                    break;
-
-                case PUFFMARKER.LEFTWRIST_GYRO_Y:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Y)).add(dp);
-                    break;
-
-                case PUFFMARKER.LEFTWRIST_GYRO_Z:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Z)).add(dp);
-                    break;
-
-
-                case PUFFMARKER.RIGHTWRIST_ACCEL_X:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
-                    break;
-
-                case PUFFMARKER.RIGHTWRIST_ACCEL_Y:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
-                    break;
-
-                case PUFFMARKER.RIGHTWRIST_ACCEL_Z:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
-                    break;
-
-                case PUFFMARKER.RIGHTWRIST_GYRO_X:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_X)).add(dp);
-                    break;
-
-                case PUFFMARKER.RIGHTWRIST_GYRO_Y:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
-                    break;
-
-                case PUFFMARKER.RIGHTWRIST_GYRO_Z:
-                    (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
-                    break;
-
-
-                default:
-                    System.out.println("NOT INTERESTED: " + dp);
-                    break;
-            }
-        }
-
     }
 
     /**
      * Persist and reset all datastreams
      */
     private void resetDataStreams() {
-        datastreams.persist(path + participant + "/");
+        datastreams.persist(path + "/");
         datastreams.reset();
     }
 
 
+    public void registerCallbackDataStream(String s) {
+        datastreams.registerDataPointInterface(s, dkInterface);
+    }
 }

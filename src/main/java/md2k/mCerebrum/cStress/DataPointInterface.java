@@ -1,5 +1,4 @@
-package md2k.mCerebrum.cStress.features;
-
+package md2k.mCerebrum.cStress;
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -8,7 +7,11 @@ package md2k.mCerebrum.cStress.features;
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
- * * Redistributions of source code must retain the above copyright notice, this
+ * * Redistributions of source code mu
+ *
+ *
+ *
+ * st retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright notice,
@@ -27,10 +30,8 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 
-public class Stress {
-    public Stress(DataStreams datastreams, double stressProbabiltyThreshold) {
-        //Do something with stress here
-    }
+public interface DataPointInterface {
+    void dataPointHandler(String stream, DataPointArray dp);
 }
