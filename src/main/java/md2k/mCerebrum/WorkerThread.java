@@ -97,7 +97,7 @@ public class WorkerThread implements Runnable {
 
             if (windowStartTime < 0)
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
-            gi
+
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
                 long starttime = System.currentTimeMillis();
                 streamProcessor.go();
