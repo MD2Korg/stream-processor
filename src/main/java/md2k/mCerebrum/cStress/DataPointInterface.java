@@ -30,8 +30,11 @@ package md2k.mCerebrum.cStress;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 
 public interface DataPointInterface {
-    void dataPointHandler(String stream, DataPointArray dp);
+    void dataPointHandler(String stream, DataPoint dp);
+
+    void dataPointArrayHandler(String stream, DataPointArray dp);
 }

@@ -77,12 +77,19 @@ public class WorkerThread implements Runnable {
 
         streamProcessor.dkInterface = new DataPointInterface() {
             @Override
-            public void dataPointHandler(String stream, DataPointArray dp) {
-                System.out.println(stream + " " + dp);
+            public void dataPointHandler(String stream, DataPoint dp) {
+                System.out.println(path + "/" + stream + " " + dp);
+            }
+
+            @Override
+            public void dataPointArrayHandler(String stream, DataPointArray dp) {
+                System.out.println(path + "/" + stream + " " + dp);
             }
         };
 
-        streamProcessor.registerCallbackDataStream("org.md2k.cstress.fv");
+        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
+
+        streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
 
         long windowStartTime = -1;
         for (CSVDataPoint ap : tp) {

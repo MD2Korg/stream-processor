@@ -228,4 +228,8 @@ public class StreamProcessor {
     public void registerCallbackDataStream(String s) {
         datastreams.registerDataPointInterface(s, dkInterface);
     }
+
+    public void registerCallbackDataArrayStream(String s) {
+        datastreams.registerDataArrayInterface(s, dkInterface);
+    }
 }
