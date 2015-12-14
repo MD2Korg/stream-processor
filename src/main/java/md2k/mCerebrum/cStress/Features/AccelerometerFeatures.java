@@ -1,9 +1,9 @@
 package md2k.mCerebrum.cStress.features;
 
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.Time;
 import md2k.mCerebrum.cStress.library.Vector;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -44,6 +44,8 @@ import java.util.List;
  */
 public class AccelerometerFeatures {
 
+    public static final String ORG_MD2K_CSTRESS_DATA_ACCELX = "org.md2k.cstress.data.accelx";
+
     /**
      * Accelerometer feature processor for StreamProcessor-Autosense.
      *
@@ -53,7 +55,7 @@ public class AccelerometerFeatures {
      */
     public AccelerometerFeatures(DataStreams datastreams, double ACTIVITY_THRESHOLD, int windowSize) {
         //Compute normalized accelerometer values
-        DataPointStream accelx = datastreams.getDataPointStream("org.md2k.cstress.data.accelx");
+        DataPointStream accelx = datastreams.getDataPointStream(ORG_MD2K_CSTRESS_DATA_ACCELX);
         DataPointStream accelxNormalized = datastreams.getDataPointStream("org.md2k.cstress.data.accelx.normalized");
         Smoothing.normalize(accelxNormalized, accelx);
 
