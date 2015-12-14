@@ -168,7 +168,7 @@ public class DataPointStream extends DataStream {
             descriptiveStats.addValue(dp.value);
 
             if (dataPointInterface != null) {
-                dataPointInterface.dataPointHandler((String) metadata.get("name"), new DataPointArray(dp));
+                dataPointInterface.dataPointHandler((String) metadata.get("name"), new DataPoint(dp));
             }
         }
     }

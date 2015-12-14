@@ -111,4 +111,12 @@ public class DataStreams {
             datastreams.get(key).dataPointInterface = callbackRegistration.get(key);
         }
     }
+
+    public void registerDataArrayInterface(String key, DataPointInterface dki) {
+        callbackRegistration.put(key, dki);
+        if (datastreams.containsKey(key)) {
+            datastreams.get(key).dataPointInterface = callbackRegistration.get(key);
+        }
+
+    }
 }

@@ -154,7 +154,7 @@ public class DataArrayStream extends DataStream {
         history.add(0, new DataPointArray(dp)); //Add in reverse to make looking through the array easier
 
         if (dataPointInterface != null) {
-            dataPointInterface.dataPointHandler((String) metadata.get("name"), dp);
+            dataPointInterface.dataPointArrayHandler((String) metadata.get("name"), dp);
         }
     }
 
