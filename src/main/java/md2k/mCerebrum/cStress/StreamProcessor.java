@@ -3,7 +3,7 @@ package md2k.mCerebrum.cStress;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.features.*;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import org.apache.commons.math3.exception.NotANumberException;
 
@@ -225,10 +225,19 @@ public class StreamProcessor {
     }
 
 
+    /**
+     * Handle registration of a callback interface
+     * @param s Stream identifier
+     */
     public void registerCallbackDataStream(String s) {
         datastreams.registerDataPointInterface(s, dkInterface);
     }
 
+
+    /**
+     * Handle registration of a callback interface
+     * @param s Stream identifier
+     */
     public void registerCallbackDataArrayStream(String s) {
         datastreams.registerDataArrayInterface(s, dkInterface);
     }

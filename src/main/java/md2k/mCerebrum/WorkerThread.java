@@ -5,7 +5,6 @@ import md2k.mCerebrum.cStress.StreamProcessor;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.library.Time;
-import md2k.mCerebrum.cStress.library.structs.CSVDataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 

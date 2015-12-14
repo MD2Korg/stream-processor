@@ -29,18 +29,26 @@ package md2k.mCerebrum.cStress.features;
  */
 
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.library.DataArrayStream;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * PuffMarker computation class
+ */
 public class PuffMarker {
 
 
+    /**
+     * Constructor for PuffMarker features
+     *
+     * @param datastreams Global datastream object
+     */
     public PuffMarker(DataStreams datastreams) {
         try {
 
@@ -65,14 +73,30 @@ public class PuffMarker {
     }
 
 
-    public boolean checkValidRollPitch(DataPointStream rolls, DataPointStream pitchs) {
-        double x = (pitchs.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
-        double y = (rolls.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD; //TODO: Is this needed?
+    /**
+     * Validate roll and pitch from the sensors based on statically learned values
+     *
+     * @param roll  Input roll datastream
+     * @param pitch Input roll datastream
+     * @return True if error is below the threshold, False otherwise
+     */
+    public boolean checkValidRollPitch(DataPointStream roll, DataPointStream pitch) {
+        double x = (pitch.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
+        double y = (roll.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD; //TODO: Is this needed?
         double error = x * x;
         return (error < PUFFMARKER.PUFFMARKER_TH[0]);
     }
 
 
+    /**
+     * Main computation routine for PuffMarker features
+     *
+     * @param datastreams Global datastream object
+     * @param wrist       Which wrist to operate on
+     * @param startIndex  Starting index of a window
+     * @param endIndex    Ending index of a window
+     * @return
+     */
     private DataPointArray computePuffMarkerFeatures(DataStreams datastreams, String wrist, int startIndex, int endIndex) {
 
         /////////////// WRIST FEATURES ////////////////////////
@@ -83,42 +107,42 @@ public class PuffMarker {
         DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex));
         DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex));
 
-            /*
-            Three filtering criteria
-             */
+        /*
+        Three filtering criteria
+         */
         double meanHeight = gyr_mag_800.descriptiveStats.getMean() - gyr_mag_8000.descriptiveStats.getMean();
         double duration = gyr_mag_8000.data.get(gyr_mag_8000.data.size() - 1).timestamp - gyr_mag_8000.data.get(0).timestamp;
         boolean isValidRollPitch = checkValidRollPitch(rolls, pitchs);
 
 
-            /*
-                WRIST - GYRO MAGNITUDE - mean
-                WRIST - GYRO MAGNITUDE - median
-                WRIST - GYRO MAGNITUDE - std deviation
-                WRIST - GYRO MAGNITUDE - quartile deviation
-             */
+        /*
+            WRIST - GYRO MAGNITUDE - mean
+            WRIST - GYRO MAGNITUDE - median
+            WRIST - GYRO MAGNITUDE - std deviation
+            WRIST - GYRO MAGNITUDE - quartile deviation
+         */
         double GYRO_Magnitude_Mean = gyr_mag.descriptiveStats.getMean();
         double GYRO_Magnitude_Median = gyr_mag.descriptiveStats.getPercentile(50);
         double GYRO_Magnitude_SD = gyr_mag.descriptiveStats.getStandardDeviation();
         double GYRO_Magnitude_Quartile_Deviation = gyr_mag.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
 
-             /*
-                WRIST - PITCH - mean
-                WRIST - PITCH - median
-                WRIST - PITCH - std deviation
-                WRIST - PITCH - quartile deviation
-             */
+         /*
+            WRIST - PITCH - mean
+            WRIST - PITCH - median
+            WRIST - PITCH - std deviation
+            WRIST - PITCH - quartile deviation
+         */
         double Pitch_Mean = pitchs.descriptiveStats.getMean();
         double Pitch_Median = pitchs.descriptiveStats.getPercentile(50);
         double Pitch_SD = pitchs.descriptiveStats.getStandardDeviation();
         double Pitch_Quartile_Deviation = pitchs.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
 
-             /*
-                WRIST - ROLL - mean
-                WRIST - ROLL - median
-                WRIST - ROLL - std deviation
-                WRIST - ROLL - quartile deviation
-             */
+         /*
+            WRIST - ROLL - mean
+            WRIST - ROLL - median
+            WRIST - ROLL - std deviation
+            WRIST - ROLL - quartile deviation
+         */
         double Roll_Mean = rolls.descriptiveStats.getMean();
         double Roll_Median = rolls.descriptiveStats.getPercentile(50);
         double Roll_SD = rolls.descriptiveStats.getStandardDeviation();

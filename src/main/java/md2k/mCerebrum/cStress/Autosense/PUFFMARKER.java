@@ -32,12 +32,12 @@ public class PUFFMARKER {
     public static final double PUFFMARKER_PITCH_MEAN = -80.3673;
     public static final double PUFFMARKER_ROLL_STD = 13.9753;
     public static final double PUFFMARKER_PITCH_STD = 13.4698;
-    public static final double PUFFMARKER_MEAN = 26.7810;
-    public static final double[][] PUFFMARKER_SIGMA = new double[][]{{195.3085, -92.7786}, {-92.7786, 181.4359}};
+//    public static final double PUFFMARKER_MEAN = 26.7810;
+//    public static final double[][] PUFFMARKER_SIGMA = new double[][]{{195.3085, -92.7786}, {-92.7786, 181.4359}};
     public static final double[] PUFFMARKER_TH = new double[]{10.1511, 7.8746, 11.7729, 11.2226};
 
     //------ Sensor KEY ------//
-    public static final String KEY_DATA_RIP = "org.md2k.puffMarker.data.rip";
+//    public static final String KEY_DATA_RIP = "org.md2k.puffMarker.data.rip";
     public static final String KEY_DATA_ACCEL_X = "org.md2k.puffMarker.data.accel.x";
     public static final String KEY_DATA_ACCEL_Y = "org.md2k.puffMarker.data.accel.y";
     public static final String KEY_DATA_ACCEL_Z = "org.md2k.puffMarker.data.accel.z";
@@ -59,7 +59,6 @@ public class PUFFMARKER {
     public static final String KEY_DATA_RIGHTWRIST_ACCEL_Y = KEY_DATA_ACCEL_Y + RIGHT_WRIST;
     public static final String KEY_DATA_RIGHTWRIST_ACCEL_X = KEY_DATA_ACCEL_X + RIGHT_WRIST;
     //------ Sensor ID ------//
-    public static final int RIP = 1;
     public static final int LEFTWRIST_ACCEL_X = 26;
     public static final int LEFTWRIST_ACCEL_Y = 27;
     //------ Sensor KEY ------//
@@ -73,14 +72,15 @@ public class PUFFMARKER {
     public static final int RIGHTWRIST_GYRO_X = 36;
     public static final int RIGHTWRIST_GYRO_Y = 37;
     public static final int RIGHTWRIST_GYRO_Z = 38;
-    public static final int[] IDs = {RIP, LEFTWRIST_ACCEL_X, LEFTWRIST_ACCEL_Y, LEFTWRIST_ACCEL_Z, LEFTWRIST_GYRO_X, LEFTWRIST_GYRO_Y, LEFTWRIST_GYRO_Z
-            , RIGHTWRIST_ACCEL_X, RIGHTWRIST_ACCEL_Y, RIGHTWRIST_ACCEL_Z, RIGHTWRIST_GYRO_X, RIGHTWRIST_GYRO_Y, RIGHTWRIST_GYRO_Z};
-    public static final int[] WristIDs = {LEFTWRIST_ACCEL_X, LEFTWRIST_ACCEL_Y, LEFTWRIST_ACCEL_Z, LEFTWRIST_GYRO_X, LEFTWRIST_GYRO_Y, LEFTWRIST_GYRO_Z
-            , RIGHTWRIST_ACCEL_X, RIGHTWRIST_ACCEL_Y, RIGHTWRIST_ACCEL_Z, RIGHTWRIST_GYRO_X, RIGHTWRIST_GYRO_Y, RIGHTWRIST_GYRO_Z};
-    public static int TH_HEIGHT = 50;
+
     public static int GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE = 13;
     public static int GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE = 131;
 
+//    public static final int[] IDs = {RIP, LEFTWRIST_ACCEL_X, LEFTWRIST_ACCEL_Y, LEFTWRIST_ACCEL_Z, LEFTWRIST_GYRO_X, LEFTWRIST_GYRO_Y, LEFTWRIST_GYRO_Z
+//            , RIGHTWRIST_ACCEL_X, RIGHTWRIST_ACCEL_Y, RIGHTWRIST_ACCEL_Z, RIGHTWRIST_GYRO_X, RIGHTWRIST_GYRO_Y, RIGHTWRIST_GYRO_Z};
+//    public static final int[] WristIDs = {LEFTWRIST_ACCEL_X, LEFTWRIST_ACCEL_Y, LEFTWRIST_ACCEL_Z, LEFTWRIST_GYRO_X, LEFTWRIST_GYRO_Y, LEFTWRIST_GYRO_Z
+//            , RIGHTWRIST_ACCEL_X, RIGHTWRIST_ACCEL_Y, RIGHTWRIST_ACCEL_Z, RIGHTWRIST_GYRO_X, RIGHTWRIST_GYRO_Y, RIGHTWRIST_GYRO_Z};
+//    public static int TH_HEIGHT = 50;
 /*
     public static final double ROLL_MEAN=30.3067;
     public static final double PITCH_MEAN=-79.8684;

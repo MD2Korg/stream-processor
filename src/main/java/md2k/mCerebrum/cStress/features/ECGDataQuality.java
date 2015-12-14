@@ -28,15 +28,23 @@ package md2k.mCerebrum.cStress.features;
  */
 
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.dataquality.autosense.ECGQualityCalculation;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 import java.util.List;
 
+/**
+ * Wrapper class for ECGQualityCalculation
+ */
 public class ECGDataQuality {
 
+    /**
+     * Constructor
+     * @param datastreams Global datastream object
+     * @param qualityThreshold Input quality threshold
+     */
     public ECGDataQuality(DataStreams datastreams, double qualityThreshold) {
         DataPointStream ecg = datastreams.getDataPointStream("org.md2k.cstress.data.ecg");
         DataPointStream ecgQuality = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.quality");

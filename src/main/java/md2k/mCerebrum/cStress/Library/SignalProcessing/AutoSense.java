@@ -1,6 +1,6 @@
 package md2k.mCerebrum.cStress.library.signalprocessing;
 
-import md2k.mCerebrum.cStress.library.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 /*

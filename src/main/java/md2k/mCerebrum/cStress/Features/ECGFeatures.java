@@ -1,8 +1,8 @@
 package md2k.mCerebrum.cStress.features;
 
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.signalprocessing.AutoSense;
 import md2k.mCerebrum.cStress.library.signalprocessing.ECG;
 import md2k.mCerebrum.cStress.library.signalprocessing.Filter;
@@ -152,7 +152,7 @@ public class ECGFeatures {
 
     /**
      * Determine valid RR-intervals and outliers
-     * <p>
+     * <p></p>
      * Reference: Matlab code \\TODO
      * </p>
      *

@@ -1,8 +1,8 @@
 package md2k.mCerebrum.cStress.features;
 
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.Vector;
 import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
@@ -33,9 +33,19 @@ import md2k.mCerebrum.cStress.library.structs.DataPoint;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+
+/**
+ * AutoSense Accelerometer and Gyrometer processor.
+ */
 public class AccelGyroFeatures {
 
 
+    /**
+     * Constructor
+     * @param datastreams Global datastreams object
+     * @param wrist Which wrist to operate on
+     */
     public AccelGyroFeatures(DataStreams datastreams, String wrist) {
 
         DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_X + wrist);
@@ -63,17 +73,19 @@ public class AccelGyroFeatures {
         } else {
             calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, 1);
         }
-
-        DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
-
-//        int[] intersectionIndexGYR_L = segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
-//        System.out.println("Arraylen=" + intersectionIndexGYR_L.length / 2 + "; datastreamlen=" + gyr_intersections.data.size());
     }
 
 
-    /*
-        segmenting those part where slow moving avg is greater than fast moving avg
-    */
+    /**
+     * Segmentation based on two moving averages
+     *
+     * @param output Output datastream
+     * @param slowMovingAverage Input slow moving average
+     * @param fastMovingAverage Input fast moving average
+     * @param THRESHOLD Threshold //TODO: more details
+     * @param near //TODO: What is this?
+     * @return
+     */
     public static int[] segmentationUsingTwoMovingAverage(DataPointStream output, DataPointStream slowMovingAverage
             , DataPointStream fastMovingAverage
             , int THRESHOLD, int near) {
@@ -96,7 +108,6 @@ public class AccelGyroFeatures {
         }
         int[] intersectionIndex = new int[curIndex + 1];
 
-//        System.arraycopy(indexList, 0, intersectionIndex, 0, curIndex + 1);
         if (curIndex > 0)
             for (int i = 0; i <= curIndex; i += 2) {
                 output.data.add(new DataPoint(indexList[i], indexList[i + 1]));
@@ -105,20 +116,44 @@ public class AccelGyroFeatures {
         return intersectionIndex;
     }
 
+    /**
+     * Compute roll from accelerometer inputs
+     * @param ax Accelerometer x-axis
+     * @param ay Accelerometer y-axis
+     * @param az Accelerometer z-axis
+     * @return
+     */
     public static double roll(double ax, double ay, double az) {
         return 180 * Math.atan2(ax, Math.sqrt(ay * ay + az * az)) / Math.PI;
     }
 
+
+    /**
+     * Compute pitch from accelerometer inputs
+     * @param ax Accelerometer x-axis
+     * @param ay Accelerometer y-axis
+     * @param az Accelerometer z-axis
+     * @return
+     */
     public static double pitch(double ax, double ay, double az) {
         return 180 * Math.atan2(-ay, -az) / Math.PI;
     }
 
-    private void calculateRollPitchSegment(DataPointStream rolls, DataPointStream pitchs, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
+    /**
+     * Segment datastreams based on roll and pitch
+     * @param roll Output roll datastream
+     * @param pitch Output pitch datastream
+     * @param accelx Input accelerometer x datastream
+     * @param accely Input accelerometer y datastream
+     * @param accelz Input accelerometer z datastream
+     * @param sign Sign //TODO: What does this mean?
+     */
+    private void calculateRollPitchSegment(DataPointStream roll, DataPointStream pitch, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
         for (int i = 0; i < accelx.data.size(); i++) {
             double rll = roll(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
             double ptch = pitch(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
-            rolls.data.add(new DataPoint(accelx.data.get(i).timestamp, rll));
-            pitchs.data.add(new DataPoint(accelx.data.get(i).timestamp, ptch));
+            roll.data.add(new DataPoint(accelx.data.get(i).timestamp, rll));
+            pitch.data.add(new DataPoint(accelx.data.get(i).timestamp, ptch));
         }
     }
 

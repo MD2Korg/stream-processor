@@ -1,24 +1,18 @@
-package md2k.mCerebrum.cStress.library;
-
-import md2k.mCerebrum.cStress.DataPointInterface;
-
-import java.util.HashMap;
-
-/*
- * Copyright (c) 2015, The University of Memphis, MD2K Center
+package md2k.mCerebrum.cStress.library.datastream;/*
+ * Copyright (c) 2015, The University of Memphis, MD2K Center 
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- *
+ * 
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,19 +25,13 @@ import java.util.HashMap;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * DataStream Interface
+ */
+public interface DataStreamInterface {
 
-public abstract class DataStream implements DataStreamInterface {
+    void persist(String filename);
 
-    public HashMap<String, Object> metadata;
-    public boolean preserve;
-    public DataPointInterface dataPointInterface;
+    void reset();
 
-    /**
-     * Retrieve stream name
-     *
-     * @return The unique stream name
-     */
-    public String getName() {
-        return (String) metadata.get("name");
-    }
 }

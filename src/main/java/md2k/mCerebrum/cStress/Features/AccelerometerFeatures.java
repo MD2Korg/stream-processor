@@ -1,7 +1,7 @@
 package md2k.mCerebrum.cStress.features;
 
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.Time;
 import md2k.mCerebrum.cStress.library.Vector;
 import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;

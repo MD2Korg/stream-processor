@@ -1,7 +1,5 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.library.structs.CSVDataPoint;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
