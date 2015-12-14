@@ -74,7 +74,7 @@ public class WorkerThread implements Runnable {
         StreamProcessor streamProcessor = new StreamProcessor(windowSize);
         streamProcessor.setPath(path);
 
-        streamProcessor.dkInterface = new DataPointInterface() {
+        streamProcessor.dpInterface = new DataPointInterface() {
             @Override
             public void dataPointHandler(String stream, DataPoint dp) {
                 System.out.println(path + "/" + stream + " " + dp);

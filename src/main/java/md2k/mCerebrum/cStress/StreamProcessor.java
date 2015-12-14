@@ -42,7 +42,7 @@ import org.apache.commons.math3.exception.NotANumberException;
  */
 public class StreamProcessor {
 
-    public DataPointInterface dkInterface;
+    public DataPointInterface dpInterface;
     private long windowSize;
     private String path;
     private DataStreams datastreams = new DataStreams();
@@ -230,7 +230,7 @@ public class StreamProcessor {
      * @param s Stream identifier
      */
     public void registerCallbackDataStream(String s) {
-        datastreams.registerDataPointInterface(s, dkInterface);
+        datastreams.registerDataPointInterface(s, dpInterface);
     }
 
 
@@ -239,6 +239,6 @@ public class StreamProcessor {
      * @param s Stream identifier
      */
     public void registerCallbackDataArrayStream(String s) {
-        datastreams.registerDataArrayInterface(s, dkInterface);
+        datastreams.registerDataArrayInterface(s, dpInterface);
     }
 }
