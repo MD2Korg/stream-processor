@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mCerebrum.cStress.library.datastream;
 
 
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;

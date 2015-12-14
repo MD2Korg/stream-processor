@@ -1,5 +1,6 @@
 package md2k.mCerebrum.cStress.library;
 
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 import java.util.ArrayList;
@@ -69,10 +70,24 @@ public class Vector {
     }
 
 
+    /**
+     * Compute the magnitude of a single (x,y,z) tuple
+     * @param x
+     * @param y
+     * @param z
+     * @return Magnitude
+     */
     public static double getMagnitude(double x, double y, double z) {
         return Math.sqrt(x * x + y * y + z * z);
     }
 
+    /**
+     * Computes the magnitude of a list of tuples (x,y,z)
+     * @param gyr_mag Output magnitude datastream
+     * @param x List of DataPoints for the x-axis
+     * @param y List of DataPoints for the y-axis
+     * @param z List of DataPoints for the z-axis
+     */
     public static void magnitude(DataPointStream gyr_mag, List<DataPoint> x, List<DataPoint> y, List<DataPoint> z) {
         for (int i = 0; i < x.size(); i++) {
             double mag = getMagnitude(x.get(i).value, y.get(i).value, z.get(i).value);

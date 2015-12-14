@@ -29,7 +29,9 @@ package md2k.mCerebrum.cStress.library.structs;
 
 /**
  * Data structure holding the results from Lomb-Scargle periodogram computation
- * Reference: https://en.wikipedia.org/wiki/Least-squares_spectral_analysis#The_Lomb.E2.80.93Scargle_periodogram
+ * <p>
+ * Reference: <a href="https://en.wikipedia.org/wiki/Least-squares_spectral_analysis#The_Lomb.E2.80.93Scargle_periodogram">https://en.wikipedia.org/wiki/Least-squares_spectral_analysis#The_Lomb.E2.80.93Scargle_periodogram</a>
+ * </p>
  */
 public class Lomb {
     public double[] P;

@@ -1,4 +1,8 @@
-package md2k.mCerebrum.cStress.library.structs;
+package md2k.mCerebrum.cStress.library.datastream;
+
+import md2k.mCerebrum.cStress.DataPointInterface;
+
+import java.util.HashMap;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -27,36 +31,19 @@ package md2k.mCerebrum.cStress.library.structs;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * DataPoint object to handle CSV AutoSense data files
- */
-public class CSVDataPoint implements Comparable {
-    public double value;
-    public long timestamp;
-    public int channel;
 
+public abstract class DataStream implements DataStreamInterface {
+
+    public HashMap<String, Object> metadata;
+    public boolean preserve;
+    public DataPointInterface dataPointInterface;
 
     /**
-     * @param channel   AutoSense channel which determine a specific sensor
-     * @param timestamp Timestamp in milliseconds since Jan 1st, 1970
-     * @param value     Sensor value
+     * Retrieve stream name
+     *
+     * @return The unique stream name
      */
-    public CSVDataPoint(int channel, long timestamp, double value) {
-        this.channel = channel;
-        this.value = value;
-        this.timestamp = timestamp;
+    public String getName() {
+        return (String) metadata.get("name");
     }
-
-    @Override
-    public int compareTo(Object obj) {
-        CSVDataPoint o = (CSVDataPoint) obj;
-        if (this.value == o.value && this.timestamp == o.timestamp && this.channel == o.channel) {
-            return 0; //They are the same
-        } else if (this.timestamp < o.timestamp) {
-            return -1; //"this" is before "o"
-        } else {
-            return 1; //"this" is after "o"
-        }
-    }
-
 }

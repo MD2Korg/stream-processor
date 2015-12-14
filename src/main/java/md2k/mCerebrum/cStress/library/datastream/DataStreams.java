@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mCerebrum.cStress.library.datastream;
 
 import md2k.mCerebrum.cStress.DataPointInterface;
 
@@ -105,6 +105,11 @@ public class DataStreams {
         }
     }
 
+    /**
+     * Registration method for the data point interface
+     * @param key String designating which data stream to reference
+     * @param dki DataPointInterface reference
+     */
     public void registerDataPointInterface(String key, DataPointInterface dki) {
         callbackRegistration.put(key, dki);
         if (datastreams.containsKey(key)) {
@@ -112,6 +117,11 @@ public class DataStreams {
         }
     }
 
+    /**
+     * Registration method for the data array interface
+     * @param key String designating which data stream to reference
+     * @param dki DataPointInterface reference
+     */
     public void registerDataArrayInterface(String key, DataPointInterface dki) {
         callbackRegistration.put(key, dki);
         if (datastreams.containsKey(key)) {

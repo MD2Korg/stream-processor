@@ -1,8 +1,7 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mCerebrum.cStress.library.datastream;
 
 
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 

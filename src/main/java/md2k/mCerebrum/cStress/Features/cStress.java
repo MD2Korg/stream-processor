@@ -27,9 +27,9 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import md2k.mCerebrum.cStress.library.DataArrayStream;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -37,8 +37,15 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Main cStress feature computation class
+ */
 public class cStress {
 
+    /**
+     * Constructor for cStress
+     * @param datastreams Global datastreams
+     */
     public cStress(DataStreams datastreams) {
         try {
             DataPointArray fv = computeStressFeatures(datastreams);

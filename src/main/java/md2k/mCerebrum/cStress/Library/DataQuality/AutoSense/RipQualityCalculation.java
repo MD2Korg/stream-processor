@@ -165,7 +165,12 @@ public class RipQualityCalculation {
         return AUTOSENSE.QUALITY_GOOD;
     }
 
-
+    /**
+     * Interface routine between the old Java AutoSense quality calculation and stream-processor
+     * @param ecg Input RIP DataPoint list
+     * @param windowSize The size of a window in milliseconds
+     * @return DataPoint list of qualities
+     */
     public List<DataPoint> computeQuality(List<DataPoint> rip, long windowSize) {
 
         List<DataPoint[]> windowedECG = Time.window(rip, windowSize);

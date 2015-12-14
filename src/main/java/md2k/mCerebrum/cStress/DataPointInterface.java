@@ -33,6 +33,9 @@ package md2k.mCerebrum.cStress;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 
+/**
+ * DataPoint Interface utilized to implement a callback mechanism
+ */
 public interface DataPointInterface {
     void dataPointHandler(String stream, DataPoint dp);
 

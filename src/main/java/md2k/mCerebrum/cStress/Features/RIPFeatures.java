@@ -1,8 +1,8 @@
 package md2k.mCerebrum.cStress.features;
 
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.Vector;
 import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
@@ -44,8 +44,9 @@ import java.util.List;
 public class RIPFeatures {
     /**
      * Core Respiration Features
+     * <p>
      * Reference: ripFeature_Extraction.m
-     *
+     * </p>
      * @param datastreams Global data stream object
      */
     public RIPFeatures(DataStreams datastreams) {

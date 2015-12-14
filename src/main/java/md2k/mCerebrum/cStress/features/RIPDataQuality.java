@@ -28,15 +28,23 @@ package md2k.mCerebrum.cStress.features;
  */
 
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.DataPointStream;
-import md2k.mCerebrum.cStress.library.DataStreams;
+import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.dataquality.autosense.RipQualityCalculation;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 import java.util.List;
 
+/**
+ * Wrapper class for RipQualityCalculation
+ */
 public class RIPDataQuality {
 
+    /**
+     * Constructor
+     * @param datastreams Global datastream object
+     * @param qualityThreshold Input quality threshold
+     */
     public RIPDataQuality(DataStreams datastreams, double qualityThreshold) {
         DataPointStream ecg = datastreams.getDataPointStream("org.md2k.cstress.data.rip");
         DataPointStream ecgQuality = datastreams.getDataPointStream("org.md2k.cstress.data.rip.quality");
