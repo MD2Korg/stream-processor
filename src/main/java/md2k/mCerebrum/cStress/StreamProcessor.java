@@ -126,9 +126,13 @@ public class StreamProcessor {
     public void go() {
         process();
         generateResults();
+        evaluateModel();
         resetDataStreams();
     }
 
+    private void evaluateModel() {
+
+    }
 
 
     /**
