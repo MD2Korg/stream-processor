@@ -1,9 +1,9 @@
 package md2k.mCerebrum.cStress.library.datastream;
 
 
+import md2k.mCerebrum.cStress.library.DescriptiveStatistics;
+import md2k.mCerebrum.cStress.library.SummaryStatistics;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -64,7 +64,7 @@ public class DataPointStream extends DataStream {
         metadata.put("name", name);
         preserve = false;
         stats = new SummaryStatistics();
-        descriptiveStats = new DescriptiveStatistics(10000);
+        descriptiveStats = new DescriptiveStatistics();
     }
 
     public DataPointStream(String name, List<DataPoint> dataPoints) {
@@ -162,7 +162,7 @@ public class DataPointStream extends DataStream {
     public void add(DataPoint dp) {
         if (!Double.isNaN(dp.value) && !Double.isInfinite(dp.value)) {
             data.add(new DataPoint(dp));
-            history.add(0, new DataPoint(dp));
+            history.add(new DataPoint(dp));
             stats.addValue(dp.value);
             descriptiveStats.addValue(dp.value);
 

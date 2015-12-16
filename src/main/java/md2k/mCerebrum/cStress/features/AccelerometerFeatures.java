@@ -1,12 +1,12 @@
 package md2k.mCerebrum.cStress.features;
 
+import md2k.mCerebrum.cStress.library.SummaryStatistics;
 import md2k.mCerebrum.cStress.library.Time;
 import md2k.mCerebrum.cStress.library.Vector;
 import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.List;
 
@@ -83,7 +83,7 @@ public class AccelerometerFeatures {
             for (int j = 0; j < magnitude.length; j++) {
                 datastreams.getDataPointStream("org.md2k.cstress.data.accel.magnitude").add(new DataPoint(wx[j].timestamp, magnitude[j]));
             }
-            DescriptiveStatistics sd = new DescriptiveStatistics(magnitude);
+            SummaryStatistics sd = new SummaryStatistics(magnitude);
 
             if (wx.length > 0) {
                 datastreams.getDataPointStream("org.md2k.cstress.data.accel.windowed.magnitude.stdev").add(new DataPoint(wx[0].timestamp, sd.getStandardDeviation()));
