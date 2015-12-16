@@ -81,8 +81,8 @@ public class PuffMarker {
      * @return True if error is below the threshold, False otherwise
      */
     public boolean checkValidRollPitch(DataPointStream roll, DataPointStream pitch) {
-        double x = (pitch.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
-        double y = (roll.descriptiveStats.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD; //TODO: Is this needed?
+        double x = (pitch.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
+        double y = (roll.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD; //TODO: Is this needed?
         double error = x * x;
         return (error < PUFFMARKER.PUFFMARKER_TH[0]);
     }
@@ -110,7 +110,7 @@ public class PuffMarker {
         /*
         Three filtering criteria
          */
-        double meanHeight = gyr_mag_800.descriptiveStats.getMean() - gyr_mag_8000.descriptiveStats.getMean();
+        double meanHeight = gyr_mag_800.stats.getMean() - gyr_mag_8000.stats.getMean();
         double duration = gyr_mag_8000.data.get(gyr_mag_8000.data.size() - 1).timestamp - gyr_mag_8000.data.get(0).timestamp;
         boolean isValidRollPitch = checkValidRollPitch(rolls, pitchs);
 
@@ -121,10 +121,10 @@ public class PuffMarker {
             WRIST - GYRO MAGNITUDE - std deviation
             WRIST - GYRO MAGNITUDE - quartile deviation
          */
-        double GYRO_Magnitude_Mean = gyr_mag.descriptiveStats.getMean();
-        double GYRO_Magnitude_Median = gyr_mag.descriptiveStats.getPercentile(50);
-        double GYRO_Magnitude_SD = gyr_mag.descriptiveStats.getStandardDeviation();
-        double GYRO_Magnitude_Quartile_Deviation = gyr_mag.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
+        double GYRO_Magnitude_Mean = gyr_mag.stats.getMean();
+        double GYRO_Magnitude_Median = gyr_mag.getPercentile(50);
+        double GYRO_Magnitude_SD = gyr_mag.stats.getStandardDeviation();
+        double GYRO_Magnitude_Quartile_Deviation = gyr_mag.getPercentile(75) - gyr_mag.getPercentile(25);
 
          /*
             WRIST - PITCH - mean
@@ -132,10 +132,10 @@ public class PuffMarker {
             WRIST - PITCH - std deviation
             WRIST - PITCH - quartile deviation
          */
-        double Pitch_Mean = pitchs.descriptiveStats.getMean();
-        double Pitch_Median = pitchs.descriptiveStats.getPercentile(50);
-        double Pitch_SD = pitchs.descriptiveStats.getStandardDeviation();
-        double Pitch_Quartile_Deviation = pitchs.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
+        double Pitch_Mean = pitchs.stats.getMean();
+        double Pitch_Median = pitchs.getPercentile(50);
+        double Pitch_SD = pitchs.stats.getStandardDeviation();
+        double Pitch_Quartile_Deviation = pitchs.getPercentile(75) - gyr_mag.getPercentile(25);
 
          /*
             WRIST - ROLL - mean
@@ -143,10 +143,10 @@ public class PuffMarker {
             WRIST - ROLL - std deviation
             WRIST - ROLL - quartile deviation
          */
-        double Roll_Mean = rolls.descriptiveStats.getMean();
-        double Roll_Median = rolls.descriptiveStats.getPercentile(50);
-        double Roll_SD = rolls.descriptiveStats.getStandardDeviation();
-        double Roll_Quartile_Deviation = rolls.descriptiveStats.getPercentile(75) - gyr_mag.descriptiveStats.getPercentile(25);
+        double Roll_Mean = rolls.stats.getMean();
+        double Roll_Median = rolls.getPercentile(50);
+        double Roll_SD = rolls.stats.getStandardDeviation();
+        double Roll_Quartile_Deviation = rolls.getPercentile(75) - gyr_mag.getPercentile(25);
 
 
         List<Double> featureVector = new ArrayList<Double>();

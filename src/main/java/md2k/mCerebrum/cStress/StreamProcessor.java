@@ -98,8 +98,8 @@ public class StreamProcessor {
             RIPFeatures rf = new RIPFeatures(datastreams);
 
             //AutoSense wrist features
-            AccelGyroFeatures leftWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
-            AccelGyroFeatures rightWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
+//            AccelGyroFeatures leftWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
+//            AccelGyroFeatures rightWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
 
 
         } catch (IndexOutOfBoundsException e) {
@@ -116,7 +116,7 @@ public class StreamProcessor {
     public void generateResults() {
         try {
             cStress cs = new cStress(datastreams);
-            PuffMarker pm = new PuffMarker(datastreams);
+//            PuffMarker pm = new PuffMarker(datastreams);
 
         } catch (NotANumberException e) {
             System.err.println("Generate result error");
@@ -220,7 +220,7 @@ public class StreamProcessor {
      * Persist and reset all datastreams
      */
     private void resetDataStreams() {
-        datastreams.persist(path + "/");
+        //datastreams.persist(path + "/");
         datastreams.reset();
     }
 

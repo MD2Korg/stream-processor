@@ -1,9 +1,9 @@
 package md2k.mCerebrum.cStress.library.signalprocessing;
 
+import md2k.mCerebrum.cStress.library.SummaryStatistics;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.Lomb;
 import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
@@ -114,13 +114,13 @@ public class ECG {
 
         nf = f.length;
 
-        DescriptiveStatistics stats = new DescriptiveStatistics();
+        SummaryStatistics stats = new SummaryStatistics();
         for (DataPoint aData : dp) {
             stats.addValue(aData.value);
         }
 
         double mx = stats.getMean();
-        double vx = stats.getVariance();
+        double vx = stats.getStandardDeviation() * stats.getStandardDeviation();
 
         for (DataPoint aDp : dp) {
             aDp.value -= mx;

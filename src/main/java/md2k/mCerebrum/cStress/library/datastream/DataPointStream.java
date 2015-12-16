@@ -1,9 +1,8 @@
 package md2k.mCerebrum.cStress.library.datastream;
 
 
+import md2k.mCerebrum.cStress.library.SummaryStatistics;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -48,7 +47,7 @@ public class DataPointStream extends DataStream {
 
     public List<DataPoint> data;
     public SummaryStatistics stats;
-    public DescriptiveStatistics descriptiveStats;
+    //    public DescriptiveStatistics descriptiveStats;
     private List<DataPoint> history;
 
 
@@ -64,7 +63,7 @@ public class DataPointStream extends DataStream {
         metadata.put("name", name);
         preserve = false;
         stats = new SummaryStatistics();
-        descriptiveStats = new DescriptiveStatistics(10000);
+//        descriptiveStats = new DescriptiveStatistics(10000);
     }
 
     public DataPointStream(String name, List<DataPoint> dataPoints) {
@@ -84,7 +83,7 @@ public class DataPointStream extends DataStream {
         this.history = new ArrayList<DataPoint>(other.history);
         this.metadata = other.metadata;
         this.stats = other.stats;
-        this.descriptiveStats = other.descriptiveStats;
+//        this.descriptiveStats = other.descriptiveStats;
         this.preserve = other.preserve;
     }
 
@@ -164,7 +163,7 @@ public class DataPointStream extends DataStream {
             data.add(new DataPoint(dp));
             history.add(0, new DataPoint(dp));
             stats.addValue(dp.value);
-            descriptiveStats.addValue(dp.value);
+//            descriptiveStats.addValue(dp.value);
 
             if (dataPointInterface != null) {
                 dataPointInterface.dataPointHandler((String) metadata.get("name"), new DataPoint(dp));
@@ -180,7 +179,7 @@ public class DataPointStream extends DataStream {
      * @return Computed percentile
      */
     public double getPercentile(int i) {
-        return descriptiveStats.getPercentile(i);
+        return stats.getMean();
     }
 
     /**
