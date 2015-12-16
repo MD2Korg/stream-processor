@@ -290,7 +290,7 @@ public class ECGFeatures {
      * @param frequency   Sampling frequence
      */
     private void filterRpeaks(DataPointStream Rpeaks, DataPointStream Rpeak_temp2, DataPointStream peaks, double frequency) {
-        DataPointStream Rpeak_temp3 = new DataPointStream("temp3");
+        List<DataPoint> Rpeak_temp3 = new ArrayList<DataPoint>();
         if (Rpeak_temp2.data.size() > 0) {
             Rpeak_temp3.add(Rpeak_temp2.data.get(0));
 
@@ -328,7 +328,7 @@ public class ECGFeatures {
             }
         }
 
-        for (DataPoint dp : Rpeak_temp3.data) {
+        for (DataPoint dp : Rpeak_temp3) {
             Rpeaks.add(new DataPoint(dp));
         }
     }
