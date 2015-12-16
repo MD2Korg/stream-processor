@@ -40,13 +40,13 @@ import java.util.List;
 /**
  * Main cStress feature computation class
  */
-public class cStress {
+public class cStressFeatureVector {
 
     /**
      * Constructor for cStress
      * @param datastreams Global datastreams
      */
-    public cStress(DataStreams datastreams) {
+    public cStressFeatureVector(DataStreams datastreams) {
         try {
             DataPointArray fv = computeStressFeatures(datastreams);
             DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.cstress.fv");
