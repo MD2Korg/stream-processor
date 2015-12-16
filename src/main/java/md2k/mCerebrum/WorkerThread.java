@@ -91,20 +91,28 @@ public class WorkerThread implements Runnable {
         streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
 
         long windowStartTime = -1;
+        long st = -1;
         for (CSVDataPoint ap : tp) {
             DataPoint dp = new DataPoint(ap.timestamp, ap.value);
+
             streamProcessor.add(ap.channel, dp);
 
-            if (windowStartTime < 0)
+
+            if (windowStartTime < 0) {
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
+                st = System.currentTimeMillis();
+            }
 
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
+                long et = System.currentTimeMillis();
+                System.out.println("Add Iteration: " + (et - st) / 1000.0);
                 long starttime = System.currentTimeMillis();
                 streamProcessor.go();
                 long endtime = System.currentTimeMillis();
 
                 System.out.println("Loop iteration in seconds: " + (endtime - starttime) / 1000.0);
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
+                st = System.currentTimeMillis();
             }
         }
     }
