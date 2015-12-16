@@ -3,9 +3,24 @@ package md2k.mCerebrum.cStress;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.features.*;
+import md2k.mCerebrum.cStress.library.structs.SVCModel;
+import md2k.mCerebrum.cStress.library.structs.Model;
+import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
+import com.google.gson.Gson;
+
+
+import javax.xml.crypto.Data;
+import java.io.FileInputStream;
+import java.io.File;
+import org.apache.commons.io.FileUtils;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.TreeMap;
 
 
 /*
@@ -46,17 +61,39 @@ public class StreamProcessor {
     private long windowSize;
     private String path;
     private DataStreams datastreams = new DataStreams();
+    private TreeMap<String,Object> models = new TreeMap<String,Object>();
+
     /**
      * Main constructor for StreamProcessor
      *
      * @param windowSize  Time in milliseconds to segment and buffer data before processing
-     * @param path        Location where data will be persisted on disk
-     * @param participant A participant identifier that should identify a directory within 'path'
      */
     public StreamProcessor(long windowSize) {
         this.windowSize = windowSize;
 
         configureDataStreams();
+    }
+
+
+
+    /**
+     * load and create a model object from a model file
+     * @param path Path to the model file (in JSON format)
+     */
+    public void loadModel(String path) {
+        Gson gson = new Gson();
+        try
+        {
+            String jsonstring = FileUtils.readFileToString(new File(path));
+            Model genericModel = gson.fromJson(jsonstring,Model.class);
+            if(genericModel.getModelType().equals("svc"))
+                models.put("cStressModel",gson.fromJson(jsonstring,SVCModel.class));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        //gson parse a JSON model file and create a SVMModel object, and add it to models
     }
 
     private void configureDataStreams() {
@@ -75,12 +112,25 @@ public class StreamProcessor {
 
         datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
         datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+
+        datastreams.getDataPointStream("org.md2k.cstress.probability").metadata.put("frequency", windowSize);
+        datastreams.getDataPointStream("org.md2k.cstress.stresslabel").metadata.put("frequency", windowSize);
+
     }
 
 
+
+    /**
+     * set the path for the feature files used by this stream processor
+     *
+     * @param path Path to the folder with the feature files
+     */
     public void setPath(String path) {
         this.path = path;
     }
+
+
+
 
     /**
      * Main computation loop that processes all buffered data through several different classes
@@ -115,20 +165,47 @@ public class StreamProcessor {
      */
     public void generateResults() {
         try {
-            cStress cs = new cStress(datastreams);
-//            PuffMarker pm = new PuffMarker(datastreams);
+            cStressFeatureVector cs = new cStressFeatureVector(datastreams);
+    //        PuffMarker pm = new PuffMarker(datastreams);
 
         } catch (NotANumberException e) {
             System.err.println("Generate result error");
         }
     }
 
+    /**
+     * Method for processing the base features, computing the model feature vectors, and deploying the model to get model outputs
+     */
     public void go() {
         process();
         generateResults();
+        runcStress();
         resetDataStreams();
     }
 
+
+    /**
+     * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
+     */
+    private void runcStress() {
+        SVCModel model = (SVCModel)models.get("cStressModel");
+        DataArrayStream featurevector = datastreams.getDataArrayStream("org.md2k.cstress.fv");
+
+        for(DataPointArray ap: featurevector.data)
+        {
+            double prob = model.computeProbability(ap);
+            int label;
+            if (prob > model.getBias())
+                label = AUTOSENSE.STRESSED;
+            else
+                label = AUTOSENSE.NOT_STRESSED;
+
+
+            datastreams.getDataPointStream("org.md2k.cstress.probability").add(new DataPoint(ap.timestamp,prob));
+            datastreams.getDataPointStream("org.md2k.cstress.stresslabel").add(new DataPoint(ap.timestamp,label));
+        }
+
+    }
 
 
     /**
@@ -220,7 +297,7 @@ public class StreamProcessor {
      * Persist and reset all datastreams
      */
     private void resetDataStreams() {
-        //datastreams.persist(path + "/");
+        datastreams.persist(path + "/");
         datastreams.reset();
     }
 
