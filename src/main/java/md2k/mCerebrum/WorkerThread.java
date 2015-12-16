@@ -37,11 +37,17 @@ import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 public class WorkerThread implements Runnable {
 
     private String path;
-
+    private String cStressModelPath;
 
     public WorkerThread(String path) {
         this.path = path;
     }
+
+    public WorkerThread(String path,String cStressModelPath) {
+        this.path = path;
+        this.cStressModelPath = cStressModelPath;
+    }
+
 
     @Override
     public void run() {
@@ -73,6 +79,7 @@ public class WorkerThread implements Runnable {
 
         StreamProcessor streamProcessor = new StreamProcessor(windowSize);
         streamProcessor.setPath(path);
+        streamProcessor.loadModel(cStressModelPath);
 
         streamProcessor.dpInterface = new DataPointInterface() {
             @Override
@@ -86,9 +93,10 @@ public class WorkerThread implements Runnable {
             }
         };
 
-        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
-
-        streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
+//        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
+//        streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
+        streamProcessor.registerCallbackDataStream("org.md2k.cstress.probability");
+        streamProcessor.registerCallbackDataStream("org.md2k.cstress.stresslabel");
 
         long windowStartTime = -1;
         long st = -1;
