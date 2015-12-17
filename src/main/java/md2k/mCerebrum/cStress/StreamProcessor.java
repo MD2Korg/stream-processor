@@ -190,7 +190,7 @@ public class StreamProcessor {
     public void go() {
         process();
         generateResults();
-//        runcStress();
+        runcStress();
         resetDataStreams();
     }
 

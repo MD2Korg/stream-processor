@@ -78,7 +78,7 @@ public class WorkerThread implements Runnable {
 
         StreamProcessor streamProcessor = new StreamProcessor(windowSize);
         streamProcessor.setPath(path);
-        //streamProcessor.loadModel(cStressModelPath);
+        streamProcessor.loadModel(cStressModelPath);
 
         streamProcessor.dpInterface = new DataPointInterface() {
             @Override
@@ -92,7 +92,7 @@ public class WorkerThread implements Runnable {
             }
         };
 
-        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
+//        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
 //        streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
         streamProcessor.registerCallbackDataStream("org.md2k.cstress.probability");
         streamProcessor.registerCallbackDataStream("org.md2k.cstress.stresslabel");
@@ -103,25 +103,25 @@ public class WorkerThread implements Runnable {
         for (CSVDataPoint ap : tp) {
             DataPoint dp = new DataPoint(ap.timestamp, ap.value);
 
-            streamProcessor.add(ap.channel, dp);
-
-
             if (windowStartTime < 0) {
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
                 st = System.currentTimeMillis();
             }
 
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
-                long et = System.currentTimeMillis();
-                System.out.println("Add Iteration: " + (et - st) / 1000.0);
-                long starttime = System.currentTimeMillis();
+//                long et = System.currentTimeMillis();
+//                System.out.println("Add Iteration: " + (et - st) / 1000.0);
+//                long starttime = System.currentTimeMillis();
                 streamProcessor.go();
-                long endtime = System.currentTimeMillis();
+//                long endtime = System.currentTimeMillis();
 
-                System.out.println("Loop " + count++ + " iteration in seconds: " + (endtime - starttime) / 1000.0);
+//                System.out.println("Loop " + count++ + " iteration in seconds: " + (endtime - starttime) / 1000.0);
                 windowStartTime += windowSize;
-                st = System.currentTimeMillis();
+//                st = System.currentTimeMillis();
             }
+
+            streamProcessor.add(ap.channel, dp);
+
         }
     }
 

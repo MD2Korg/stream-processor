@@ -88,18 +88,19 @@ public class ECGFeatures {
         DataPointStream peaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks");
         findpeaks(peaks, y5normalized);
 
-        DataPointStream rr_ave = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_ave");
-        DataPointStream Rpeak_temp1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp1");
-        filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream);
-
-        DataPointStream Rpeak_temp2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp2");
-        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
-
-        DataPointStream rpeaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.rpeaks");
-        filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
-
+//        DataPointStream rr_ave = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_ave");
+//        DataPointStream Rpeak_temp1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp1");
+//        filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream);
+//
+//        DataPointStream Rpeak_temp2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp2");
+//        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
+//
+//        DataPointStream rpeaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.rpeaks");
+//        filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
+//
         DataPointStream rr_value = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value");
-        computeRRValue(rr_value, rpeaks);
+        //computeRRValue(rr_value, rpeaks);
+        computeRRValue(rr_value, peaks);
 
         DataPointStream rr_value_diff = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value_diff");
         DataPointStream validfilter_rr_interval = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.validfilter_rr_value");
