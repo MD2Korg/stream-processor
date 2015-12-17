@@ -1,24 +1,22 @@
 package md2k.mCerebrum.cStress;
 
+import com.google.gson.Gson;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.features.*;
-import md2k.mCerebrum.cStress.library.structs.SVCModel;
-import md2k.mCerebrum.cStress.library.structs.Model;
+import md2k.mCerebrum.cStress.features.AccelerometerFeatures;
+import md2k.mCerebrum.cStress.features.ECGFeatures;
+import md2k.mCerebrum.cStress.features.RIPFeatures;
+import md2k.mCerebrum.cStress.features.cStressFeatureVector;
 import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
-import org.apache.commons.math3.exception.NotANumberException;
-import com.google.gson.Gson;
-
-
-import javax.xml.crypto.Data;
-import java.io.FileInputStream;
-import java.io.File;
+import md2k.mCerebrum.cStress.library.structs.Model;
+import md2k.mCerebrum.cStress.library.structs.SVCModel;
 import org.apache.commons.io.FileUtils;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import org.apache.commons.math3.exception.NotANumberException;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.TreeMap;
 
@@ -139,13 +137,26 @@ public class StreamProcessor {
 
         try {
             //Data quality computations
-            ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
-            RIPDataQuality ripDQ = new RIPDataQuality(datastreams, AUTOSENSE.AUTOSENSE_RIP_QUALITY);
+            //ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
+            //RIPDataQuality ripDQ = new RIPDataQuality(datastreams, AUTOSENSE.AUTOSENSE_RIP_QUALITY);
 
             //AutoSense features
-            AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
-            ECGFeatures ef = new ECGFeatures(datastreams);
-            RIPFeatures rf = new RIPFeatures(datastreams);
+            try {
+                AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("AccelerometerFeatures Exception Handler: IndexOutOfBoundsException");
+            }
+            try {
+                ECGFeatures ef = new ECGFeatures(datastreams);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
+                e.printStackTrace();
+            }
+            try {
+                RIPFeatures rf = new RIPFeatures(datastreams);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
+            }
 
             //AutoSense wrist features
 //            AccelGyroFeatures leftWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
@@ -179,7 +190,7 @@ public class StreamProcessor {
     public void go() {
         process();
         generateResults();
-        runcStress();
+//        runcStress();
         resetDataStreams();
     }
 

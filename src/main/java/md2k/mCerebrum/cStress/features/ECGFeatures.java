@@ -411,8 +411,8 @@ public class ECGFeatures {
      * </p>
      *
      * @param rrAverage Output datastream
-     * @param temp1     Input temp datastream
-     * @param peaks     INput datastream
+     * @param temp1     Output temp datastream
+     * @param peaks     Input datastream
      * @param ECG       Input ECG datastream
      */
     private void filterPeaks(DataPointStream rrAverage, DataPointStream temp1, DataPointStream peaks, DataPointStream ECG) {

@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+//import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -64,7 +66,7 @@ public class DataPointStream extends DataStream {
         metadata.put("name", name);
         preserve = false;
         stats = new SummaryStatistics();
-        descriptiveStats = new DescriptiveStatistics();
+        descriptiveStats = new DescriptiveStatistics(10000);
     }
 
     public DataPointStream(String name, List<DataPoint> dataPoints) {

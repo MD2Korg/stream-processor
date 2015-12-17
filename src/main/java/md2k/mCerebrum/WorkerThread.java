@@ -3,7 +3,6 @@ package md2k.mCerebrum;
 import md2k.mCerebrum.cStress.DataPointInterface;
 import md2k.mCerebrum.cStress.StreamProcessor;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
 import md2k.mCerebrum.cStress.library.Time;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
@@ -59,19 +58,19 @@ public class WorkerThread implements Runnable {
         tp.importData(path + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
         tp.importData(path + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
-        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
-        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
-        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
-        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
-        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
-        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
-
-        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
-        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
-        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
-        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
-        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
-        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
+//        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
+//        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
+//        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
+//        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
+//        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
+//        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
+//
+//        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
+//        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
+//        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
+//        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
+//        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
+//        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
 
         tp.sort();
 
@@ -79,7 +78,7 @@ public class WorkerThread implements Runnable {
 
         StreamProcessor streamProcessor = new StreamProcessor(windowSize);
         streamProcessor.setPath(path);
-        streamProcessor.loadModel(cStressModelPath);
+        //streamProcessor.loadModel(cStressModelPath);
 
         streamProcessor.dpInterface = new DataPointInterface() {
             @Override
@@ -93,13 +92,14 @@ public class WorkerThread implements Runnable {
             }
         };
 
-//        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
+        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
 //        streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
         streamProcessor.registerCallbackDataStream("org.md2k.cstress.probability");
         streamProcessor.registerCallbackDataStream("org.md2k.cstress.stresslabel");
 
         long windowStartTime = -1;
         long st = -1;
+        int count = 0;
         for (CSVDataPoint ap : tp) {
             DataPoint dp = new DataPoint(ap.timestamp, ap.value);
 
@@ -118,8 +118,8 @@ public class WorkerThread implements Runnable {
                 streamProcessor.go();
                 long endtime = System.currentTimeMillis();
 
-                System.out.println("Loop iteration in seconds: " + (endtime - starttime) / 1000.0);
-                windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
+                System.out.println("Loop " + count++ + " iteration in seconds: " + (endtime - starttime) / 1000.0);
+                windowStartTime += windowSize;
                 st = System.currentTimeMillis();
             }
         }

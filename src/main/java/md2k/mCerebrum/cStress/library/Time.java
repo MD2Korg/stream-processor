@@ -72,7 +72,9 @@ public class Time {
                     for (int i = 0; i < temp.length; i++) {
                         temp[i] = tempArray.get(i);
                     }
-                    result.add(temp);
+                    if (temp.length > 0) {
+                        result.add(temp);
+                    }
                     tempArray = new ArrayList<DataPoint>();
                     startTime += size;
                 }
@@ -81,7 +83,9 @@ public class Time {
             for (int i = 0; i < temp.length; i++) {
                 temp[i] = tempArray.get(i);
             }
-            result.add(temp);
+            if (temp.length > 0) {
+                result.add(temp);
+            }
         }
         return result;
     }

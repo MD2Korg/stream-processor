@@ -27,23 +27,26 @@ package md2k.mCerebrum.cStress.library;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import java.util.TreeMap;
 
 public class DescriptiveStatistics {
 
     TreeMap<Integer, PSquared> pp = new TreeMap<Integer, PSquared>();
 
+    public DescriptiveStatistics(int i) {
+
+    }
+
     public void addValue(double value) {
         for (Integer i : pp.keySet()) {
             pp.get(i).accept(value);
         }
-
     }
+
 
     public double getPercentile(Integer i) {
         if (!pp.containsKey(i)) {
-            pp.put(i, new PSquared(i.doubleValue()));
+            pp.put(i, new PSquared(i.doubleValue() / 100.0));
         }
         return pp.get(i).getPValue();
     }
