@@ -27,10 +27,11 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import md2k.mCerebrum.cStress.StreamConstants;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.library.dataquality.autosense.ECGQualityCalculation;
 import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.dataquality.autosense.ECGQualityCalculation;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 import java.util.List;
@@ -46,8 +47,8 @@ public class ECGDataQuality {
      * @param qualityThreshold Input quality threshold
      */
     public ECGDataQuality(DataStreams datastreams, double qualityThreshold) {
-        DataPointStream ecg = datastreams.getDataPointStream("org.md2k.cstress.data.ecg");
-        DataPointStream ecgQuality = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.quality");
+        DataPointStream ecg = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG);
+        DataPointStream ecgQuality = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_QUALITY);
 
         ECGQualityCalculation ecgComputation = new ECGQualityCalculation(3, 50, 4500, 20, 2, 47);
         List<DataPoint> quality = ecgComputation.computeQuality(ecg.data, 5000); //0.67
@@ -60,7 +61,7 @@ public class ECGDataQuality {
             }
         }
 
-        DataPointStream ecgWindowQuality = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.window.quality");
+        DataPointStream ecgWindowQuality = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_WINDOW_QUALITY);
 
         if ((count / quality.size()) > qualityThreshold)
             ecgWindowQuality.add(new DataPoint(quality.get(0).timestamp, AUTOSENSE.QUALITY_GOOD));

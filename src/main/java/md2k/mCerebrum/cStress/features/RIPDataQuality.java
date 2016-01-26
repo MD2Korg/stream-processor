@@ -27,10 +27,11 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import md2k.mCerebrum.cStress.StreamConstants;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.library.dataquality.autosense.RipQualityCalculation;
 import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.dataquality.autosense.RipQualityCalculation;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 
 import java.util.List;
@@ -46,8 +47,8 @@ public class RIPDataQuality {
      * @param qualityThreshold Input quality threshold
      */
     public RIPDataQuality(DataStreams datastreams, double qualityThreshold) {
-        DataPointStream ecg = datastreams.getDataPointStream("org.md2k.cstress.data.rip");
-        DataPointStream ecgQuality = datastreams.getDataPointStream("org.md2k.cstress.data.rip.quality");
+        DataPointStream ecg = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP);
+        DataPointStream ecgQuality = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_QUALITY);
 
         RipQualityCalculation ripQuality = new RipQualityCalculation(5, 50, 4500, 20, 2, 20, 150);
         List<DataPoint> quality = ripQuality.computeQuality(ecg.data, 5000);
@@ -60,7 +61,7 @@ public class RIPDataQuality {
             }
         }
 
-        DataPointStream ecgWindowQuality = datastreams.getDataPointStream("org.md2k.cstress.data.rip.window.quality");
+        DataPointStream ecgWindowQuality = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_WINDOW_QUALITY);
 
         if ((count / quality.size()) > qualityThreshold)
             ecgWindowQuality.add(new DataPoint(quality.get(0).timestamp, AUTOSENSE.QUALITY_GOOD));

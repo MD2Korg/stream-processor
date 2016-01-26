@@ -1,9 +1,10 @@
 package md2k.mCerebrum;
 
-import md2k.mCerebrum.cStress.DataPointInterface;
+import md2k.mCerebrum.cStress.StreamConstants;
 import md2k.mCerebrum.cStress.StreamProcessor;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.library.Time;
+import md2k.mCerebrum.cStress.library.datastream.DataPointInterface;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
 
@@ -92,10 +93,10 @@ public class WorkerThread implements Runnable {
             }
         };
 
-//        streamProcessor.registerCallbackDataArrayStream("org.md2k.cstress.fv");
-//        streamProcessor.registerCallbackDataStream("org.md2k.cstress.data.accel.activity");
-        streamProcessor.registerCallbackDataStream("org.md2k.cstress.probability");
-        streamProcessor.registerCallbackDataStream("org.md2k.cstress.stresslabel");
+        streamProcessor.registerCallbackDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV);
+        streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY);
+        streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY);
+        streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL);
 
         long windowStartTime = -1;
         long st = -1;
@@ -109,15 +110,8 @@ public class WorkerThread implements Runnable {
             }
 
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
-//                long et = System.currentTimeMillis();
-//                System.out.println("Add Iteration: " + (et - st) / 1000.0);
-//                long starttime = System.currentTimeMillis();
                 streamProcessor.go();
-//                long endtime = System.currentTimeMillis();
-
-//                System.out.println("Loop " + count++ + " iteration in seconds: " + (endtime - starttime) / 1000.0);
                 windowStartTime += windowSize;
-//                st = System.currentTimeMillis();
             }
 
             streamProcessor.add(ap.channel, dp);

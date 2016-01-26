@@ -1,7 +1,5 @@
 package md2k.mCerebrum.cStress.library.datastream;
 
-import md2k.mCerebrum.cStress.DataPointInterface;
-
 import java.util.TreeMap;
 
 /*

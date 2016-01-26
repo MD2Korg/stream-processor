@@ -1,9 +1,10 @@
 package md2k.mCerebrum.cStress.features;
 
+import md2k.mCerebrum.cStress.StreamConstants;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.library.Vector;
 import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.Vector;
 import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -42,6 +43,7 @@ import java.util.List;
  * Respiration feature computation class
  */
 public class RIPFeatures {
+
     /**
      * Core Respiration Features
      * <p>
@@ -52,73 +54,73 @@ public class RIPFeatures {
     public RIPFeatures(DataStreams datastreams) {
 
 
-        DataPointStream rip = datastreams.getDataPointStream("org.md2k.cstress.data.rip");
-        DataPointStream rip_smooth = datastreams.getDataPointStream("org.md2k.cstress.data.rip.smooth");
+        DataPointStream rip = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP);
+        DataPointStream rip_smooth = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_SMOOTH);
         Smoothing.smooth(rip_smooth, rip, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
 
-        int windowLength = (int) Math.round(AUTOSENSE.WINDOW_LENGTH_SECS * (Double) datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.get("frequency"));
-        DataPointStream rip_mac = datastreams.getDataPointStream("org.md2k.cstress.data.rip.mac");
+        int windowLength = (int) Math.round(AUTOSENSE.WINDOW_LENGTH_SECS * (Double) datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).metadata.get("frequency"));
+        DataPointStream rip_mac = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MAC);
         Smoothing.smooth(rip_mac, rip_smooth, windowLength); //TWH: Replaced MAC with Smooth after discussion on 11/9/2015
 
-        DataPointStream upIntercepts = datastreams.getDataPointStream("org.md2k.cstress.data.rip.upIntercepts");
-        DataPointStream downIntercepts = datastreams.getDataPointStream("org.md2k.cstress.data.rip.downIntercepts");
+        DataPointStream upIntercepts = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS);
+        DataPointStream downIntercepts = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS);
         generateIntercepts(upIntercepts, downIntercepts, rip_smooth, rip_mac);
 
-        DataPointStream upInterceptsFiltered = datastreams.getDataPointStream("org.md2k.cstress.data.rip.upIntercepts.filtered");
-        DataPointStream downInterceptsFiltered = datastreams.getDataPointStream("org.md2k.cstress.data.rip.downIntercepts.filtered");
+        DataPointStream upInterceptsFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS_FILTERED);
+        DataPointStream downInterceptsFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS_FILTERED);
         filterIntercepts(upInterceptsFiltered, downInterceptsFiltered, upIntercepts, downIntercepts);
 
-        DataPointStream upInterceptsFiltered1sec = datastreams.getDataPointStream("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec");
-        DataPointStream downInterceptsFiltered1sec = datastreams.getDataPointStream("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec");
+        DataPointStream upInterceptsFiltered1sec = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS_FILTERED_1SEC);
+        DataPointStream downInterceptsFiltered1sec = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS_FILTERED_1SEC);
         filter1Second(upInterceptsFiltered1sec, downInterceptsFiltered1sec, upInterceptsFiltered, downInterceptsFiltered);
 
-        DataPointStream upInterceptsFiltered1sect20 = datastreams.getDataPointStream("org.md2k.cstress.data.rip.upIntercepts.filtered.1sec.t20");
-        DataPointStream downInterceptsFiltered1sect20 = datastreams.getDataPointStream("org.md2k.cstress.data.rip.downIntercepts.filtered.1sec.t20");
+        DataPointStream upInterceptsFiltered1sect20 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS_FILTERED_1SEC_T20);
+        DataPointStream downInterceptsFiltered1sect20 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS_FILTERED_1SEC_T20);
         filtert20second(upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, upInterceptsFiltered1sec, downInterceptsFiltered1sec);
 
-        DataPointStream peaks = datastreams.getDataPointStream("org.md2k.cstress.data.rip.peaks");
+        DataPointStream peaks = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_PEAKS);
         generatePeaks(peaks, upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, rip_smooth);
 
-        DataPointStream valleys = datastreams.getDataPointStream("org.md2k.cstress.data.rip.valleys");
+        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
         generateValleys(valleys, upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, rip_smooth);
 
-        DataPointStream inspirationAmplitude = datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspirationAmplitude");
+        DataPointStream inspirationAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPIRATION_AMPLITUDE);
         double meanInspirationAmplitude = generateInspirationAmplitude(inspirationAmplitude, peaks, valleys);
 
-        DataPointStream respirationDuration = datastreams.getDataPointStream("org.md2k.cstress.data.rip.respirationDuration");
+        DataPointStream respirationDuration = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPIRATION_DURATION);
         generateRespirationDuration(respirationDuration, valleys);
 
-        DataPointStream valleysFiltered = datastreams.getDataPointStream("org.md2k.cstress.data.rip.valleys.filtered");
-        DataPointStream peaksFiltered = datastreams.getDataPointStream("org.md2k.cstress.data.rip.peaks.filtered");
+        DataPointStream valleysFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS_FILTERED);
+        DataPointStream peaksFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_PEAKS_FILTERED);
         filterPeaksAndValleys(peaksFiltered, valleysFiltered, respirationDuration, inspirationAmplitude, peaks, valleys, meanInspirationAmplitude);
 
 
         //Key features
 
-        double activity = datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").data.get(0).value;
+        double activity = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
         if (activity == 0.0) {
             for (int i = 0; i < valleys.data.size() - 1; i++) {
 
-                datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).timestamp - valleys.data.get(i).timestamp));
-                datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").add(new DataPoint(peaks.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - peaks.data.get(i).timestamp));
-                datastreams.getDataPointStream("org.md2k.cstress.data.rip.respduration").add(new DataPoint(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - valleys.data.get(i).timestamp));
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).timestamp - valleys.data.get(i).timestamp));
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).add(new DataPoint(peaks.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - peaks.data.get(i).timestamp));
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).add(new DataPoint(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp - valleys.data.get(i).timestamp));
 
-                datastreams.getDataPointStream("org.md2k.cstress.data.rip.stretch").add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).value - valleys.data.get(i).value));
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH).add(new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).value - valleys.data.get(i).value));
 
-                DataPoint inratio = datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip.inspduration").data.size() - 1);
-                DataPoint exratio = datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip.exprduration").data.size() - 1);
+                DataPoint inratio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.size() - 1);
+                DataPoint exratio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).data.size() - 1);
 
-                (datastreams.getDataPointStream("org.md2k.cstress.data.rip.IERatio")).add(new DataPoint(valleys.data.get(i).timestamp, inratio.value / exratio.value));
+                (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_IERATIO)).add(new DataPoint(valleys.data.get(i).timestamp, inratio.value / exratio.value));
 
-                DataPoint rsa = rsaCalculateCycle(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp, datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr"));
+                DataPoint rsa = rsaCalculateCycle(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp, datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR));
                 if (rsa.value != -1.0) { //Only add if a valid value
-                    (datastreams.getDataPointStream("org.md2k.cstress.data.rip.RSA")).add(rsa);
+                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RSA)).add(rsa);
                 }
 
             }
 
 
-            (datastreams.getDataPointStream("org.md2k.cstress.data.rip.BreathRate")).add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.size() - 1).timestamp, valleys.data.size() - 1));
+            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_BREATH_RATE)).add(new DataPoint(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.size() - 1).timestamp, valleys.data.size() - 1));
 
             double minuteVentilation = 0.0;
             for (int i = 0; i < valleys.data.size() - 1; i++) {
@@ -126,7 +128,7 @@ public class RIPFeatures {
             }
             //minuteVentilation *= (valleys.data.size()-1); //TODO: Check with experts that this should not be there
 
-            (datastreams.getDataPointStream("org.md2k.cstress.data.rip.MinuteVentilation")).add(new DataPoint(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.get(datastreams.getDataPointStream("org.md2k.cstress.data.rip").data.size() - 1).timestamp, minuteVentilation));
+            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MINUTE_VENTILATION)).add(new DataPoint(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.size() - 1).timestamp, minuteVentilation));
         }
 
     }
