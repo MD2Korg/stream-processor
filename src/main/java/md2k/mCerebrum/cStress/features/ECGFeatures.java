@@ -1,5 +1,6 @@
 package md2k.mCerebrum.cStress.features;
 
+import md2k.mCerebrum.cStress.StreamConstants;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
 import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
 import md2k.mCerebrum.cStress.library.datastream.DataStreams;
@@ -47,6 +48,7 @@ import java.util.List;
  */
 public class ECGFeatures {
 
+
     /**
      * ECG Constructor which handles feature computation.
      *
@@ -55,7 +57,7 @@ public class ECGFeatures {
     public ECGFeatures(DataStreams datastreams) {
 
         //Compute RR Intervals
-        DataPointStream ECGstream = datastreams.getDataPointStream("org.md2k.cstress.data.ecg");
+        DataPointStream ECGstream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG);
         double frequency = (Double) ECGstream.metadata.get("frequency");
 
         //Ohio State Algorithm
@@ -68,77 +70,71 @@ public class ECGFeatures {
         double[] w = {500.0 / 0.02, 1.0 / 0.02, 500 / 0.02};
         double fl = AUTOSENSE.FL_INIT;
 
-        DataPointStream ECGbiasremoval = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.biasremoval");
-        for (DataPoint dp : ECGstream.data) {
-            ECGbiasremoval.add(new DataPoint(dp.timestamp, dp.value - ECGstream.getMean()));
-        }
+        DataPointStream y2 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y2);
+        DataPointStream y2normalized = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y2_NORMALIZED);
+        AutoSense.applyFilterNormalize(ECGstream, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
 
-        DataPointStream y2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y2");
-        DataPointStream y2normalized = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y2-normalized");
-//        AutoSense.applyFilterNormalize(ECGstream, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
-        AutoSense.applyFilterNormalize(ECGbiasremoval, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
-
-        DataPointStream y3 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y3");
-        DataPointStream y3normalized = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y3-normalized");
+        DataPointStream y3 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y3);
+        DataPointStream y3normalized = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y3_NORMALIZED);
         AutoSense.applyFilterNormalize(y2normalized, y3, y3normalized, new double[]{-1.0 / 8.0, -2.0 / 8.0, 0.0 / 8.0, 2.0 / 8.0, -1.0 / 8.0}, 90);
 
-        DataPointStream y4 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y4");
-        DataPointStream y4normalized = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y4-normalized");
+        DataPointStream y4 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y4);
+        DataPointStream y4normalized = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y4_NORMALIZED);
         AutoSense.applySquareFilterNormalize(y3normalized, y4, y4normalized, 90);
 
-        DataPointStream y5 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y5");
-        DataPointStream y5normalized = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y5-normalized");
+        DataPointStream y5 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y5);
+        DataPointStream y5normalized = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_Y5_NORMALIZED);
         AutoSense.applyFilterNormalize(y4normalized, y5, y5normalized, Filter.blackman(window_l), 90);
 
 
-        DataPointStream peaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks");
+        DataPointStream peaks = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS);
         findpeaks(peaks, y5normalized);
 
-        DataPointStream rr_ave = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_ave");
-        DataPointStream Rpeak_temp1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp1");
-        DataPointStream thr1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.thr1");
+        DataPointStream rr_ave = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_AVE);
+        DataPointStream Rpeak_temp1 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_TEMP1);
+        DataPointStream thr1 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_THR1);
         thr1.setPreservedLastInsert(true);
-        DataPointStream thr2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.thr2");
+        DataPointStream thr2 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_THR2);
         thr2.setPreservedLastInsert(true);
-        DataPointStream sig_lev = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.sig_lev");
+        DataPointStream sig_lev = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_SIG_LEV);
         sig_lev.setPreservedLastInsert(true);
-        DataPointStream noise_lev = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.noise_lev");
+        DataPointStream noise_lev = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_NOISE_LEV);
         noise_lev.setPreservedLastInsert(true);
         filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream, thr1, thr2, sig_lev, noise_lev);
 
-        DataPointStream Rpeak_temp2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp2");
+        DataPointStream Rpeak_temp2 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_TEMP2);
         filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
 
-        DataPointStream rpeaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.rpeaks");
+        DataPointStream rpeaks = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_RPEAKS);
         filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
 
-        DataPointStream rr_value = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value");
+        DataPointStream rr_value = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE);
         computeRRValue(rr_value, rpeaks);
 //        computeRRValue(rr_value, peaks);
 
-        DataPointStream rr_value_diff = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value_diff");
-        DataPointStream validfilter_rr_interval = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.validfilter_rr_value");
-        DataPointStream rr_outlier = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.outlier");
+        DataPointStream rr_value_diff = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE_DIFF);
+        DataPointStream validfilter_rr_interval = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_VALIDFILTER_RR_VALUE);
+        DataPointStream rr_outlier = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_OUTLIER);
         validRRinterval(rr_outlier, validfilter_rr_interval, rr_value_diff, rr_value);
 
-        DataPointStream rr_value_filtered = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value.filtered");
+        DataPointStream rr_value_filtered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE_FILTERED);
         rpeakFilter(rr_value, rr_value_filtered, rr_outlier);
 
-        double activity = datastreams.getDataPointStream("org.md2k.cstress.data.accel.activity").data.get(0).value;
+        double activity = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
         //Decide if we should add the RR intervals from this minute to the running stats
         if (activity == 0.0) {
 
-            for (int i = 0; i < (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.size(); i++) {
-                if (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.outlier").data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
-                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").add((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i));
-                    DataPoint hr = new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i).timestamp, 60.0 / (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(i).value);
-                    datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.heartrate").add(hr);
+            for (int i = 0; i < (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.size(); i++) {
+                if (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_OUTLIER).data.get(i).value == AUTOSENSE.QUALITY_GOOD) {
+                    datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR).add((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(i));
+                    DataPoint hr = new DataPoint((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(i).timestamp, 60.0 / (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(i).value);
+                    datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_HEARTRATE).add(hr);
                 }
             }
 
-            DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").data.size()];
+            DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR).data.size()];
             for (int i = 0; i < rrDatapoints.length; i++) {
-                rrDatapoints[i] = new DataPoint(i, datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr").data.get(i).value);
+                rrDatapoints[i] = new DataPoint(i, datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR).data.get(i).value);
             }
 
             if (rrDatapoints.length > 0) {
@@ -150,16 +146,16 @@ public class ECGFeatures {
                 double hf = ECG.heartRatePower(HRLomb.P, HRLomb.f, 0.3, 0.4);
 
                 if (!Double.isInfinite(lfhf) && !Double.isNaN(lfhf)) {
-                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LowHighFrequencyEnergyRatio")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, lfhf));
+                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_LOW_HIGH_FREQUENCY_ENERGY_RATIO)).add(new DataPoint((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(0).timestamp, lfhf));
                 }
                 if (!Double.isInfinite(lf) && !Double.isNaN(lf)) {
-                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombLowFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, lf));
+                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_LOMB_LOW_FREQUENCY_ENERGY)).add(new DataPoint((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(0).timestamp, lf));
                 }
                 if (!Double.isInfinite(mf) && !Double.isNaN(mf)) {
-                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombMediumFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, mf));
+                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_LOMB_MEDIUM_FREQUENCY_ENERGY)).add(new DataPoint((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(0).timestamp, mf));
                 }
                 if (!Double.isInfinite(hf) && !Double.isNaN(hf)) {
-                    (datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr.LombHighFrequencyEnergy")).add(new DataPoint((datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value")).data.get(0).timestamp, hf));
+                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_LOMB_HIGH_FREQUENCY_ENERGY)).add(new DataPoint((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE)).data.get(0).timestamp, hf));
                 }
             }
         }
@@ -574,7 +570,7 @@ public class ECGFeatures {
      * @param rr_ave      Current rr average
      * @return New rr average
      */
-    public DataPoint rr_ave_update(List<DataPoint> rpeak_temp1, DataPointStream rr_ave) { //TODO: Consider replacing this algorithm with something like and EWMA
+    public DataPoint rr_ave_update(List<DataPoint> rpeak_temp1, DataPointStream rr_ave) { //TODO: Consider replacing this algorithm with something like an EWMA
         List<Long> peak_interval = new ArrayList<Long>();
         DataPoint result = new DataPoint(0, 0.0);
         if (rpeak_temp1.size() != 0) {

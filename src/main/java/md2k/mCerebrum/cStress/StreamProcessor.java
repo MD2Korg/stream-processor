@@ -1,26 +1,5 @@
 package md2k.mCerebrum.cStress;
 
-import com.google.gson.Gson;
-import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.features.AccelerometerFeatures;
-import md2k.mCerebrum.cStress.features.ECGFeatures;
-import md2k.mCerebrum.cStress.features.RIPFeatures;
-import md2k.mCerebrum.cStress.features.cStressFeatureVector;
-import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
-import md2k.mCerebrum.cStress.library.structs.Model;
-import md2k.mCerebrum.cStress.library.structs.SVCModel;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.math3.exception.NotANumberException;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.TreeMap;
-
-
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -49,6 +28,24 @@ import java.util.TreeMap;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import com.google.gson.Gson;
+import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
+import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
+import md2k.mCerebrum.cStress.features.*;
+import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
+import md2k.mCerebrum.cStress.library.datastream.DataPointInterface;
+import md2k.mCerebrum.cStress.library.datastream.DataStreams;
+import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import md2k.mCerebrum.cStress.library.structs.Model;
+import md2k.mCerebrum.cStress.library.structs.SVCModel;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.exception.NotANumberException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.TreeMap;
 
 /**
  * Main class that implements StreamProcessor and controls the data processing pipeline
@@ -96,23 +93,23 @@ public class StreamProcessor {
 
     private void configureDataStreams() {
         //Configure Data Streams
-        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("frequency", 64.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.ecg").metadata.put("channelID", AUTOSENSE.CHEST_ECG);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG).metadata.put("frequency", 64.0);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG).metadata.put("channelID", AUTOSENSE.CHEST_ECG);
 
-        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("frequency", 64.0 / 3.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.rip").metadata.put("channelID", AUTOSENSE.CHEST_RIP);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).metadata.put("frequency", 64.0 / 3.0);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).metadata.put("channelID", AUTOSENSE.CHEST_RIP);
 
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelx").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELX).metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELX).metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.accely").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELY).metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELY).metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("frequency", 64.0 / 6.0);
-        datastreams.getDataPointStream("org.md2k.cstress.data.accelz").metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELZ).metadata.put("frequency", 64.0 / 6.0);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELZ).metadata.put("channelID", AUTOSENSE.CHEST_ACCEL_X);
 
-        datastreams.getDataPointStream("org.md2k.cstress.probability").metadata.put("frequency", windowSize);
-        datastreams.getDataPointStream("org.md2k.cstress.stresslabel").metadata.put("frequency", windowSize);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).metadata.put("frequency", 1000.0 / windowSize);
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).metadata.put("frequency", 1000.0 / windowSize);
 
     }
 
@@ -137,8 +134,16 @@ public class StreamProcessor {
 
         try {
             //Data quality computations
-            //ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
-            //RIPDataQuality ripDQ = new RIPDataQuality(datastreams, AUTOSENSE.AUTOSENSE_RIP_QUALITY);
+            try {
+                ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("ECGDataQuality Exception Handler: IndexOutOfBoundsException");
+            }
+            try {
+                RIPDataQuality ripDQ = new RIPDataQuality(datastreams, AUTOSENSE.AUTOSENSE_RIP_QUALITY);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("RIPDataQuality Exception Handler: IndexOutOfBoundsException");
+            }
 
             //AutoSense features
             try {
@@ -200,7 +205,7 @@ public class StreamProcessor {
      */
     private void runcStress() {
         SVCModel model = (SVCModel)models.get("cStressModel");
-        DataArrayStream featurevector = datastreams.getDataArrayStream("org.md2k.cstress.fv");
+        DataArrayStream featurevector = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV);
 
         for(DataPointArray ap: featurevector.data)
         {
@@ -212,8 +217,8 @@ public class StreamProcessor {
                 label = AUTOSENSE.NOT_STRESSED;
 
 
-            datastreams.getDataPointStream("org.md2k.cstress.probability").add(new DataPoint(ap.timestamp,prob));
-            datastreams.getDataPointStream("org.md2k.cstress.stresslabel").add(new DataPoint(ap.timestamp,label));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).add(new DataPoint(ap.timestamp, label));
         }
 
     }
@@ -228,23 +233,23 @@ public class StreamProcessor {
     public void add(int channel, DataPoint dp) {
         switch (channel) {
             case AUTOSENSE.CHEST_ECG:
-                datastreams.getDataPointStream("org.md2k.cstress.data.ecg").add(dp);
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG).add(dp);
                 break;
 
             case AUTOSENSE.CHEST_RIP:
-                datastreams.getDataPointStream("org.md2k.cstress.data.rip").add(dp);
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).add(dp);
                 break;
 
             case AUTOSENSE.CHEST_ACCEL_X:
-                datastreams.getDataPointStream("org.md2k.cstress.data.accelx").add(dp);
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELX).add(dp);
                 break;
 
             case AUTOSENSE.CHEST_ACCEL_Y:
-                datastreams.getDataPointStream("org.md2k.cstress.data.accely").add(dp);
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELY).add(dp);
                 break;
 
             case AUTOSENSE.CHEST_ACCEL_Z:
-                datastreams.getDataPointStream("org.md2k.cstress.data.accelz").add(dp);
+                datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCELZ).add(dp);
                 break;
 
 
