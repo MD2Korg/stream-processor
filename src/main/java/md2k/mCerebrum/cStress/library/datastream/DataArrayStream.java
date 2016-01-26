@@ -141,6 +141,7 @@ public class DataArrayStream extends DataStream {
                 data.clear();
             }
         }
+        history.clear(); //TWH: Clear history for now
     }
 
 

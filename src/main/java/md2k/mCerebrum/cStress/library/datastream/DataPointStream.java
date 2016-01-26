@@ -133,6 +133,7 @@ public class DataPointStream extends DataStream {
                 data.clear();
             }
         }
+        history.clear(); //TWH: Clear history for now
     }
 
 
@@ -192,6 +193,11 @@ public class DataPointStream extends DataStream {
      */
     public double getMean() {
         return stats.getMean();
+    }
+
+
+    public double getLatestValue() {
+        return data.get(data.size() - 1).value;
     }
 
     /**

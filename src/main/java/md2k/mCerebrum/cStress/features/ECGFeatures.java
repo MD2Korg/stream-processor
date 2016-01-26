@@ -68,9 +68,15 @@ public class ECGFeatures {
         double[] w = {500.0 / 0.02, 1.0 / 0.02, 500 / 0.02};
         double fl = AUTOSENSE.FL_INIT;
 
+        DataPointStream ECGbiasremoval = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.biasremoval");
+        for (DataPoint dp : ECGstream.data) {
+            ECGbiasremoval.add(new DataPoint(dp.timestamp, dp.value - ECGstream.getMean()));
+        }
+
         DataPointStream y2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y2");
         DataPointStream y2normalized = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y2-normalized");
-        AutoSense.applyFilterNormalize(ECGstream, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
+//        AutoSense.applyFilterNormalize(ECGstream, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
+        AutoSense.applyFilterNormalize(ECGbiasremoval, y2, y2normalized, Filter.firls(fl, F, A, w), 90);
 
         DataPointStream y3 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y3");
         DataPointStream y3normalized = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.y3-normalized");
@@ -88,19 +94,27 @@ public class ECGFeatures {
         DataPointStream peaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks");
         findpeaks(peaks, y5normalized);
 
-//        DataPointStream rr_ave = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_ave");
-//        DataPointStream Rpeak_temp1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp1");
-//        filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream);
-//
-//        DataPointStream Rpeak_temp2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp2");
-//        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
-//
-//        DataPointStream rpeaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.rpeaks");
-//        filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
-//
+        DataPointStream rr_ave = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_ave");
+        DataPointStream Rpeak_temp1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp1");
+        DataPointStream thr1 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.thr1");
+        thr1.setPreservedLastInsert(true);
+        DataPointStream thr2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.thr2");
+        thr2.setPreservedLastInsert(true);
+        DataPointStream sig_lev = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.sig_lev");
+        sig_lev.setPreservedLastInsert(true);
+        DataPointStream noise_lev = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.noise_lev");
+        noise_lev.setPreservedLastInsert(true);
+        filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream, thr1, thr2, sig_lev, noise_lev);
+
+        DataPointStream Rpeak_temp2 = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.temp2");
+        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
+
+        DataPointStream rpeaks = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.peaks.rpeaks");
+        filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
+
         DataPointStream rr_value = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value");
-        //computeRRValue(rr_value, rpeaks);
-        computeRRValue(rr_value, peaks);
+        computeRRValue(rr_value, rpeaks);
+//        computeRRValue(rr_value, peaks);
 
         DataPointStream rr_value_diff = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.rr_value_diff");
         DataPointStream validfilter_rr_interval = datastreams.getDataPointStream("org.md2k.cstress.data.ecg.validfilter_rr_value");
@@ -416,11 +430,15 @@ public class ECGFeatures {
      * @param peaks     Input datastream
      * @param ECG       Input ECG datastream
      */
-    private void filterPeaks(DataPointStream rrAverage, DataPointStream temp1, DataPointStream peaks, DataPointStream ECG) {
-        double thr1 = AUTOSENSE.THR1_INIT;
-        double thr2 = 0.5 * thr1;
-        double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
-        double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
+    private void filterPeaks(DataPointStream rrAverage, DataPointStream temp1, DataPointStream peaks, DataPointStream ECG, DataPointStream thr1, DataPointStream thr2, DataPointStream sig_lev, DataPointStream noise_lev) {
+
+
+        if (thr1.data.size() == 0) {
+            thr1.add(new DataPoint(ECG.data.get(0).timestamp, AUTOSENSE.THR1_INIT));
+            thr2.add(new DataPoint(ECG.data.get(0).timestamp, 0.5 * AUTOSENSE.THR1_INIT));
+            sig_lev.add(new DataPoint(ECG.data.get(0).timestamp, AUTOSENSE.SIG_LEV_FACTOR * AUTOSENSE.THR1_INIT));
+            noise_lev.add(new DataPoint(ECG.data.get(0).timestamp, AUTOSENSE.NOISE_LEV_FACTOR * AUTOSENSE.SIG_LEV_FACTOR * AUTOSENSE.THR1_INIT));
+        }
 
         DataPoint rr_ave;
 
@@ -445,23 +463,23 @@ public class ECGFeatures {
 
         for (int i1 = 0; i1 < peaks.data.size(); i1++) {
             if (Rpeak_temp1.size() == 0) {
-                if (peaks.data.get(i1).value > thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                if (peaks.data.get(i1).value > thr1.getLatestValue() && peaks.data.get(i1).value < (3.0 * sig_lev.getLatestValue())) {
                     if (Rpeak_temp1.size() <= c1) {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp, Smoothing.ewma(peaks.data.get(i1).value, sig_lev.getLatestValue(), AUTOSENSE.EWMA_ALPHA)));
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
-                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
+                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp, Smoothing.ewma(peaks.data.get(i1).value, noise_lev.getLatestValue(), AUTOSENSE.EWMA_ALPHA)));
                 }
 
-                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
-                thr2 = 0.5 * thr1; //TODO: Candidate for datastream
+                thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
+                thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
 
                 rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
             } else {
@@ -470,7 +488,7 @@ public class ECGFeatures {
                     List<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
 
                     for (int j = c2.get(c1 - 1) + 1; j < i1 - 1; j++) {
-                        if (peaks.data.get(i1).value < 3.0 * sig_lev && peaks.data.get(i1).value > thr2) {
+                        if (peaks.data.get(i1).value < 3.0 * sig_lev.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
                             searchback_array_inrange.add(peaks.data.get(i1).value);
                             searchback_array_inrange_index.add(j - c2.get(c1 - 1));
                         }
@@ -489,34 +507,37 @@ public class ECGFeatures {
                             Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
                         Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                        sig_lev = Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                        sig_lev.add(new DataPoint(Rpeak_temp1.get(c1).timestamp, Smoothing.ewma(Rpeak_temp1.get(c1 - 1).value, sig_lev.getLatestValue(), AUTOSENSE.EWMA_ALPHA)));
                         if (c1 >= c2.size()) {
                             c2.add(0);
                         }
                         c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
                         i1 = c2.get(c1 - 1) + 1;
                         c1 += 1;
-                        thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                        thr2 = 0.5 * thr1;
+
+                        thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
+                        thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
+
                         rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
                         continue;
                     }
-                } else if (peaks.data.get(i1).value >= thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                } else if (peaks.data.get(i1).value >= thr1.getLatestValue() && peaks.data.get(i1).value < (3.0 * sig_lev.getLatestValue())) {
                     if (Rpeak_temp1.size() >= c1) {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = Smoothing.ewma(peaks.data.get(i1).value, sig_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp, Smoothing.ewma(peaks.data.get(i1).value, sig_lev.getLatestValue(), AUTOSENSE.EWMA_ALPHA)));
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
-                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = Smoothing.ewma(peaks.data.get(i1).value, noise_lev, AUTOSENSE.EWMA_ALPHA); //TODO: Candidate for datastream
+                } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
+                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp, Smoothing.ewma(peaks.data.get(i1).value, noise_lev.getLatestValue(), AUTOSENSE.EWMA_ALPHA)));
                 }
-                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                thr2 = 0.5 * thr1;
+                thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
+                thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
+
                 rr_ave = rr_ave_update(Rpeak_temp1, rrAverage);
             }
         }
