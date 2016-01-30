@@ -142,6 +142,7 @@ public class Filter {
      * Standard convolution implementation for producing the "same" size filter
      * <p>
      * Reference: Matlab's conv algorithm
+     * http://www.mathworks.com/help/matlab/ref/conv.html
      * </p>
      *
      * @param signal Input data array
@@ -149,20 +150,15 @@ public class Filter {
      * @return Filtered signal array that is the same size as the input array
      */
     public static double[] conv(double[] signal, double[] kernel) {
-        double[] result = new double[Math.max(Math.max(signal.length + kernel.length, signal.length), kernel.length)];
+        double[] result = new double[signal.length];
 
-        double[] tempsignal = new double[signal.length + kernel.length];
-        System.arraycopy(signal, 0, tempsignal, kernel.length / 2, signal.length); //Zero pad the end of signal
-
-        for (int i = 0; i < signal.length; i++) {
-            result[i] = 0;
-            for (int j = 0; j < kernel.length; j++) {
-                result[i] += tempsignal[i + j] * kernel[j];
+        int start_k = kernel.length/2;
+        for (int k = 0; k < result.length; k++) {
+            result[k] = 0;
+            for (int j = Math.max(0,k+start_k+1-kernel.length); j < Math.min(signal.length,k+start_k+1); j++) {
+                result[k] += signal[j] * kernel[k+start_k-j];
             }
         }
-
-        double[] shortresult = new double[signal.length];
-        System.arraycopy(result, 0, shortresult, 0, signal.length); //Remove excess array size
-        return shortresult;
+        return result;
     }
 }
