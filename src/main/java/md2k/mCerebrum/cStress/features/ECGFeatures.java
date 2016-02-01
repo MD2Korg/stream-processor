@@ -1,4 +1,4 @@
- package md2k.mCerebrum.cStress.features;
+package md2k.mCerebrum.cStress.features;
 
 import md2k.mCerebrum.cStress.StreamConstants;
 import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
@@ -301,8 +301,6 @@ public class ECGFeatures {
      * @param frequency   Sampling frequence
      */
     private void filterRpeaks(DataPointStream Rpeaks, DataPointStream Rpeak_temp2, DataPointStream peaks, double frequency) {
-
-
         List<DataPoint> Rpeak_temp3 = new ArrayList<DataPoint>();
         if (Rpeak_temp2.data.size() > 0) {
             Rpeak_temp3.add(Rpeak_temp2.data.get(0));
@@ -371,7 +369,7 @@ public class ECGFeatures {
             List<Integer> eli_index = new ArrayList<Integer>();
 
             for (int j = 0; j < diffRpeak.size(); j++) {
-                if (diffRpeak.get(j) < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER*1000)) {
+                if (diffRpeak.get(j) < (AUTOSENSE.RPEAK_INTERPEAK_LIMIT)) {
                     if (Rpeak_temp2.data.get(j).value < Rpeak_temp2.data.get(j + 1).value) {
                         eli_index.add(0);
                     } else {
@@ -383,7 +381,7 @@ public class ECGFeatures {
             }
 
             for (int j = 0; j < diffRpeak.size(); j++) {
-                if (diffRpeak.get(j) < (AUTOSENSE.RPEAK_INTERPEAK_MULTIPLIER*1000)) {
+                if (diffRpeak.get(j) < (AUTOSENSE.RPEAK_INTERPEAK_LIMIT)) {
                     Rpeak_temp2.data.set(j + eli_index.get(j), new DataPoint(0, -999999));
                 }
             }
