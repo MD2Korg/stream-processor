@@ -301,6 +301,8 @@ public class ECGFeatures {
      * @param frequency   Sampling frequence
      */
     private void filterRpeaks(DataPointStream Rpeaks, DataPointStream Rpeak_temp2, DataPointStream peaks, double frequency) {
+
+
         List<DataPoint> Rpeak_temp3 = new ArrayList<DataPoint>();
         if (Rpeak_temp2.data.size() > 0) {
             Rpeak_temp3.add(Rpeak_temp2.data.get(0));
@@ -354,7 +356,7 @@ public class ECGFeatures {
      * @param Rpeak_temp1 Input datastream
      * @param frequency   Sampling frequency
      */
-    public void filterPeaksTemp2(DataPointStream Rpeak_temp2, DataPointStream Rpeak_temp1, double frequency) {
+    private void filterPeaksTemp2(DataPointStream Rpeak_temp2, DataPointStream Rpeak_temp1, double frequency) {
         Rpeak_temp2.data.addAll(Rpeak_temp1.data);
 
         boolean difference = false;
@@ -424,12 +426,13 @@ public class ECGFeatures {
      * @param peaks     Input datastream
      * @param ECG       Input ECG datastream
      */
-    public void filterPeaks(DataPointStream rrAverage, DataPointStream temp1, DataPointStream peaks, DataPointStream ECG) {
-        double thr1 = AUTOSENSE.THR1_INIT;
-        double thr2 = 0.5 * thr1;
-        double sig_lev = AUTOSENSE.SIG_LEV_FACTOR * thr1;
-        double noise_lev = AUTOSENSE.NOISE_LEV_FACTOR * sig_lev;
-
+    private void filterPeaks(DataPointStream rrAverage, DataPointStream temp1, DataPointStream peaks, DataPointStream ECG, DataPointStream thr1, DataPointStream thr2, DataPointStream sig_lev, DataPointStream noise_lev) {
+        if (thr1.data.size() == 0) {
+            thr1.add(new DataPoint(ECG.data.get(0).timestamp, AUTOSENSE.THR1_INIT));
+            thr2.add(new DataPoint(ECG.data.get(0).timestamp, 0.5 * AUTOSENSE.THR1_INIT));
+            sig_lev.add(new DataPoint(ECG.data.get(0).timestamp, AUTOSENSE.SIG_LEV_FACTOR * AUTOSENSE.THR1_INIT));
+            noise_lev.add(new DataPoint(ECG.data.get(0).timestamp, AUTOSENSE.NOISE_LEV_FACTOR * AUTOSENSE.SIG_LEV_FACTOR * AUTOSENSE.THR1_INIT));
+        }
         DataPoint rr_ave;
 
         if (rrAverage.stats.getN() == 0) {
@@ -453,23 +456,23 @@ public class ECGFeatures {
         int i1 = 0;
         while (i1 < peaks.data.size()) {
             if (Rpeak_temp1.size() == 0) {
-                if (peaks.data.get(i1).value > thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                if (peaks.data.get(i1).value > thr1.getLatestValue() && peaks.data.get(i1).value < (3.0 * sig_lev.getLatestValue())) {
                     if (Rpeak_temp1.size() <= c1) {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = 0.125*peaks.data.get(i1).value+0.875*sig_lev;
+                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value+0.875*sig_lev.getLatestValue()));
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
-                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = 0.125*peaks.data.get(i1).value + 0.875*noise_lev;
+                } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
+                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value + 0.875*noise_lev.getLatestValue()));
                 }
 
-                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev); //TODO: Candidate for datastream
-                thr2 = 0.5 * thr1; //TODO: Candidate for datastream
+                thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue()))); //TODO: Candidate for datastream
+                thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue())); //TODO: Candidate for datastream
                 i1++;
                 rr_ave = rr_ave_update(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
             } else {
@@ -478,7 +481,7 @@ public class ECGFeatures {
                     List<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
 
                     for (int j = c2.get(c1 - 1)+1; j < i1 - 1; j++) {
-                        if (peaks.data.get(j).value < 3.0 * sig_lev && peaks.data.get(j).value > thr2) {
+                        if (peaks.data.get(j).value < 3.0 * sig_lev.getLatestValue() && peaks.data.get(j).value > thr2.getLatestValue()) {
                             searchback_array_inrange.add(peaks.data.get(j).value);
                             searchback_array_inrange_index.add(j - c2.get(c1 - 1));
                         }
@@ -497,34 +500,34 @@ public class ECGFeatures {
                             Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
                         Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                        sig_lev = 0.125*Rpeak_temp1.get(c1).value+0.875*sig_lev;
+                        sig_lev.add(new DataPoint(Rpeak_temp1.get(c1).timestamp,0.125*Rpeak_temp1.get(c1).value+0.875*sig_lev.getLatestValue()));
                         if (c1 >= c2.size()) {
                             c2.add(0);
                         }
                         c2.set(c1, c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index));
                         i1 = c2.get(c1) + 1;
                         c1 += 1;
-                        thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                        thr2 = 0.5 * thr1;
+                        thr1.add(new DataPoint(peaks.data.get(i1).timestamp,noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
+                        thr2.add(new DataPoint(peaks.data.get(i1).timestamp,0.5 * thr1.getLatestValue()));
                         rr_ave = rr_ave_update(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
                         continue;
                     }
-                } else if (peaks.data.get(i1).value >= thr1 && peaks.data.get(i1).value < (3.0 * sig_lev)) {
+                } else if (peaks.data.get(i1).value >= thr1.getLatestValue() && peaks.data.get(i1).value < (3.0 * sig_lev.getLatestValue())) {
                     if (Rpeak_temp1.size() >= c1) {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev = 0.125*peaks.data.get(i1).value+0.875*sig_lev;
+                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value+0.875*sig_lev.getLatestValue()));
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
-                } else if (peaks.data.get(i1).value < thr1 && peaks.data.get(i1).value > thr2) {
-                    noise_lev = 0.125*peaks.data.get(i1).value + 0.875*noise_lev;
+                } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
+                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value + 0.875*noise_lev.getLatestValue()));
                 }
-                thr1 = noise_lev + 0.25 * (sig_lev - noise_lev);
-                thr2 = 0.5 * thr1;
+                thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
+                thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
                 rr_ave = rr_ave_update(Rpeak_temp1, rrAverage,ECG.data.get(0).timestamp);
                 i1++;
             }
@@ -562,7 +565,7 @@ public class ECGFeatures {
      * @param rr_ave      Current rr average
      * @return New rr average
      */
-    public DataPoint rr_ave_update(List<DataPoint> rpeak_temp1, DataPointStream rr_ave, long initial_ts) { //TODO: Consider replacing this algorithm with something like and EWMA
+    private DataPoint rr_ave_update(List<DataPoint> rpeak_temp1, DataPointStream rr_ave, long initial_ts) { //TODO: Consider replacing this algorithm with something like and EWMA
         List<Long> peak_interval = new ArrayList<Long>();
         DataPoint result = rr_ave.data.get(rr_ave.data.size() - 1);
         if (rpeak_temp1.size() != 0) {
