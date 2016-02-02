@@ -459,16 +459,16 @@ public class ECGFeatures {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value+0.875*sig_lev.getLatestValue()));
+                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp,Smoothing.ewma(peaks.data.get(i1).value,sig_lev.getLatestValue(),AUTOSENSE.EWMA_ALPHA)));
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
                 } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
-                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value + 0.875*noise_lev.getLatestValue()));
+                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,Smoothing.ewma(peaks.data.get(i1).value,noise_lev.getLatestValue(),AUTOSENSE.EWMA_ALPHA)));
                 }
-
+                
                 thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue()))); //TODO: Candidate for datastream
                 thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue())); //TODO: Candidate for datastream
                 i1++;
@@ -477,14 +477,14 @@ public class ECGFeatures {
                 if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
                     List<Double> searchback_array_inrange = new ArrayList<Double>();
                     List<Integer> searchback_array_inrange_index = new ArrayList<Integer>();
-
+                    
                     for (int j = c2.get(c1 - 1)+1; j < i1 - 1; j++) {
                         if (peaks.data.get(j).value < 3.0 * sig_lev.getLatestValue() && peaks.data.get(j).value > thr2.getLatestValue()) {
                             searchback_array_inrange.add(peaks.data.get(j).value);
                             searchback_array_inrange_index.add(j - c2.get(c1 - 1));
                         }
                     }
-
+                    
                     if (searchback_array_inrange.size() > 0) {
                         double searchback_max = searchback_array_inrange.get(0);
                         int searchback_max_index = 0;
@@ -498,7 +498,7 @@ public class ECGFeatures {
                             Rpeak_temp1.add(new DataPoint(0, 0.0));
                         }
                         Rpeak_temp1.set(c1, peaks.data.get(c2.get(c1 - 1) + searchback_array_inrange_index.get(searchback_max_index)));
-                        sig_lev.add(new DataPoint(Rpeak_temp1.get(c1).timestamp,0.125*Rpeak_temp1.get(c1).value+0.875*sig_lev.getLatestValue()));
+                        sig_lev.add(new DataPoint(Rpeak_temp1.get(c1).timestamp,Smoothing.ewma(Rpeak_temp1.get(c1).value,sig_lev.getLatestValue(),AUTOSENSE.EWMA_ALPHA)));
                         if (c1 >= c2.size()) {
                             c2.add(0);
                         }
@@ -515,14 +515,14 @@ public class ECGFeatures {
                         Rpeak_temp1.add(new DataPoint(0, 0.0));
                     }
                     Rpeak_temp1.set(c1, peaks.data.get(i1));
-                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value+0.875*sig_lev.getLatestValue()));
+                    sig_lev.add(new DataPoint(peaks.data.get(i1).timestamp,Smoothing.ewma(peaks.data.get(i1).value,sig_lev.getLatestValue(),AUTOSENSE.EWMA_ALPHA)));
                     if (c2.size() <= c1) {
                         c2.add(0);
                     }
                     c2.set(c1, i1);
                     c1 += 1;
                 } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
-                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,0.125*peaks.data.get(i1).value + 0.875*noise_lev.getLatestValue()));
+                    noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,Smoothing.ewma(peaks.data.get(i1).value,noise_lev.getLatestValue(),AUTOSENSE.EWMA_ALPHA)));
                 }
                 thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
                 thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
@@ -573,10 +573,11 @@ public class ECGFeatures {
             }
 
             if (peak_interval.size() >= AUTOSENSE.PEAK_INTERVAL_MINIMUM_SIZE) {
+                long rr_ave_temp = 0;
                 for (int i = peak_interval.size() - AUTOSENSE.PEAK_INTERVAL_MINIMUM_SIZE; i < peak_interval.size(); i++) {
-                    result.value += peak_interval.get(i);
+                    rr_ave_temp += peak_interval.get(i);
                 }
-                rr_ave.add(new DataPoint(rpeak_temp1.get(rpeak_temp1.size() - 1).timestamp, result.value /= 8.0));
+                rr_ave.add(new DataPoint(rpeak_temp1.get(rpeak_temp1.size() - 1).timestamp, rr_ave_temp / 8.0));
                 result = rr_ave.data.get(rr_ave.data.size() - 1);
             }
         }
