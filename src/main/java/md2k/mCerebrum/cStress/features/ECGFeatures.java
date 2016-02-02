@@ -95,7 +95,7 @@ public class ECGFeatures {
         DataPointStream thr1 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_THR1);
         thr1.setPreservedLastInsert(true);
         DataPointStream thr2 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_THR2);
-        thr2.setPreservedLastInsert(true); 
+        thr2.setPreservedLastInsert(true);
         DataPointStream sig_lev = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_SIG_LEV);
         sig_lev.setPreservedLastInsert(true);
         DataPointStream noise_lev = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_NOISE_LEV);
