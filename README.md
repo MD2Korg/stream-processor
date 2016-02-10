@@ -1,6 +1,12 @@
 # Stream Processor - A real-time high-frequency framework for mCerebrum's data sources
 [![Build Status](https://travis-ci.org/MD2Korg/stream-processor.svg)](https://travis-ci.org/MD2Korg/stream-processor)
 
+# Overview
+Stream Processor is a library and data processing tool that contains online implementations
+of algorithms designed to run on mCerebrum.  This codebase also be run in a standalone
+fashion on most computing platforms.
+
+It contains implementations of the following algorithms:
 ## Algorithms
 - cStress: A continuous stress assessment algorithm
 
