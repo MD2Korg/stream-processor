@@ -133,7 +133,7 @@ public class DataPointStream extends DataStream {
                 data.clear();
             }
         }
-        history.clear(); //TWH: Clear history for now
+        //history.clear(); //TWH: Clear history for now
     }
 
 
@@ -155,6 +155,31 @@ public class DataPointStream extends DataStream {
         Collections.reverse(result);
         return result;
     }
+
+    /**
+     * Retrieve historical data including the current window of data
+     *
+     * @param numSamples Get previous N samples
+     * @return List of data that is within the time window
+     */
+    public List<DataPoint> getHistoricalNValues(int numSamples) {
+        List<DataPoint> result = new ArrayList<DataPoint>();
+
+        //for (int i=0; i<numSamples && i<history.size(); i++) {
+        //    result.add(history.get(i));
+        //}
+        int fromI = history.size() - numSamples;
+        if (fromI < 0) {
+            fromI = 0;
+        }
+        for (int i = history.size() - 1; i >= fromI; i--) {
+            result.add(history.get(i));
+        }
+
+        //Collections.reverse(result);
+        return result;
+    }
+
 
     /**
      * Main method to add DataPoint to the data stream.  Updates stats and descriptiveStats and checks for invalid data
@@ -198,6 +223,10 @@ public class DataPointStream extends DataStream {
 
     public double getLatestValue() {
         return data.get(data.size() - 1).value;
+    }
+
+    public long getLatestTimestamp() {
+        return data.get(data.size() - 1).timestamp;
     }
 
     /**
