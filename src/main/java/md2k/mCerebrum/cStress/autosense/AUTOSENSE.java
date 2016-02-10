@@ -74,7 +74,7 @@ public class AUTOSENSE {
     public static final double STRESS_PROBABILTY_THRESHOLD = 0.339329059788;
 
     public static final double RPEAK_INTERPEAK_MULTIPLIER = 0.5;
-
+    public static final int RPEAK_INTERPEAK_LIMIT = 500;
     public static final int SAMPLE_LENGTH_SECS = 60;
 
     public static final double ACTIVITY_THRESHOLD = 0.35;
