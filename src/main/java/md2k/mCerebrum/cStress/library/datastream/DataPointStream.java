@@ -4,6 +4,7 @@ package md2k.mCerebrum.cStress.library.datastream;
 import md2k.mCerebrum.cStress.library.DescriptiveStatistics;
 import md2k.mCerebrum.cStress.library.SummaryStatistics;
 import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -51,7 +52,7 @@ public class DataPointStream extends DataStream {
     public List<DataPoint> data;
     public SummaryStatistics stats;
     public DescriptiveStatistics descriptiveStats;
-    private List<DataPoint> history;
+    private CircularFifoQueue<DataPoint> history;
 
 
     /**
@@ -61,13 +62,25 @@ public class DataPointStream extends DataStream {
      */
     public DataPointStream(String name) {
         data = new ArrayList<DataPoint>();
-        history = new ArrayList<DataPoint>();
+        history = new CircularFifoQueue<DataPoint>(1);
         metadata = new HashMap<String, Object>();
         metadata.put("name", name);
         preserve = false;
         stats = new SummaryStatistics();
         descriptiveStats = new DescriptiveStatistics(10000);
     }
+
+    /**
+     * Constructor
+     *
+     * @param name        Unique name of the DataPoint object
+     * @param historySize number of elements to maintain as part of the historical state
+     */
+    public DataPointStream(String name, int historySize) {
+        this(name);
+        history = new CircularFifoQueue<DataPoint>(historySize);
+    }
+
 
     public DataPointStream(String name, List<DataPoint> dataPoints) {
         this(name);
@@ -76,6 +89,7 @@ public class DataPointStream extends DataStream {
         }
     }
 
+
     /**
      * Copy Constructor
      *
@@ -83,11 +97,15 @@ public class DataPointStream extends DataStream {
      */
     public DataPointStream(DataPointStream other) {
         this.data = new ArrayList<DataPoint>(other.data);
-        this.history = new ArrayList<DataPoint>(other.history);
+        this.history = new CircularFifoQueue<DataPoint>(other.history);
         this.metadata = other.metadata;
         this.stats = other.stats;
         this.descriptiveStats = other.descriptiveStats;
         this.preserve = other.preserve;
+    }
+
+    public void setHistoricalBufferSize(int historySize) {
+        history = new CircularFifoQueue<DataPoint>(historySize);
     }
 
     /**
@@ -133,7 +151,6 @@ public class DataPointStream extends DataStream {
                 data.clear();
             }
         }
-        //history.clear(); //TWH: Clear history for now
     }
 
 
@@ -151,8 +168,6 @@ public class DataPointStream extends DataStream {
                 result.add(dpa);
             }
         }
-
-        Collections.reverse(result);
         return result;
     }
 
@@ -165,9 +180,6 @@ public class DataPointStream extends DataStream {
     public List<DataPoint> getHistoricalNValues(int numSamples) {
         List<DataPoint> result = new ArrayList<DataPoint>();
 
-        //for (int i=0; i<numSamples && i<history.size(); i++) {
-        //    result.add(history.get(i));
-        //}
         int fromI = history.size() - numSamples;
         if (fromI < 0) {
             fromI = 0;
@@ -176,7 +188,7 @@ public class DataPointStream extends DataStream {
             result.add(history.get(i));
         }
 
-        //Collections.reverse(result);
+        Collections.reverse(result);
         return result;
     }
 
