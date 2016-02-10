@@ -45,6 +45,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NotANumberException;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.TreeMap;
 
@@ -55,7 +56,7 @@ public class StreamProcessor {
 
     public DataPointInterface dpInterface;
     private long windowSize;
-    private String path;
+    private String path = null;
     private DataStreams datastreams = new DataStreams();
     private TreeMap<String,Object> models = new TreeMap<String,Object>();
 
@@ -123,6 +124,14 @@ public class StreamProcessor {
      */
     public void setPath(String path) {
         this.path = path;
+        for (File f : new File(path).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.startsWith("org.md2k") && name.endsWith(".csv");
+            }
+        })) {
+            f.delete();
+        }
     }
 
 
@@ -326,7 +335,8 @@ public class StreamProcessor {
      * Persist and reset all datastreams
      */
     private void resetDataStreams() {
-        datastreams.persist(path + "/");
+        if (path != null)
+            datastreams.persist(path + "/");
         datastreams.reset();
     }
 
