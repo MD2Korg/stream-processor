@@ -45,18 +45,35 @@ public class StressEpisodeClassification {
     public static final double thresholdNo = 0.29;
 
     public static final int stressProbabilitySmoothingWindow = 3; // 3 minute
+    public static final int BUFFER_SIZE = 100;
+    public static final int BUFFER_SIZE_SMALL = 10;
 
     public StressEpisodeClassification(DataStreams datastreams, long windowSize) {
 
         DataPointStream dsStressProbability = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY);
+
         DataPointStream dsStressProbabilityImputed = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY_IMPUTED);
+        dsStressProbabilityImputed.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
+
         DataPointStream dsStressProbabilitySmoothed = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY_SMOOTHED);
+        dsStressProbabilitySmoothed.setHistoricalBufferSize(BUFFER_SIZE);
+
         DataPointStream dsStressProbabilityAvailable = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY_AVAILABLE);
+        dsStressProbabilityAvailable.setHistoricalBufferSize(BUFFER_SIZE);
+
         DataPointStream dsEmaFast = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_FAST);
+        dsEmaFast.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
+
         DataPointStream dsEmaSlow = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SLOW);
+        dsEmaSlow.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
+
         DataPointStream dsEmaSignal = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SIGNAL);
-        //DataPointStream dsHistogram = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_HISTOGRAM);
+        dsEmaSignal.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
+
         DataPointStream dsStressEpisodeClassification = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION);
+        dsStressEpisodeClassification.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
+
+
 
         if (dsStressProbability.data.size() > 0) {
             DataPoint stressProbability = new DataPoint(dsStressProbability.getLatestTimestamp(), dsStressProbability.getLatestValue());
@@ -65,7 +82,7 @@ public class StressEpisodeClassification {
             dsStressProbabilityAvailable.add(new DataPoint(dsStressProbability.getLatestTimestamp(), 1.0));
         } else {
             //Handle missing datapoint. Imputation by carry forwarding the last known value.
-            long currentTimestamp = -1; //getCurrentTimestamp();
+            long currentTimestamp = -1;
             List<DataPoint> imputedHistoryLast = dsStressProbabilityImputed.getHistoricalNValues(1);
             if (imputedHistoryLast.size() > 0) {
                 if (imputedHistoryLast.get(0).timestamp == -1) {
@@ -85,7 +102,7 @@ public class StressEpisodeClassification {
 
             dsStressProbabilityAvailable.add(new DataPoint(currentTimestamp, 0.0));
         }
-        //Smoothing.smooth(dsStressProbabilitySmoothed, dsStressProbabilityImputed, stressProbabilitySmoothingWindow);
+
         smoothViaHistoricalValues(dsStressProbabilitySmoothed, dsStressProbabilityImputed, stressProbabilitySmoothingWindow);
 
         DataPoint stressProbability = new DataPoint(dsStressProbabilitySmoothed.getLatestTimestamp(), dsStressProbabilitySmoothed.getLatestValue());

@@ -2,6 +2,7 @@ package md2k.mCerebrum.cStress.library.datastream;
 
 
 import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -45,7 +46,7 @@ import java.util.List;
 public class DataArrayStream extends DataStream {
 
     public List<DataPointArray> data;
-    private List<DataPointArray> history;
+    private CircularFifoQueue<DataPointArray> history;
 
     /**
      * Constructor
@@ -54,12 +55,21 @@ public class DataArrayStream extends DataStream {
      */
     public DataArrayStream(String name) {
         data = new ArrayList<DataPointArray>();
-        history = new ArrayList<DataPointArray>();
+        history = new CircularFifoQueue<DataPointArray>(1);
         metadata = new HashMap<String, Object>();
         metadata.put("name", name);
         preserve = false;
     }
 
+    /**
+     * Constructor
+     *
+     * @param name Unique name of the DataArrayStream object
+     */
+    public DataArrayStream(String name, int historySize) {
+        this(name);
+        history = new CircularFifoQueue<DataPointArray>(historySize);
+    }
 
     /**
      * Copy Constructor
@@ -68,11 +78,14 @@ public class DataArrayStream extends DataStream {
      */
     public DataArrayStream(DataArrayStream other) {
         this.data = new ArrayList<DataPointArray>(other.data);
-        this.history = new ArrayList<DataPointArray>(other.history);
+        this.history = new CircularFifoQueue<DataPointArray>(other.history);
         this.metadata = other.metadata;
         this.preserve = other.preserve;
     }
 
+    public void setHistoricalBufferSize(int historySize) {
+        history = new CircularFifoQueue<DataPointArray>(historySize);
+    }
 
     /**
      * Set method for data stream preservation
@@ -98,10 +111,30 @@ public class DataArrayStream extends DataStream {
                 result.add(dpa);
             }
         }
+        return result;
+    }
+
+    /**
+     * Retrieve historical data including the current window of data
+     *
+     * @param numSamples Get previous N samples
+     * @return List of data that is within the time window
+     */
+    public List<DataPointArray> getHistoricalNValues(int numSamples) {
+        List<DataPointArray> result = new ArrayList<DataPointArray>();
+
+        int fromI = history.size() - numSamples;
+        if (fromI < 0) {
+            fromI = 0;
+        }
+        for (int i = history.size() - 1; i >= fromI; i--) {
+            result.add(history.get(i));
+        }
 
         Collections.reverse(result);
         return result;
     }
+
 
     /**
      * Persist the data stream to the local file system
@@ -141,7 +174,6 @@ public class DataArrayStream extends DataStream {
                 data.clear();
             }
         }
-        history.clear(); //TWH: Clear history for now
     }
 
 
@@ -152,7 +184,7 @@ public class DataArrayStream extends DataStream {
      */
     public void add(DataPointArray dp) {
         data.add(new DataPointArray(dp));
-        history.add(0, new DataPointArray(dp)); //Add in reverse to make looking through the array easier
+        history.add(new DataPointArray(dp));
 
         if (dataPointInterface != null) {
             dataPointInterface.dataPointArrayHandler((String) metadata.get("name"), dp);
