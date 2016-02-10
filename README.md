@@ -95,5 +95,13 @@ Replay logic for sending data through Stream Processor and processing windows `s
 # Release History
 - 0.1.0 Initial release
 
+# Contributors
+ - Timothy Hnat <twhnat@memphis.edu>
+ - Karen Hovsepian <karoper@gmail.com>
+ - Hillol Sarker <hillolsarker@gmail.com>
+
 # License
 [BSD 2-Clause](LICENSE)
+
+# Support
+This research was supported by grant U54EB020404 awarded by the National Institute of Biomedical Imaging and Bioengineering (NIBIB) through funds provided by the trans-NIH Big Data to Knowledge (BD2K) initiative ([www.bd2k.nih.gov](http://www.bd2k.nih.gov)).
