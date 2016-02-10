@@ -96,9 +96,9 @@ Replay logic for sending data through Stream Processor and processing windows `s
 - 0.1.0 Initial release
 
 # Contributors
- - Timothy Hnat <twhnat@memphis.edu>
- - Karen Hovsepian <karoper@gmail.com>
- - Hillol Sarker <hillolsarker@gmail.com>
+ - Timothy Hnat ([twhnat](https://github.com/twhnat)) <twhnat@memphis.edu>
+ - Karen Hovsepian ([karoaper](https://github.com/karoaper)) <karoaper@gmail.com>
+ - Hillol Sarker ([hillolsarker](https://github.com/hillolsarker)) <hillolsarker@gmail.com>
 
 # License
 [BSD 2-Clause](LICENSE)
