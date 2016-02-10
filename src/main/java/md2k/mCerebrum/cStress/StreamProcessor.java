@@ -5,6 +5,7 @@ package md2k.mCerebrum.cStress;
  * - Timothy Hnat <twhnat@memphis.edu>
  * - Karen Hovsepian <karoaper@gmail.com>
  * - Nazir Saleneen <nsleheen@memphis.edu>
+ * - Hillol Sarker <hsarker@memphis.edu>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,6 +197,7 @@ public class StreamProcessor {
         process();
         generateResults();
         runcStress();
+        runcStressEpisode();
         resetDataStreams();
     }
 
@@ -221,6 +223,17 @@ public class StreamProcessor {
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).add(new DataPoint(ap.timestamp, label));
         }
 
+    }
+
+    /**
+     * Method for generating stress episodes and classify them
+     */
+    private void runcStressEpisode() {
+        try {
+            StressEpisodeClassification sef = new StressEpisodeClassification(datastreams, windowSize);
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("StressEpisodeClassification Exception Handler: IndexOutOfBoundsException");
+        }
     }
 
 

@@ -96,5 +96,13 @@ public class StreamConstants {
     public static final String ORG_MD2K_CSTRESS_DATA_RIP_WINDOW_QUALITY = "org.md2k.cstress.data.rip.window.quality";
     public static final String ORG_MD2K_CSTRESS_FV = "org.md2k.cstress.fv";
     public static final String ORG_MD2K_CSTRESS_PROBABILITY = "org.md2k.cstress.probability";
+    public static final String ORG_MD2K_CSTRESS_PROBABILITY_IMPUTED = "org.md2k.cstress.probability.imputed";
+    public static final String ORG_MD2K_CSTRESS_PROBABILITY_SMOOTHED = "org.md2k.cstress.probability.smoothed";
     public static final String ORG_MD2K_CSTRESS_STRESSLABEL = "org.md2k.cstress.stresslabel";
+    public static final String ORG_MD2K_CSTRESS_PROBABILITY_AVAILABLE = "org.md2k.cstress.probability.available";
+    public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_FAST = "org.md2k.cstress.stress.episode.ema.fast";
+    public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SLOW = "org.md2k.cstress.stress.episode.ema.slow";
+    public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SIGNAL = "org.md2k.cstress.stress.episode.ema.signal";
+    public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION = "org.md2k.cstress.stress.episode.classification";
+    //public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_HISTOGRAM = "org.md2k.cstress.stress.episode.histogram";
 }
