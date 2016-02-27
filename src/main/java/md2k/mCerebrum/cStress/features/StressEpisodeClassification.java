@@ -45,8 +45,8 @@ public class StressEpisodeClassification {
     public static final double thresholdNo = 0.29;
 
     public static final int stressProbabilitySmoothingWindow = 3; // 3 minute
-    public static final int BUFFER_SIZE = 100;
-    public static final int BUFFER_SIZE_SMALL = 10;
+    public static final int BUFFER_SIZE = 1000;
+    public static final int BUFFER_SIZE_SMALL = 100;
 
     public StressEpisodeClassification(DataStreams datastreams, long windowSize) {
 
