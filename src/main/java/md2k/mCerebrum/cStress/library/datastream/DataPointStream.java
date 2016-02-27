@@ -105,7 +105,16 @@ public class DataPointStream extends DataStream {
     }
 
     public void setHistoricalBufferSize(int historySize) {
-        history = new CircularFifoQueue<DataPoint>(historySize);
+        if (history.size() != historySize) {
+            List<DataPoint> temp = new ArrayList<DataPoint>();
+            for (DataPoint dp : history) {
+                temp.add(dp);
+            }
+            history = new CircularFifoQueue<DataPoint>(historySize);
+            for (DataPoint dp : temp) {
+                history.add(dp);
+            }
+        }
     }
 
     /**
