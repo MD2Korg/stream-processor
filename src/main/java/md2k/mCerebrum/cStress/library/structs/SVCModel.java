@@ -28,14 +28,15 @@ package md2k.mCerebrum.cStress.library.structs;
  */
 public class SVCModel extends Model{
     private double intercept;
-    private double bias;
+    private double[] bias;
     private double probA;
     private double probB;
 
     private Kernel kernel;
     private Support [] support;
     private NormParam [] normparams;
-    public SVCModel(String modelName,String modelType,double intercept, double bias, double probA, double probB, Kernel kernel, Support [] support,NormParam [] normparams)
+
+    public SVCModel(String modelName, String modelType, double intercept, double[] bias, double probA, double probB, Kernel kernel, Support[] support, NormParam[] normparams)
     {
         super(modelName,modelType);
         this.intercept = intercept;
@@ -47,9 +48,13 @@ public class SVCModel extends Model{
         this.normparams = normparams;
     }
 
-    public double getBias()
+    public double getHighBias()
     {
-        return bias;
+        return bias[1];
+    }
+
+    public double getLowBias() {
+        return bias[0];
     }
 
     public double computeProbability(DataPointArray ap)
@@ -118,13 +123,6 @@ public class SVCModel extends Model{
                 this.name = name;
                 this.value = value;
             }
-/*            public KernelParameter(int degree)
-            {
-                this.degree = degree;
-            }
-
-            public KernelParameter(){}
-*/
         }
     }
 

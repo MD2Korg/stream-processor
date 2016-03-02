@@ -222,10 +222,12 @@ public class StreamProcessor {
         {
             double prob = model.computeProbability(ap);
             int label;
-            if (prob > model.getBias())
+            if (prob > model.getHighBias())
                 label = AUTOSENSE.STRESSED;
-            else
+            else if (prob < model.getLowBias())
                 label = AUTOSENSE.NOT_STRESSED;
+            else
+                label = AUTOSENSE.UNSURE;
 
 
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).add(new DataPoint(ap.timestamp, prob));

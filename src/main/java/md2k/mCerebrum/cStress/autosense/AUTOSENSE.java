@@ -51,6 +51,7 @@ public class AUTOSENSE {
 
     public static final int NOT_STRESSED = 0;
     public static final int STRESSED = 1;
+    public static final int UNSURE = 2;
 
     //Library signal processing constants
     public static final double MED_CONSTANT = 4.5;
