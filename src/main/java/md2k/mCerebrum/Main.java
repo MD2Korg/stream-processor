@@ -42,7 +42,7 @@ public class Main {
 
         ExecutorService executor = Executors.newFixedThreadPool(4);
 
-        for (int i = 50; i < 51; i++) {
+        for (int i = 0; i < 23; i++) {
             String person = "SI" + String.format("%02d", i);
             Runnable worker = new WorkerThread(path + person,args[1]);
             executor.execute(worker);
