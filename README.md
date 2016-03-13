@@ -1,5 +1,6 @@
 # Stream Processor - A real-time high-frequency framework for mCerebrum's data sources
 [![Build Status](https://travis-ci.org/MD2Korg/stream-processor.svg)](https://travis-ci.org/MD2Korg/stream-processor)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/a1e60f1fdf66413194166d33f5fbf4f1)](https://www.codacy.com/app/twhnat/stream-processor)
 
 # Overview
 Stream Processor is a library and data processing tool that contains online implementations
