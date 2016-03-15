@@ -7,6 +7,9 @@ repositories {
     mavenCentral()
 }
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.+'
     compile 'org.apache.commons:commons-math3:3.5'
