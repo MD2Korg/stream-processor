@@ -55,6 +55,25 @@ public class CStressFeatureVector {
         } catch (IndexOutOfBoundsException e) {
             //Ignore this error
         }
+        try {
+            DataPointArray fv = computeRIP(datastreams);
+            DataArrayStream fvRIPStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV_RIP);
+            fvRIPStream.add(fv);
+        } catch (IndexOutOfBoundsException e) {
+            //Ignore this error
+        }
+    }
+
+    private DataPointArray computeRIP(DataStreams datastreams) {
+
+        List<Double> RIPFeatures = computeRIPFeatures(datastreams);
+
+        for (Double aFeatureVector : RIPFeatures) {
+            if (Double.isNaN(aFeatureVector)) {
+                throw new NotANumberException();
+            }
+        }
+        return new DataPointArray(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE).data.get(0).timestamp, RIPFeatures);
     }
 
     /**
@@ -105,7 +124,57 @@ public class CStressFeatureVector {
         DescriptiveStatistics heartrate = new DescriptiveStatistics(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_HEARTRATE).getNormalizedValues());
         double ECG_RR_Interval_Heart_Rate = heartrate.getMean();
 
+
+        List<Double> RIPFeatures = computeRIPFeatures(datastreams);
+
          /*
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - mean
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
+         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
+         */
+
+        DescriptiveStatistics RSA = new DescriptiveStatistics((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RSA)).getNormalizedValues());
+
+        double RSA_Quartile_Deviation = (RSA.getPercentile(75) - RSA.getPercentile(25)) / 2.0;
+        double RSA_Mean = RSA.getMean();
+        double RSA_Median = RSA.getPercentile(50);
+        double RSA_80thPercentile = RSA.getPercentile(80);
+
+        List<Double> featureVector = new ArrayList<Double>();
+
+
+        featureVector.add(ECG_RR_Interval_Variance);// 1
+        featureVector.add(ECG_RR_Interval_Low_High_Frequency_Energy_Ratio);// 2
+        featureVector.add(ECG_RR_Interval_High_Frequency_Energy);// 3
+        featureVector.add(ECG_RR_Interval_Medium_Frequency_Energy);// 4
+        featureVector.add(ECG_RR_Interval_Low_Frequency_Energy);// 5
+        featureVector.add(ECG_RR_Interval_Mean);// 6
+        featureVector.add(ECG_RR_Interval_Median);// 7
+        featureVector.add(ECG_RR_Interval_Quartile_Deviation);// 8
+        featureVector.add(ECG_RR_Interval_80thPercentile);// 9
+        featureVector.add(ECG_RR_Interval_20thPercentile);// 10
+        featureVector.add(ECG_RR_Interval_Heart_Rate);// 11
+
+        featureVector.addAll(RIPFeatures); //12-33
+
+        featureVector.add(RSA_Quartile_Deviation);// 34
+        featureVector.add(RSA_Mean);// 35
+        featureVector.add(RSA_Median);// 36
+        featureVector.add(RSA_80thPercentile);// 37
+
+
+        for (Double aFeatureVector : featureVector) {
+            if (Double.isNaN(aFeatureVector)) {
+                throw new NotANumberException();
+            }
+        }
+        return new DataPointArray(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE).data.get(0).timestamp, featureVector);
+    }
+
+    private List<Double> computeRIPFeatures(DataStreams datastreams) {
+        List<Double> featureVector = new ArrayList<Double>();
+        /*
          RIP - Inspiration Duration - quartile deviation
          RIP - Inspiration Duration - mean
          RIP - Inspiration Duration - median
@@ -183,34 +252,6 @@ public class CStressFeatureVector {
         DataPointStream minVent = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MINUTE_VENTILATION);
         double RIP_Inspiration_Minute_Ventilation = (minVent.data.get(0).value - minVent.stats.getMean()) / minVent.stats.getStandardDeviation();
 
-         /*
-         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - quartile deviation
-         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - mean
-         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - median
-         RIP+ECG - Respiratory Sinus Arrhythmia (RSA) - 80th percentile
-         */
-
-        DescriptiveStatistics RSA = new DescriptiveStatistics((datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RSA)).getNormalizedValues());
-
-        double RSA_Quartile_Deviation = (RSA.getPercentile(75) - RSA.getPercentile(25)) / 2.0;
-        double RSA_Mean = RSA.getMean();
-        double RSA_Median = RSA.getPercentile(50);
-        double RSA_80thPercentile = RSA.getPercentile(80);
-
-        List<Double> featureVector = new ArrayList<Double>();
-
-
-        featureVector.add(ECG_RR_Interval_Variance);// 1
-        featureVector.add(ECG_RR_Interval_Low_High_Frequency_Energy_Ratio);// 2
-        featureVector.add(ECG_RR_Interval_High_Frequency_Energy);// 3
-        featureVector.add(ECG_RR_Interval_Medium_Frequency_Energy);// 4
-        featureVector.add(ECG_RR_Interval_Low_Frequency_Energy);// 5
-        featureVector.add(ECG_RR_Interval_Mean);// 6
-        featureVector.add(ECG_RR_Interval_Median);// 7
-        featureVector.add(ECG_RR_Interval_Quartile_Deviation);// 8
-        featureVector.add(ECG_RR_Interval_80thPercentile);// 9
-        featureVector.add(ECG_RR_Interval_20thPercentile);// 10
-        featureVector.add(ECG_RR_Interval_Heart_Rate);// 11
 
         featureVector.add(RIP_Breath_Rate);// 12
         featureVector.add(RIP_Inspiration_Minute_Ventilation);// 13
@@ -240,17 +281,11 @@ public class CStressFeatureVector {
         featureVector.add(RIP_Stretch_Median);// 32
         featureVector.add(RIP_Stretch_80thPercentile);// 33
 
-        featureVector.add(RSA_Quartile_Deviation);// 34
-        featureVector.add(RSA_Mean);// 35
-        featureVector.add(RSA_Median);// 36
-        featureVector.add(RSA_80thPercentile);// 37
-
-
         for (Double aFeatureVector : featureVector) {
             if (Double.isNaN(aFeatureVector)) {
                 throw new NotANumberException();
             }
         }
-        return new DataPointArray(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE).data.get(0).timestamp, featureVector);
+        return featureVector;
     }
 }

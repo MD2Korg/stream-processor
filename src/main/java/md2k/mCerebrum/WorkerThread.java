@@ -38,14 +38,16 @@ public class WorkerThread implements Runnable {
 
     private String path;
     private String cStressModelPath;
+    private String cStressRIPModelPath;
 
     public WorkerThread(String path) {
         this.path = path;
     }
 
-    public WorkerThread(String path,String cStressModelPath) {
+    public WorkerThread(String path, String cStressModelPath, String cStressRIPModelPath) {
         this.path = path;
         this.cStressModelPath = cStressModelPath;
+        this.cStressRIPModelPath = cStressRIPModelPath;
     }
 
 
@@ -79,7 +81,8 @@ public class WorkerThread implements Runnable {
 
         StreamProcessor streamProcessor = new StreamProcessor(windowSize);
         streamProcessor.setPath(path);
-        streamProcessor.loadModel(cStressModelPath);
+        streamProcessor.loadModel("cStressModel", cStressModelPath);
+        streamProcessor.loadModel("cStressRIPModel", cStressRIPModelPath);
 
         streamProcessor.dpInterface = new DataPointInterface() {
             @Override
