@@ -51,6 +51,7 @@ public class StressEpisodeClassification {
     public StressEpisodeClassification(DataStreams datastreams, long windowSize) {
 
         DataPointStream dsStressProbability = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY);
+        DataPointStream dsStressRIPProbability = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_RIP_PROBABILITY);
 
         DataPointStream dsStressProbabilityImputed = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY_IMPUTED);
         dsStressProbabilityImputed.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
@@ -80,6 +81,11 @@ public class StressEpisodeClassification {
             dsStressProbabilityImputed.add(stressProbability);
 
             dsStressProbabilityAvailable.add(new DataPoint(dsStressProbability.getLatestTimestamp(), 1.0));
+        } else if (dsStressRIPProbability.data.size() > 0) {
+            DataPoint stressProbability = new DataPoint(dsStressRIPProbability.getLatestTimestamp(), dsStressRIPProbability.getLatestValue());
+            dsStressProbabilityImputed.add(stressProbability);
+
+            dsStressProbabilityAvailable.add(new DataPoint(dsStressRIPProbability.getLatestTimestamp(), 1.0));
         } else {
             //Handle missing datapoint. Imputation by carry forwarding the last known value.
             long currentTimestamp = -1;

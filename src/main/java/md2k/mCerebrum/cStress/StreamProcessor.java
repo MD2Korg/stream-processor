@@ -77,14 +77,14 @@ public class StreamProcessor {
      * load and create a model object from a model file
      * @param path Path to the model file (in JSON format)
      */
-    public void loadModel(String path) {
+    public void loadModel(String name, String path) {
         Gson gson = new Gson();
         try
         {
             String jsonstring = FileUtils.readFileToString(new File(path));
             Model genericModel = gson.fromJson(jsonstring,Model.class);
             if(genericModel.getModelType().equals("svc"))
-                models.put("cStressModel",gson.fromJson(jsonstring,SVCModel.class));
+                models.put(name, gson.fromJson(jsonstring, SVCModel.class));
         }
         catch (IOException e)
         {
@@ -232,6 +232,26 @@ public class StreamProcessor {
 
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).add(new DataPoint(ap.timestamp, label));
+        }
+
+
+        //RIP only model
+        model = (SVCModel) models.get("cStressRIPModel");
+        featurevector = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV_RIP);
+
+        for (DataPointArray ap : featurevector.data) {
+            double prob = model.computeProbability(ap);
+            int label;
+            if (prob > model.getHighBias())
+                label = AUTOSENSE.STRESSED;
+            else if (prob < model.getLowBias())
+                label = AUTOSENSE.NOT_STRESSED;
+            else
+                label = AUTOSENSE.UNSURE;
+
+
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_RIP_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_RIP_STRESSLABEL).add(new DataPoint(ap.timestamp, label));
         }
 
     }
