@@ -1,9 +1,9 @@
-package md2k.mCerebrum.cStress.library.dataquality.autosense;
+package md2k.mcerebrum.cstress.library.dataquality.autosense;
 
 
-import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.Time;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.library.Time;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 
 import java.util.ArrayList;
 import java.util.List;

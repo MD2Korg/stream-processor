@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.features;
+package md2k.mcerebrum.cstress.features;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
@@ -27,11 +27,11 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import md2k.mCerebrum.cStress.StreamConstants;
-import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import md2k.mcerebrum.cstress.StreamConstants;
+import md2k.mcerebrum.cstress.library.datastream.DataArrayStream;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -41,15 +41,15 @@ import java.util.List;
 /**
  * Main cStress feature computation class
  */
-public class cStressFeatureVector {
+public class CStressFeatureVector {
 
     /**
      * Constructor for cStress
      * @param datastreams Global datastreams
      */
-    public cStressFeatureVector(DataStreams datastreams) {
+    public CStressFeatureVector(DataStreams datastreams) {
         try {
-            DataPointArray fv = computeStressFeatures(datastreams);
+            DataPointArray fv = compute(datastreams);
             DataArrayStream fvStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV);
             fvStream.add(fv);
         } catch (IndexOutOfBoundsException e) {
@@ -63,7 +63,7 @@ public class cStressFeatureVector {
      * @param datastreams Global DataStreams object
      * @return FV
      */
-    private DataPointArray computeStressFeatures(DataStreams datastreams) {
+    private DataPointArray compute(DataStreams datastreams) {
 
         /* List of features for SVM model
 

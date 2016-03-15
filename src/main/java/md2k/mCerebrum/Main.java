@@ -1,4 +1,4 @@
-package md2k.mCerebrum;
+package md2k.mcerebrum;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.tests;
+package md2k.mcerebrum.cstress.tests;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

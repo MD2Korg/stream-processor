@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mcerebrum.cstress.library;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
@@ -31,11 +31,7 @@ import java.util.TreeMap;
 
 public class DescriptiveStatistics {
 
-    TreeMap<Integer, PSquared> pp = new TreeMap<Integer, PSquared>();
-
-    public DescriptiveStatistics(int i) {
-
-    }
+    private TreeMap<Integer, PSquared> pp = new TreeMap<Integer, PSquared>();
 
     public void addValue(double value) {
         for (Integer i : pp.keySet()) {

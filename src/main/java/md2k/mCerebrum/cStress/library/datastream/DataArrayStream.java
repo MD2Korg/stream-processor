@@ -1,7 +1,7 @@
-package md2k.mCerebrum.cStress.library.datastream;
+package md2k.mcerebrum.cstress.library.datastream;
 
 
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.io.BufferedWriter;

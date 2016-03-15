@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library.datastream;/*
+package md2k.mcerebrum.cstress.library.datastream;/*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.

@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library.datastream;
+package md2k.mcerebrum.cstress.library.datastream;
 
 import java.util.HashMap;
 

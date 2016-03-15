@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library.signalprocessing;
+package md2k.mcerebrum.cstress.library.signalprocessing;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

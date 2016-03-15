@@ -1,4 +1,4 @@
-package md2k.mCerebrum;
+package md2k.mcerebrum;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

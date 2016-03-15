@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library.datastream;
+package md2k.mcerebrum.cstress.library.datastream;
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -30,8 +30,8 @@ package md2k.mCerebrum.cStress.library.datastream;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 
 /**
  * DataPoint Interface utilized to implement a callback mechanism

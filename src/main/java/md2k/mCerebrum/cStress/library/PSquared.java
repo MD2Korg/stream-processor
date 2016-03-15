@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mcerebrum.cstress.library;
 
 /*
 
@@ -40,27 +40,27 @@ public class PSquared {
     final double p;
 
     // Last percentile value
-    double pValue;
+    private double pValue;
 
     // Initial observations
-    double[] initial = new double[MARKERS];
-    int initialCount = 0;
-    boolean initialized = false;
+    private double[] initial = new double[MARKERS];
+    private int initialCount = 0;
+    private boolean initialized = false;
 
     // Marker heights
-    double[] q = new double[MARKERS];
+    private double[] q = new double[MARKERS];
 
     // Marker positions
-    int[] n = new int[MARKERS];
+    private int[] n = new int[MARKERS];
 
     // Desired marker positions
-    double[] n_desired = new double[MARKERS];
+    private double[] n_desired = new double[MARKERS];
 
     // Precalculated desired marker increments
-    double[] dn = new double[MARKERS];
+    private double[] dn = new double[MARKERS];
 
     // Last k value
-    int lastK;
+    private int lastK;
 
     public PSquared(double p) {
         // Set percentile
@@ -89,9 +89,9 @@ public class PSquared {
 
         // Precalculated desired marker increments
         dn[0] = 0;
-        dn[1] = (double) p / 2f;
+        dn[1] = p / 2f;
         dn[2] = p;
-        dn[3] = (1f + (double) p) / 2f;
+        dn[3] = (1f + p) / 2f;
         dn[4] = 1;
     }
 
@@ -115,11 +115,9 @@ public class PSquared {
 
     public double accept(double x) {
         // Still recording initial values
-        if (!initialized) {
-            if (!acceptInitial(x)) {
-                pValue = initialSetPercentile();
-                return pValue;
-            }
+        if (!initialized && !acceptInitial(x)) {
+            pValue = initialSetPercentile();
+            return pValue;
         }
 
         int k = -1;
@@ -182,27 +180,27 @@ public class PSquared {
         return pValue;
     }
 
-    double linear(int d, int i) {
+    private double linear(int d, int i) {
         return q[i] + d * (q[i + d] - q[i]) / (n[i + d] - n[i]);
     }
 
-    double parabolic(double d, int i) {
-        double a = (double) d / (double) (n[i + 1] - n[i - 1]);
+    private double parabolic(double d, int i) {
+        double a = d / (double) (n[i + 1] - n[i - 1]);
 
-        double b = (double) (n[i] - n[i - 1] + d) * (q[i + 1] - q[i]) / (double) (n[i + 1] - n[i])
-                + (double) (n[i + 1] - n[i] - d) * (q[i] - q[i - 1]) / (double) (n[i] - n[i - 1]);
+        double b = (n[i] - n[i - 1] + d) * (q[i + 1] - q[i]) / (double) (n[i + 1] - n[i])
+                + (n[i + 1] - n[i] - d) * (q[i] - q[i - 1]) / (double) (n[i] - n[i - 1]);
 
-        return (double) q[i] + a * b;
+        return q[i] + a * b;
     }
 
-    int sign(double d) {
+    private int sign(double d) {
         if (d >= 0)
             return 1;
 
         return -1;
     }
 
-    void dump() {
+    public void dump() {
         System.out.println("initial: " + Arrays.toString(initial));
         System.out.println("k: " + lastK);
         System.out.println("q: " + Arrays.toString(q));

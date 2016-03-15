@@ -1,7 +1,7 @@
-package md2k.mCerebrum.cStress.library.signalprocessing;
+package md2k.mcerebrum.cstress.library.signalprocessing;
 
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center

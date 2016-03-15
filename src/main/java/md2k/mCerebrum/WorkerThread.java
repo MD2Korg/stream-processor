@@ -1,12 +1,12 @@
-package md2k.mCerebrum;
+package md2k.mcerebrum;
 
-import md2k.mCerebrum.cStress.StreamConstants;
-import md2k.mCerebrum.cStress.StreamProcessor;
-import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.Time;
-import md2k.mCerebrum.cStress.library.datastream.DataPointInterface;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import md2k.mcerebrum.cstress.StreamConstants;
+import md2k.mcerebrum.cstress.StreamProcessor;
+import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.library.Time;
+import md2k.mcerebrum.cstress.library.datastream.DataPointInterface;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -100,14 +100,11 @@ public class WorkerThread implements Runnable {
         streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY);
 
         long windowStartTime = -1;
-        long st = -1;
-        int count = 0;
         for (CSVDataPoint ap : tp) {
             DataPoint dp = new DataPoint(ap.timestamp, ap.value);
 
             if (windowStartTime < 0) {
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
-                st = System.currentTimeMillis();
             }
 
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds

@@ -1,15 +1,15 @@
-package md2k.mCerebrum.cStress.features;
+package md2k.mcerebrum.cstress.features;
 
-import md2k.mCerebrum.cStress.StreamConstants;
-import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.signalprocessing.AutoSense;
-import md2k.mCerebrum.cStress.library.signalprocessing.ECG;
-import md2k.mCerebrum.cStress.library.signalprocessing.Filter;
-import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import md2k.mCerebrum.cStress.library.structs.Lomb;
+import md2k.mcerebrum.cstress.StreamConstants;
+import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.signalprocessing.AutoSense;
+import md2k.mcerebrum.cstress.library.signalprocessing.ECG;
+import md2k.mcerebrum.cstress.library.signalprocessing.Filter;
+import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.structs.Lomb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -63,7 +63,7 @@ public class ECGFeatures {
         //Ohio State Algorithm
         int window_l = (int) Math.ceil(frequency / 5.0);
 
-        //Specific to Autosense hardware @ 64Hz and 12-bit values //TODO: Fix this
+        //Specific to Autosense hardware @ 64Hz and 12-bit values
         double f = 2.0 / frequency;
         double[] F = {0.0, 4.5 * f, 5.0 * f, 20.0 * f, 20.5 * f, 1};
         double[] A = {0, 0, 1, 1, 0, 0};
@@ -103,14 +103,13 @@ public class ECGFeatures {
         filterPeaks(rr_ave, Rpeak_temp1, peaks, ECGstream, thr1, thr2, sig_lev, noise_lev);
 
         DataPointStream Rpeak_temp2 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_TEMP2);
-        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1, frequency);
+        filterPeaksTemp2(Rpeak_temp2, Rpeak_temp1);
 
         DataPointStream rpeaks = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_PEAKS_RPEAKS);
         filterRpeaks(rpeaks, Rpeak_temp2, peaks, frequency);
 
         DataPointStream rr_value = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE);
         computeRRValue(rr_value, rpeaks);
-//        computeRRValue(rr_value, peaks);
 
         DataPointStream rr_value_diff = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE_DIFF);
         DataPointStream validfilter_rr_interval = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_VALIDFILTER_RR_VALUE);
@@ -132,7 +131,7 @@ public class ECGFeatures {
                 }
             }
 
-            DataPoint[] rrDatapoints = new DataPoint[(int) datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR).data.size()];
+            DataPoint[] rrDatapoints = new DataPoint[datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR).data.size()];
             for (int i = 0; i < rrDatapoints.length; i++) {
                 rrDatapoints[i] = new DataPoint(i, datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR).data.get(i).value);
             }
@@ -163,8 +162,8 @@ public class ECGFeatures {
 
     /**
      * Determine valid RR-intervals and outliers
-     * <p></p>
-     * Reference: Matlab code \\TODO
+     * <p>
+     * Reference: Matlab code
      * </p>
      *
      * @param outlierresult     Output outlier datastream
@@ -246,7 +245,7 @@ public class ECGFeatures {
     /**
      * Compute RR intervals in seconds
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      *
      * @param rr_value Output rr-interval datastream
@@ -262,7 +261,7 @@ public class ECGFeatures {
     /**
      * Filter r-peaks
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      *
      * @param rr_value          Input rr-value datastream
@@ -292,7 +291,7 @@ public class ECGFeatures {
     /**
      * Filter r-peaks
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      *
      * @param Rpeaks      output r-peak datastream
@@ -347,14 +346,13 @@ public class ECGFeatures {
     /**
      * Filter r-peaks Temp 2
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      *
      * @param Rpeak_temp2 Output datastream
      * @param Rpeak_temp1 Input datastream
-     * @param frequency   Sampling frequency
      */
-    private void filterPeaksTemp2(DataPointStream Rpeak_temp2, DataPointStream Rpeak_temp1, double frequency) {
+    private void filterPeaksTemp2(DataPointStream Rpeak_temp2, DataPointStream Rpeak_temp1) {
         Rpeak_temp2.data.addAll(Rpeak_temp1.data);
 
         boolean difference = false;
@@ -402,7 +400,7 @@ public class ECGFeatures {
     /**
      * Filter r-peaks
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      * <p>
      * <code>
@@ -468,11 +466,11 @@ public class ECGFeatures {
                 } else if (peaks.data.get(i1).value < thr1.getLatestValue() && peaks.data.get(i1).value > thr2.getLatestValue()) {
                     noise_lev.add(new DataPoint(peaks.data.get(i1).timestamp,Smoothing.ewma(peaks.data.get(i1).value,noise_lev.getLatestValue(),AUTOSENSE.EWMA_ALPHA)));
                 }
-                
-                thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue()))); //TODO: Candidate for datastream
-                thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue())); //TODO: Candidate for datastream
+
+                thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
+                thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
                 i1++;
-                rr_ave = rr_ave_update(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
+                rr_ave = rrAveUpdate(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
             } else {
                 if (((peaks.data.get(i1).timestamp - peaks.data.get(c2.get(c1 - 1)).timestamp) > 1.66 * rr_ave.value) && (i1 - c2.get(c1 - 1)) > 1) {
                     List<Double> searchback_array_inrange = new ArrayList<Double>();
@@ -507,7 +505,7 @@ public class ECGFeatures {
                         c1 += 1;
                         thr1.add(new DataPoint(peaks.data.get(i1).timestamp,noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
                         thr2.add(new DataPoint(peaks.data.get(i1).timestamp,0.5 * thr1.getLatestValue()));
-                        rr_ave = rr_ave_update(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
+                        rr_ave = rrAveUpdate(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
                         continue;
                     }
                 } else if (peaks.data.get(i1).value >= thr1.getLatestValue() && peaks.data.get(i1).value < (3.0 * sig_lev.getLatestValue())) {
@@ -526,7 +524,7 @@ public class ECGFeatures {
                 }
                 thr1.add(new DataPoint(peaks.data.get(i1).timestamp, noise_lev.getLatestValue() + 0.25 * (sig_lev.getLatestValue() - noise_lev.getLatestValue())));
                 thr2.add(new DataPoint(peaks.data.get(i1).timestamp, 0.5 * thr1.getLatestValue()));
-                rr_ave = rr_ave_update(Rpeak_temp1, rrAverage,ECG.data.get(0).timestamp);
+                rr_ave = rrAveUpdate(Rpeak_temp1, rrAverage, ECG.data.get(0).timestamp);
                 i1++;
             }
         }
@@ -535,7 +533,7 @@ public class ECGFeatures {
     /**
      * Identfy peaks in the y5 nroamlized datastream
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      *
      * @param peaks        Output datastream
@@ -546,7 +544,7 @@ public class ECGFeatures {
             if (y5normalized.data.get(i - 2).value < y5normalized.data.get(i - 1).value &&
                     y5normalized.data.get(i - 1).value < y5normalized.data.get(i).value &&
                     y5normalized.data.get(i).value >= y5normalized.data.get(i + 1).value &&
-                    y5normalized.data.get(i + 1).value > y5normalized.data.get(i + 2).value) { //TODO: Why is this hard-coded to five samples to examine?
+                    y5normalized.data.get(i + 1).value > y5normalized.data.get(i + 2).value) {
                 peaks.add(new DataPoint(y5normalized.data.get(i)));
             }
         }
@@ -556,14 +554,14 @@ public class ECGFeatures {
     /**
      * rr-ave (Average) update method
      * <p>
-     * Reference: Matlab code \\TODO
+     * Reference: Matlab code
      * </p>
      *
      * @param rpeak_temp1 Input datastream
      * @param rr_ave      Current rr average
      * @return New rr average
      */
-    private DataPoint rr_ave_update(List<DataPoint> rpeak_temp1, DataPointStream rr_ave, long initial_ts) { //TODO: Consider replacing this algorithm with something like and EWMA
+    private DataPoint rrAveUpdate(List<DataPoint> rpeak_temp1, DataPointStream rr_ave, long initial_ts) {
         List<Long> peak_interval = new ArrayList<Long>();
         DataPoint result = rr_ave.data.get(rr_ave.data.size() - 1);
         if (rpeak_temp1.size() != 0) {

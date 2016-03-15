@@ -1,9 +1,9 @@
-package md2k.mCerebrum.cStress.library.datastream;
+package md2k.mcerebrum.cstress.library.datastream;
 
 
-import md2k.mCerebrum.cStress.library.DescriptiveStatistics;
-import md2k.mCerebrum.cStress.library.SummaryStatistics;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.DescriptiveStatistics;
+import md2k.mcerebrum.cstress.library.SummaryStatistics;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.io.BufferedWriter;
@@ -67,7 +67,7 @@ public class DataPointStream extends DataStream {
         metadata.put("name", name);
         preserve = false;
         stats = new SummaryStatistics();
-        descriptiveStats = new DescriptiveStatistics(10000);
+        descriptiveStats = new DescriptiveStatistics();
     }
 
     /**

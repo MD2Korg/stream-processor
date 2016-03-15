@@ -1,7 +1,7 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mcerebrum.cstress.library;
 
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress;
+package md2k.mcerebrum.cstress;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -31,16 +31,16 @@ package md2k.mCerebrum.cStress;
  */
 
 import com.google.gson.Gson;
-import md2k.mCerebrum.cStress.autosense.AUTOSENSE;
-import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.features.*;
-import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
-import md2k.mCerebrum.cStress.library.datastream.DataPointInterface;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
-import md2k.mCerebrum.cStress.library.structs.Model;
-import md2k.mCerebrum.cStress.library.structs.SVCModel;
+import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
+import md2k.mcerebrum.cstress.features.*;
+import md2k.mcerebrum.cstress.library.datastream.DataArrayStream;
+import md2k.mcerebrum.cstress.library.datastream.DataPointInterface;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.library.structs.DataPointArray;
+import md2k.mcerebrum.cstress.library.structs.Model;
+import md2k.mcerebrum.cstress.library.structs.SVCModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NotANumberException;
 
@@ -191,7 +191,7 @@ public class StreamProcessor {
      */
     public void generateResults() {
         try {
-            cStressFeatureVector cs = new cStressFeatureVector(datastreams);
+            CStressFeatureVector cs = new CStressFeatureVector(datastreams);
     //        PuffMarker pm = new PuffMarker(datastreams);
 
         } catch (NotANumberException e) {

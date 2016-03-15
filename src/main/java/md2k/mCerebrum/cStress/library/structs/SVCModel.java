@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library.structs;
+package md2k.mcerebrum.cstress.library.structs;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -26,6 +26,7 @@ package md2k.mCerebrum.cStress.library.structs;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 public class SVCModel extends Model{
     private double intercept;
     private double[] bias;
@@ -66,7 +67,7 @@ public class SVCModel extends Model{
         {
             vals[i] = (ap.value.get(i)-normparams[i].mean)/normparams[i].std;
         }
-        if(kernel.type.equals("rbf"))
+        if ("rbf".equals(kernel.type))
         {
             for(Support supportvector: support) {
                 double norm = 0;
@@ -78,8 +79,7 @@ public class SVCModel extends Model{
                 outputvalue += Math.exp(-kernel.parameters[0].value * norm)* supportvector.dualCoef;
             }
             outputvalue += intercept;
-        }
-        else if(kernel.type.equals("poly"))
+        } else if ("poly".equals(kernel.type))
         {
             for(Support supportvector: support) {
                 double dotvalue  = 0;
@@ -107,8 +107,8 @@ public class SVCModel extends Model{
     }
 
     class Kernel {
-        String type;
-        KernelParameter[] parameters;
+        public String type;
+        public KernelParameter[] parameters;
 
         public Kernel(String type, KernelParameter[] parameters) {
             this.type = type;
@@ -116,8 +116,8 @@ public class SVCModel extends Model{
         }
 
         class KernelParameter {
-            String name;
-            double value;
+            public String name;
+            public double value;
 
             public KernelParameter(String name, double value) {
                 this.name = name;
@@ -127,19 +127,18 @@ public class SVCModel extends Model{
     }
 
     class Support {
-        double dualCoef;
-        double[] supportVector;
-//        ArrayRealVector supportVector;
+        public double dualCoef;
+        public double[] supportVector;
 
         public Support(double dualCoef, double[] supportVector) {
             this.dualCoef = dualCoef;
-            this.supportVector = supportVector;//new ArrayRealVector(supportVector);
+            this.supportVector = supportVector;
         }
     }
 
     class NormParam {
-        double mean;
-        double std;
+        public double mean;
+        public double std;
 
         public NormParam(double mean, double std) {
             this.mean = mean;

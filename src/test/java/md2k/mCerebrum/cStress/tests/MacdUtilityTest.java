@@ -1,6 +1,6 @@
-package md2k.mCerebrum.cStress.tests;
+package md2k.mcerebrum.cstress.tests;
 
-import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
+import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

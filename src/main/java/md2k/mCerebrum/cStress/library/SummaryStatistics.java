@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.library;
+package md2k.mcerebrum.cstress.library;
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center 
  * - Timothy Hnat <twhnat@memphis.edu>
@@ -28,9 +28,9 @@ package md2k.mCerebrum.cStress.library;
 
 public class SummaryStatistics {
 
-    double sum = 0;
-    double sumsq = 0;
-    long n = 0;
+    private double sum = 0;
+    private double sumsq = 0;
+    private long n = 0;
 
     public SummaryStatistics(double[] values) {
         for (int i = 0; i < values.length; i++) {

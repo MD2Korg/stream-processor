@@ -1,10 +1,10 @@
-package md2k.mCerebrum.cStress.features;
+package md2k.mcerebrum.cstress.features;
 
-import md2k.mCerebrum.cStress.StreamConstants;
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.StreamConstants;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class StressEpisodeClassification {
     public static final double thresholdYes = 0.44;
     public static final double thresholdNo = 0.29;
 
-    public static final int stressProbabilitySmoothingWindow = 3; // 3 minute
+    public static final int stressProbabilitySmoothingWindow = 3; // 3 minutes
     public static final int BUFFER_SIZE = 1000;
     public static final int BUFFER_SIZE_SMALL = 100;
 
@@ -140,8 +140,6 @@ public class StressEpisodeClassification {
         double emaSignal = Smoothing.ewma(macd, emaSignalPrev, 2.0 / (macdParamSignal + 1));
         dsEmaSignal.add(new DataPoint(stressProbability.timestamp, emaSignal));
 
-        //double histogramPrev = dsHistogram.getLatestValue();
-
         double histogramPrev = macdPrev - emaSignalPrev;
         double histogram = macd - emaSignal;
         if (histogramPrev < 0 && histogram > 0) {
@@ -171,9 +169,7 @@ public class StressEpisodeClassification {
                     dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unsure.value));
                 }
             }
-        } else if (histogramPrev > 0 && histogram < 0) {
-            //Episode in the middle; Started Decreasing
-        }
+        } //else Episode in the middle; Started Decreasing
     }
 
     public long getEpisodeStartTimestamp(DataStreams datastreams) {
@@ -211,11 +207,11 @@ public class StressEpisodeClassification {
         output.add(new DataPoint(input.getLatestTimestamp(), sumValue / listHistoryDP.size()));
     }
 
-    public static enum StressEpisodeClass {
+    public enum StressEpisodeClass {
         NotStress(0), Unsure(1), YesStress(2), Unknown(3), NotClassified(4);
         private double value;
 
-        private StressEpisodeClass(double value) {
+        StressEpisodeClass(double value) {
             this.value = value;
         }
     }

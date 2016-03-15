@@ -1,4 +1,4 @@
-package md2k.mCerebrum.cStress.features;
+package md2k.mcerebrum.cstress.features;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -28,11 +28,11 @@ package md2k.mCerebrum.cStress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import md2k.mCerebrum.cStress.autosense.PUFFMARKER;
-import md2k.mCerebrum.cStress.library.datastream.DataArrayStream;
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.structs.DataPointArray;
+import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
+import md2k.mcerebrum.cstress.library.datastream.DataArrayStream;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
 
 import java.util.ArrayList;

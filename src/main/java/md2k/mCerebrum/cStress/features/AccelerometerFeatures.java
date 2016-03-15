@@ -1,13 +1,13 @@
-package md2k.mCerebrum.cStress.features;
+package md2k.mcerebrum.cstress.features;
 
-import md2k.mCerebrum.cStress.StreamConstants;
-import md2k.mCerebrum.cStress.library.SummaryStatistics;
-import md2k.mCerebrum.cStress.library.Time;
-import md2k.mCerebrum.cStress.library.Vector;
-import md2k.mCerebrum.cStress.library.datastream.DataPointStream;
-import md2k.mCerebrum.cStress.library.datastream.DataStreams;
-import md2k.mCerebrum.cStress.library.signalprocessing.Smoothing;
-import md2k.mCerebrum.cStress.library.structs.DataPoint;
+import md2k.mcerebrum.cstress.StreamConstants;
+import md2k.mcerebrum.cstress.library.SummaryStatistics;
+import md2k.mcerebrum.cstress.library.Time;
+import md2k.mcerebrum.cstress.library.Vector;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 
 import java.util.List;
 
