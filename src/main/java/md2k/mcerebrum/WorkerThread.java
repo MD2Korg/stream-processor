@@ -3,6 +3,7 @@ package md2k.mcerebrum;
 import md2k.mcerebrum.cstress.StreamConstants;
 import md2k.mcerebrum.cstress.StreamProcessor;
 import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.library.Time;
 import md2k.mcerebrum.cstress.library.datastream.DataPointInterface;
 import md2k.mcerebrum.cstress.library.structs.DataPoint;
@@ -61,19 +62,19 @@ public class WorkerThread implements Runnable {
         tp.importData(path + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
         tp.importData(path + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
-//        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
-//        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
-//        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
-//        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
-//        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
-//        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
-//
-//        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
-//        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
-//        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
-//        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
-//        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
-//        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
+        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
+        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
+        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
+        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
+        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
+        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
+
+        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
+        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
+        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
+        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
+        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
+        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
 
         tp.sort();
 

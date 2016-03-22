@@ -38,7 +38,7 @@ import md2k.mcerebrum.cstress.library.structs.DataPoint;
 /**
  * AutoSense Accelerometer and Gyrometer processor.
  */
-public class AccelGyroFeatures {
+public class AutosenseWristFeatures {
 
 
     /**
@@ -46,15 +46,15 @@ public class AccelGyroFeatures {
      * @param datastreams Global datastreams object
      * @param wrist Which wrist to operate on
      */
-    public AccelGyroFeatures(DataStreams datastreams, String wrist) {
+    public AutosenseWristFeatures(DataStreams datastreams, String wrist) {
 
-        DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_X + wrist);
-        DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Y + wrist);
-        DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Z + wrist);
+        DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X + wrist);
+        DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y + wrist);
+        DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z + wrist);
 
-        DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_X + wrist);
-        DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_Y + wrist);
-        DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_Z + wrist);
+        DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + wrist);
+        DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + wrist);
+        DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z + wrist);
 
         DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);

@@ -28,40 +28,39 @@ package md2k.mcerebrum.cstress.autosense;
  */
 
 public class PUFFMARKER {
-    public static final double PUFFMARKER_ROLL_MEAN = 26.7810;
-    public static final double PUFFMARKER_PITCH_MEAN = -80.3673;
-    public static final double PUFFMARKER_ROLL_STD = 13.9753;
-    public static final double PUFFMARKER_PITCH_STD = 13.4698;
-//    public static final double PUFFMARKER_MEAN = 26.7810;
+    public static final double PUFF_MARKER_ROLL_MEAN = 26.7810;
+    public static final double PUFF_MARKER_PITCH_MEAN = -80.3673;
+    public static final double PUFF_MARKER_ROLL_STD = 13.9753;
+    public static final double PUFF_MARKER_PITCH_STD = 13.4698;
+    //    public static final double PUFFMARKER_MEAN = 26.7810;
 //    public static final double[][] PUFFMARKER_SIGMA = new double[][]{{195.3085, -92.7786}, {-92.7786, 181.4359}};
-    public static final double[] PUFFMARKER_TH = new double[]{10.1511, 7.8746, 11.7729, 11.2226};
+    public static final double[] PUFF_MARKER_TH = new double[]{10.1511, 7.8746, 11.7729, 11.2226};
 
     //------ Sensor KEY ------//
-//    public static final String KEY_DATA_RIP = "org.md2k.puffMarker.data.rip";
-    public static final String KEY_DATA_ACCEL_X = "org.md2k.puffMarker.data.accel.x";
-    public static final String KEY_DATA_ACCEL_Y = "org.md2k.puffMarker.data.accel.y";
-    public static final String KEY_DATA_ACCEL_Z = "org.md2k.puffMarker.data.accel.z";
-    public static final String KEY_DATA_GYRO_X = "org.md2k.puffMarker.data.gyro.x";
-    public static final String KEY_DATA_GYRO_Y = "org.md2k.puffMarker.data.gyro.y";
-    public static final String KEY_DATA_GYRO_Z = "org.md2k.puffMarker.data.gyro.z";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIP = "org.md2k.puffMarker.data.rip";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X = "org.md2k.puffMarker.data.accel.x";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y = "org.md2k.puffMarker.data.accel.y";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z = "org.md2k.puffMarker.data.accel.z";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_X = "org.md2k.puffMarker.data.gyro.x";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y = "org.md2k.puffMarker.data.gyro.y";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z = "org.md2k.puffMarker.data.gyro.z";
     public static final String LEFT_WRIST = ".leftwrist";
-    public static final String KEY_DATA_LEFTWRIST_GYRO_Z = KEY_DATA_GYRO_Z + LEFT_WRIST;
-    public static final String KEY_DATA_LEFTWRIST_GYRO_Y = KEY_DATA_GYRO_Y + LEFT_WRIST;
-    public static final String KEY_DATA_LEFTWRIST_GYRO_X = KEY_DATA_GYRO_X + LEFT_WRIST;
-    public static final String KEY_DATA_LEFTWRIST_ACCEL_Z = KEY_DATA_ACCEL_Z + LEFT_WRIST;
-    public static final String KEY_DATA_LEFTWRIST_ACCEL_Y = KEY_DATA_ACCEL_Y + LEFT_WRIST;
-    public static final String KEY_DATA_LEFTWRIST_ACCEL_X = KEY_DATA_ACCEL_X + LEFT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_Z = ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z + LEFT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_Y = ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + LEFT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_X = ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + LEFT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Z = ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z + LEFT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Y = ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y + LEFT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_X = ORG_MD2K_PUFF_MARKER_DATA_GYRO_X + LEFT_WRIST;
     public static final String RIGHT_WRIST = ".rightwrist";
-    public static final String KEY_DATA_RIGHTWRIST_GYRO_Z = KEY_DATA_GYRO_Z + RIGHT_WRIST;
-    public static final String KEY_DATA_RIGHTWRIST_GYRO_Y = KEY_DATA_GYRO_Y + RIGHT_WRIST;
-    public static final String KEY_DATA_RIGHTWRIST_GYRO_X = KEY_DATA_GYRO_X + RIGHT_WRIST;
-    public static final String KEY_DATA_RIGHTWRIST_ACCEL_Z = KEY_DATA_ACCEL_Z + RIGHT_WRIST;
-    public static final String KEY_DATA_RIGHTWRIST_ACCEL_Y = KEY_DATA_ACCEL_Y + RIGHT_WRIST;
-    public static final String KEY_DATA_RIGHTWRIST_ACCEL_X = KEY_DATA_ACCEL_X + RIGHT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_Z = ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z + RIGHT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_Y = ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + RIGHT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_X = ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + RIGHT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Z = ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z + RIGHT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Y = ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y + RIGHT_WRIST;
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_X = ORG_MD2K_PUFF_MARKER_DATA_GYRO_X + RIGHT_WRIST;
     //------ Sensor ID ------//
     public static final int LEFTWRIST_ACCEL_X = 26;
     public static final int LEFTWRIST_ACCEL_Y = 27;
-    //------ Sensor KEY ------//
     public static final int LEFTWRIST_ACCEL_Z = 28;
     public static final int LEFTWRIST_GYRO_X = 29;
     public static final int LEFTWRIST_GYRO_Y = 30;

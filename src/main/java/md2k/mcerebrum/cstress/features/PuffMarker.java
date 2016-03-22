@@ -28,6 +28,7 @@ package md2k.mcerebrum.cstress.features;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import md2k.mcerebrum.cstress.StreamConstants;
 import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.library.datastream.DataArrayStream;
 import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
@@ -54,7 +55,7 @@ public class PuffMarker {
 
             String[] wristList = new String[]{PUFFMARKER.LEFT_WRIST, PUFFMARKER.RIGHT_WRIST};
             for (String wrist : wristList) {
-                // AccelGyroFeatures agf = new AccelGyroFeatures(datastreams, wrist); //TODO: Is this needed?
+                // AutosenseWristFeatures agf = new AutosenseWristFeatures(datastreams, wrist); //TODO: Is this needed?
 
                 DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
                 for (int i = 0; i < gyr_intersections.data.size(); i++) {
@@ -81,10 +82,10 @@ public class PuffMarker {
      * @return True if error is below the threshold, False otherwise
      */
     public boolean checkValidRollPitch(DataPointStream roll, DataPointStream pitch) {
-        double x = (pitch.getPercentile(50) - PUFFMARKER.PUFFMARKER_PITCH_MEAN) / PUFFMARKER.PUFFMARKER_PITCH_STD;
-        double y = (roll.getPercentile(50) - PUFFMARKER.PUFFMARKER_ROLL_MEAN) / PUFFMARKER.PUFFMARKER_ROLL_STD; //TODO: Is this needed?
+        double x = (pitch.getPercentile(50) - PUFFMARKER.PUFF_MARKER_PITCH_MEAN) / PUFFMARKER.PUFF_MARKER_PITCH_STD;
+        double y = (roll.getPercentile(50) - PUFFMARKER.PUFF_MARKER_ROLL_MEAN) / PUFFMARKER.PUFF_MARKER_ROLL_STD; //TODO: Is this needed?
         double error = x * x;
-        return (error < PUFFMARKER.PUFFMARKER_TH[0]);
+        return (error < PUFFMARKER.PUFF_MARKER_TH[0]);
     }
 
 
@@ -98,6 +99,68 @@ public class PuffMarker {
      * @return
      */
     private DataPointArray computePuffMarkerFeatures(DataStreams datastreams, String wrist, int startIndex, int endIndex) {
+
+//        G.SVM.RIP_MPUFF_ROC.IND=[1:7, 10:12,14,19:21,23,29,32,8,9];G.SVM.RIP_MPUFF_ROC.NAME='rip_mpuff_roc';
+//        G.SVM.WRIST_MRP.IND=109:121;G.SVM.WRIST_MRP.NAME='wrist_mrp';
+//        G.SVM.RIP_MPUFF_ROC_WRIST_MRP_TIME.IND=[G.SVM.RIP_MPUFF_ROC.IND, G.SVM.WRIST_MRP.IND,134:138];
+
+        /////////////// RESPIRATION FEATURES ////////////////////////
+        double insp = 0;        //1
+        double expr = 0;        //2
+        double resp = 0;        //3
+        double ieRatio = 0;     //4
+        double stretch = 0;     //5
+        double u_stretch = 0;      //  6. U_Stretch = max(sample[j])
+        double l_stretch = 0;      //  7. L_Stretch = min(sample[j])
+        double bd_insp = 0;        //10. BD_INSP = INSP(i)-INSP(i-1)
+        double bd_expr = 0;        //11. BD_EXPR = EXPR(i)-EXPR(i-1)
+        double bd_resp = 0;        //12. BD_RESP = RESP(i)-RESP(i-1)
+        double bd_stretch = 0;     //14. BD_Stretch= Stretch(i)-Stretch(i-1)
+        double fd_insp = 0;        //  19. FD_INSP = INSP(i)-INSP(i+1)
+        double fd_expr = 0;        //  20. FD_EXPR = EXPR(i)-EXPR(i+1)
+        double fd_resp = 0;        //  21. FD_RESP = RESP(i)-RESP(i+1)
+        double fd_stretch = 0;     //  23. FD_Stretch= Stretch(i)-Stretch(i+1)
+        double d5_expr = 0;         //  29. D5_EXPR(i) = EXPR(i) / avg(EXPR(i-2)...EXPR(i+2))
+        double d5_stretch = 0;      //  32. D5_Stretch = Stretch(i) / avg(Stretch(i-2)...Stretch(i+2))
+        double roc_max = 0;      //  8. ROC_MAX = max(sample[j]-sample[j-1])
+        double roc_min = 0;      //  9. ROC_MIN = min(sample[j]-sample[j-1])
+
+        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
+        for (int i = 0; i < valleys.data.size() - 1; i++) {
+            double respCycleMaxAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
+            if (valleys.data.get(i).timestamp < startIndex && valleys.data.get(i).timestamp < startIndex
+                    && respCycleMaxAmplitude > u_stretch) {
+
+                insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.get(i).value;
+                resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(i).value;
+
+                ieRatio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_IERATIO).data.get(i).value;
+                expr = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).data.get(i).value;
+                stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH).data.get(i).value;
+
+                bd_insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION_BACK_DIFFERENCE).data.get(i).value;
+                fd_insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION_FORWARD_DIFFERENCE).data.get(i).value;
+
+                bd_expr = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION_BACK_DIFFERENCE).data.get(i).value;
+                fd_expr = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION_FORWARD_DIFFERENCE).data.get(i).value;
+
+                bd_resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION_BACK_DIFFERENCE).data.get(i).value;
+                fd_resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION_FORWARD_DIFFERENCE).data.get(i).value;
+
+                bd_stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH_BACK_DIFFERENCE).data.get(i).value;
+                fd_stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH_FORWARD_DIFFERENCE).data.get(i).value;
+
+                d5_expr = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_STRETCH).data.get(i).value;
+                d5_stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_EXPRDURATION).data.get(i).value;
+
+                u_stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
+                l_stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_AMPLITUDE).data.get(i).value;
+                roc_max = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_RATE_OF_CHANGE).data.get(i).value;
+                roc_min = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_RATE_OF_CHANGE).data.get(i).value;
+
+            }
+
+        }
 
         /////////////// WRIST FEATURES ////////////////////////
         DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex));
@@ -150,6 +213,26 @@ public class PuffMarker {
 
 
         List<Double> featureVector = new ArrayList<Double>();
+
+        featureVector.add(insp);
+        featureVector.add(expr);
+        featureVector.add(resp);
+        featureVector.add(ieRatio);
+        featureVector.add(stretch);
+        featureVector.add(u_stretch);
+        featureVector.add(l_stretch);
+        featureVector.add(bd_insp);
+        featureVector.add(bd_expr);
+        featureVector.add(bd_resp);
+        featureVector.add(bd_stretch);
+        featureVector.add(fd_insp);
+        featureVector.add(fd_expr);
+        featureVector.add(fd_resp);
+        featureVector.add(fd_stretch);
+        featureVector.add(d5_expr);
+        featureVector.add(d5_stretch);
+        featureVector.add(roc_max);
+        featureVector.add(roc_min);
 
         featureVector.add(GYRO_Magnitude_Mean);
         featureVector.add(GYRO_Magnitude_Median);
