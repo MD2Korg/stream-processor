@@ -170,6 +170,7 @@ public class StreamProcessor {
             try {
                 RIPFeatures rf = new RIPFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
                 System.err.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
@@ -184,10 +185,6 @@ public class StreamProcessor {
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
             }
-
-            //AutoSense wrist features
-//            AutosenseWristFeatures leftWrist = new AutosenseWristFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
-//            AutosenseWristFeatures rightWrist = new AutosenseWristFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
 
 
         } catch (IndexOutOfBoundsException e) {
@@ -204,7 +201,7 @@ public class StreamProcessor {
     public void generateResults() {
         try {
             CStressFeatureVector cs = new CStressFeatureVector(datastreams);
-    //        PuffMarker pm = new PuffMarker(datastreams);
+            PuffMarker pm = new PuffMarker(datastreams);
 
         } catch (NotANumberException e) {
             System.err.println("Generate result error");

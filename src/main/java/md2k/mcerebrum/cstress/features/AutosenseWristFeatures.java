@@ -59,10 +59,21 @@ public class AutosenseWristFeatures {
         DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
 
-        DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag800" + wrist);
+        DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist);
         Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
-        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag8000" + wrist);
+        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist);
         Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+
+        DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
+        segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
+
+/*
+        DataPointStream acl_y_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag800" + wrist);
+        Smoothing.smooth(acl_y_800, accely, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        DataPointStream acl_y_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag8000" + wrist);
+        Smoothing.smooth(acl_y_8000, accely, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+*/
+
 
         DataPointStream roll = datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist);
         DataPointStream pitch = datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist);
@@ -109,7 +120,7 @@ public class AutosenseWristFeatures {
         int[] intersectionIndex = new int[curIndex + 1];
 
         if (curIndex > 0)
-            for (int i = 0; i <= curIndex; i += 2) {
+            for (int i = 0; i < curIndex; i += 2) {
                 output.data.add(new DataPoint(indexList[i], indexList[i + 1]));
                 intersectionIndex[i] = indexList[i];
             }

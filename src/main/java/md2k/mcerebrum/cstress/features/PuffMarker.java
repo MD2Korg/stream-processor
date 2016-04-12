@@ -33,8 +33,10 @@ import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.library.datastream.DataArrayStream;
 import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
 import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
 import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 import org.apache.commons.math3.exception.NotANumberException;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,17 +57,25 @@ public class PuffMarker {
 
             String[] wristList = new String[]{PUFFMARKER.LEFT_WRIST, PUFFMARKER.RIGHT_WRIST};
             for (String wrist : wristList) {
-                // AutosenseWristFeatures agf = new AutosenseWristFeatures(datastreams, wrist); //TODO: Is this needed?
 
                 DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
+                int totalFeatures = 0;
                 for (int i = 0; i < gyr_intersections.data.size(); i++) {
                     int startIndex = (int) gyr_intersections.data.get(i).timestamp;
                     int endIndex = (int) gyr_intersections.data.get(i).value;
 
+//                    System.out.println(" s=" + startIndex+", e="+endIndex + " "+"org.md2k.cstress.data.gyr.mag_800" + wrist);
+
                     DataPointArray fv = computePuffMarkerFeatures(datastreams, wrist, startIndex, endIndex);
-                    DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.puffMarkers.fv");
-                    fvStream.add(fv);
+                    if (fv != null) {
+                        totalFeatures++;
+//                    System.out.println(" |feature|=" + fv.value.size());
+
+                        DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.puffMarkers.fv");
+                        fvStream.add(fv);
+                    }
                 }
+                System.out.println("Total features = " + totalFeatures);
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -81,7 +91,7 @@ public class PuffMarker {
      * @param pitch Input roll datastream
      * @return True if error is below the threshold, False otherwise
      */
-    public boolean checkValidRollPitch(DataPointStream roll, DataPointStream pitch) {
+    public boolean checkValidRollPitch(DescriptiveStatistics roll, DescriptiveStatistics pitch) {
         double x = (pitch.getPercentile(50) - PUFFMARKER.PUFF_MARKER_PITCH_MEAN) / PUFFMARKER.PUFF_MARKER_PITCH_STD;
         double y = (roll.getPercentile(50) - PUFFMARKER.PUFF_MARKER_ROLL_MEAN) / PUFFMARKER.PUFF_MARKER_ROLL_STD; //TODO: Is this needed?
         double error = x * x;
@@ -125,12 +135,18 @@ public class PuffMarker {
         double roc_max = 0;      //  8. ROC_MAX = max(sample[j]-sample[j-1])
         double roc_min = 0;      //  9. ROC_MIN = min(sample[j]-sample[j-1])
 
-        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
-        for (int i = 0; i < valleys.data.size() - 1; i++) {
-            double respCycleMaxAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
-            if (valleys.data.get(i).timestamp < startIndex && valleys.data.get(i).timestamp < startIndex
-                    && respCycleMaxAmplitude > u_stretch) {
 
+        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
+        DataPointStream gyr_mag800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist);
+//            System.out.print("valleys:"+ valleys.data.size());
+
+        boolean isRIPPresent = false;
+        for (int i = 0; i < valleys.data.size() - 2; i++) {
+            double respCycleMaxAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
+            if (valleys.data.get(i).timestamp > gyr_mag800.data.get(startIndex).timestamp && valleys.data.get(i).timestamp < gyr_mag800.data.get(endIndex).timestamp
+                    && respCycleMaxAmplitude > u_stretch
+                    ) {
+                isRIPPresent = true;
                 insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.get(i).value;
                 resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(i).value;
 
@@ -162,21 +178,43 @@ public class PuffMarker {
 
         }
 
+        if (!isRIPPresent) return null;
         /////////////// WRIST FEATURES ////////////////////////
-        DataPointStream gyr_mag = new DataPointStream("org.md2k.cstress.data.gyr.mag" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex));
-        DataPointStream gyr_mag_800 = new DataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex));
-        DataPointStream gyr_mag_8000 = new DataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex));
 
-        DataPointStream rolls = new DataPointStream("org.md2k.cstress.data.roll" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex));
-        DataPointStream pitchs = new DataPointStream("org.md2k.cstress.data.pitch" + wrist + ".segment", (datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex));
+
+        List<DataPoint> gyr_mag_800 = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex);
+        DescriptiveStatistics mag800stats = new DescriptiveStatistics();
+        for (DataPoint dp : gyr_mag_800) {
+            mag800stats.addValue(dp.value);
+        }
+
+        List<DataPoint> gyr_mag_8000 = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex);
+        DescriptiveStatistics mag8000stats = new DescriptiveStatistics();
+        for (DataPoint dp : gyr_mag_8000) {
+            mag8000stats.addValue(dp.value);
+        }
+        List<DataPoint> rolls = (datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex);
+        DescriptiveStatistics rollstats = new DescriptiveStatistics();
+        for (DataPoint dp : rolls) {
+            rollstats.addValue(dp.value);
+        }
+
+        List<DataPoint> pitches = (datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex);
+        DescriptiveStatistics pitchstats = new DescriptiveStatistics();
+        for (DataPoint dp : pitches) {
+            pitchstats.addValue(dp.value);
+        }
 
         /*
         Three filtering criteria
          */
-        double meanHeight = gyr_mag_800.stats.getMean() - gyr_mag_8000.stats.getMean();
-        double duration = gyr_mag_8000.data.get(gyr_mag_8000.data.size() - 1).timestamp - gyr_mag_8000.data.get(0).timestamp;
-        boolean isValidRollPitch = checkValidRollPitch(rolls, pitchs);
+        if (gyr_mag_8000.size() == 0) return null;
+        double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
+        double duration = gyr_mag_8000.get(gyr_mag_8000.size() - 1).timestamp - gyr_mag_8000.get(0).timestamp;
+        boolean isValidRollPitch = checkValidRollPitch(rollstats, pitchstats);
 
+        if (!(duration > PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration < PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
+            return null;
 
         /*
             WRIST - GYRO MAGNITUDE - mean
@@ -184,10 +222,15 @@ public class PuffMarker {
             WRIST - GYRO MAGNITUDE - std deviation
             WRIST - GYRO MAGNITUDE - quartile deviation
          */
-        double GYRO_Magnitude_Mean = gyr_mag.stats.getMean();
-        double GYRO_Magnitude_Median = gyr_mag.getPercentile(50);
-        double GYRO_Magnitude_SD = gyr_mag.stats.getStandardDeviation();
-        double GYRO_Magnitude_Quartile_Deviation = gyr_mag.getPercentile(75) - gyr_mag.getPercentile(25);
+        List<DataPoint> gyr_mag = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex);
+        DescriptiveStatistics magstats = new DescriptiveStatistics();
+        for (DataPoint dp : gyr_mag) {
+            magstats.addValue(dp.value);
+        }
+        double GYRO_Magnitude_Mean = magstats.getMean();// gyr_mag.stats.getMean();
+        double GYRO_Magnitude_Median = magstats.getPercentile(50);// gyr_mag.getPercentile(50);
+        double GYRO_Magnitude_SD = magstats.getStandardDeviation();// gyr_mag.stats.getStandardDeviation();
+        double GYRO_Magnitude_Quartile_Deviation = magstats.getPercentile(75) - magstats.getPercentile(25);// gyr_mag.getPercentile(75) - gyr_mag.getPercentile(25);
 
          /*
             WRIST - PITCH - mean
@@ -195,10 +238,11 @@ public class PuffMarker {
             WRIST - PITCH - std deviation
             WRIST - PITCH - quartile deviation
          */
-        double Pitch_Mean = pitchs.stats.getMean();
-        double Pitch_Median = pitchs.getPercentile(50);
-        double Pitch_SD = pitchs.stats.getStandardDeviation();
-        double Pitch_Quartile_Deviation = pitchs.getPercentile(75) - gyr_mag.getPercentile(25);
+
+        double Pitch_Mean = pitchstats.getMean();
+        double Pitch_Median = pitchstats.getPercentile(50);
+        double Pitch_SD = pitchstats.getStandardDeviation();
+        double Pitch_Quartile_Deviation = pitchstats.getPercentile(75) - pitchstats.getPercentile(25);
 
          /*
             WRIST - ROLL - mean
@@ -206,10 +250,10 @@ public class PuffMarker {
             WRIST - ROLL - std deviation
             WRIST - ROLL - quartile deviation
          */
-        double Roll_Mean = rolls.stats.getMean();
-        double Roll_Median = rolls.getPercentile(50);
-        double Roll_SD = rolls.stats.getStandardDeviation();
-        double Roll_Quartile_Deviation = rolls.getPercentile(75) - gyr_mag.getPercentile(25);
+        double Roll_Mean = rollstats.getMean();
+        double Roll_Median = rollstats.getPercentile(50);
+        double Roll_SD = rollstats.getStandardDeviation();
+        double Roll_Quartile_Deviation = rollstats.getPercentile(75) - rollstats.getPercentile(25);
 
 
         List<Double> featureVector = new ArrayList<Double>();
@@ -218,21 +262,21 @@ public class PuffMarker {
         featureVector.add(expr);
         featureVector.add(resp);
         featureVector.add(ieRatio);
-        featureVector.add(stretch);
+        featureVector.add(stretch);//5
         featureVector.add(u_stretch);
         featureVector.add(l_stretch);
         featureVector.add(bd_insp);
         featureVector.add(bd_expr);
-        featureVector.add(bd_resp);
+        featureVector.add(bd_resp);//10
         featureVector.add(bd_stretch);
         featureVector.add(fd_insp);
         featureVector.add(fd_expr);
         featureVector.add(fd_resp);
-        featureVector.add(fd_stretch);
+        featureVector.add(fd_stretch);//15
         featureVector.add(d5_expr);
         featureVector.add(d5_stretch);
         featureVector.add(roc_max);
-        featureVector.add(roc_min);
+        featureVector.add(roc_min); //19
 
         featureVector.add(GYRO_Magnitude_Mean);
         featureVector.add(GYRO_Magnitude_Median);
@@ -249,11 +293,16 @@ public class PuffMarker {
         featureVector.add(Roll_SD);
         featureVector.add(Roll_Quartile_Deviation);
 
+        int cnt = 0;
         for (Double aFeatureVector : featureVector) {
+            cnt++;
+//                System.out.print(", ("+cnt+","+aFeatureVector+")");
             if (Double.isNaN(aFeatureVector)) {
-                throw new NotANumberException();
+//                    System.out.println("NaN at "+cnt);
+                    throw new NotANumberException();
             }
         }
-        return new DataPointArray(gyr_mag.data.get(0).timestamp, featureVector);
+
+        return new DataPointArray(gyr_mag.get(0).timestamp, featureVector);
     }
 }
