@@ -49,6 +49,7 @@ public class RIPFeatures {
      * <p>
      * Reference: ripFeature_Extraction.m
      * </p>
+     *
      * @param datastreams Global data stream object
      */
     public RIPFeatures(DataStreams datastreams) {
@@ -98,8 +99,8 @@ public class RIPFeatures {
 
         //Key features
 
-//        double activity = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
-//        if (activity == 0.0) {
+        double activity = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.size() == 0) ? 0 : datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
+        if (activity == 0.0) {
 //        System.out.println("; |V|="+valleys.data.size());
 
             for (int i = 0; i < valleys.data.size() - 1; i++) {
@@ -135,11 +136,11 @@ public class RIPFeatures {
                     (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION_BACK_DIFFERENCE)).add(new DataPoint(valleys.data.get(i).timestamp, exprDuration.value - preExpDuration.value));
                     (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION_FORWARD_DIFFERENCE)).add(new DataPoint(preExpDuration.timestamp, preExpDuration.value - exprDuration.value));
 
-                    DataPoint preRespDuration = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(i-1);
+                    DataPoint preRespDuration = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(i - 1);
                     (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION_BACK_DIFFERENCE)).add(new DataPoint(valleys.data.get(i).timestamp, respDuration.value - preRespDuration.value));
                     (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION_FORWARD_DIFFERENCE)).add(new DataPoint(preRespDuration.timestamp, preRespDuration.value - respDuration.value));
 
-                    DataPoint preStretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH).data.get(i-1);
+                    DataPoint preStretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH).data.get(i - 1);
                     (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH_BACK_DIFFERENCE)).add(new DataPoint(valleys.data.get(i).timestamp, stretch.value - preStretch.value));
                     (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH_FORWARD_DIFFERENCE)).add(new DataPoint(preStretch.timestamp, preStretch.value - stretch.value));
                 } else {
@@ -157,24 +158,20 @@ public class RIPFeatures {
             DataPointStream exprStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION);
             DataPointStream stretchStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH);
             int len = Math.min(exprStream.data.size(), stretchStream.data.size());
-            for (int i = 2; i < len; i++) {
+            for (int i = 0; i < len; i++) {
                 double d5_stretch = 0;
                 double d5_exp = 0;
-                int cnt=0;
-                for (int j = -2; j <= 2 && i+j < len; j++) {
+                int cnt = 0;
+                for (int j = -2; j <= 2 && i + j < len; j++) {
+                    if (i + j < 0 || j == 0) continue;
                     d5_stretch += stretchStream.data.get(i + j).value;
                     d5_exp += exprStream.data.get(i + j).value;
                     cnt++;
                 }
                 d5_stretch /= cnt;
+                d5_stretch = stretchStream.data.get(i).value / d5_stretch;
                 d5_exp /= cnt;
-                if(i==2) {
-                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_STRETCH)).add(new DataPoint(stretchStream.data.get(0).timestamp, d5_stretch));
-                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_STRETCH)).add(new DataPoint(stretchStream.data.get(1).timestamp, d5_stretch));
-
-                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_EXPRDURATION)).add(new DataPoint(exprStream.data.get(0).timestamp, d5_exp));
-                    (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_EXPRDURATION)).add(new DataPoint(exprStream.data.get(1).timestamp, d5_exp));
-                }
+                d5_exp = exprStream.data.get(i).value / d5_exp;
                 (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_STRETCH)).add(new DataPoint(stretchStream.data.get(i).timestamp, d5_stretch));
                 (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_EXPRDURATION)).add(new DataPoint(exprStream.data.get(i).timestamp, d5_exp));
             }
@@ -215,7 +212,7 @@ public class RIPFeatures {
             }
 
             (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MINUTE_VENTILATION)).add(new DataPoint(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.size() - 1).timestamp, minuteVentilation));
-//        }
+        }
 
     }
 

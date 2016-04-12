@@ -75,7 +75,7 @@ public class PuffMarker {
                         fvStream.add(fv);
                     }
                 }
-                System.out.println("Total features = " + totalFeatures);
+//                System.out.println("Total features = " + totalFeatures);
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -137,16 +137,18 @@ public class PuffMarker {
 
 
         DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
-        DataPointStream gyr_mag800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist);
+        DataPointStream gyr_mag_stream = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
 //            System.out.print("valleys:"+ valleys.data.size());
 
         boolean isRIPPresent = false;
+        int candidateRespirationValley = 0;
         for (int i = 0; i < valleys.data.size() - 2; i++) {
             double respCycleMaxAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
-            if (valleys.data.get(i).timestamp > gyr_mag800.data.get(startIndex).timestamp && valleys.data.get(i).timestamp < gyr_mag800.data.get(endIndex).timestamp
+            if (valleys.data.get(i).timestamp > gyr_mag_stream.data.get(startIndex).timestamp && valleys.data.get(i).timestamp < gyr_mag_stream.data.get(endIndex).timestamp
                     && respCycleMaxAmplitude > u_stretch
                     ) {
                 isRIPPresent = true;
+                candidateRespirationValley = i;
                 insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.get(i).value;
                 resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(i).value;
 
@@ -255,6 +257,17 @@ public class PuffMarker {
         double Roll_SD = rollstats.getStandardDeviation();
         double Roll_Quartile_Deviation = rollstats.getPercentile(75) - rollstats.getPercentile(25);
 
+        /*
+            Respiration - Start time
+            Respiration - End time
+            Wrist - Start time
+            Wrist - End time
+            features : 'RStime-WStime','REtime-WStime','RStime-WEtime','REtime-WEtime','RPStime-WEtime'
+         */
+        long rStime = valleys.data.get(candidateRespirationValley).timestamp;
+        long rEtime = valleys.data.get(candidateRespirationValley).timestamp;
+        long wStime = gyr_mag_stream.data.get(startIndex).timestamp;
+        long wEtime = gyr_mag_stream.data.get(endIndex).timestamp;
 
         List<Double> featureVector = new ArrayList<Double>();
 
@@ -283,6 +296,8 @@ public class PuffMarker {
         featureVector.add(GYRO_Magnitude_SD);
         featureVector.add(GYRO_Magnitude_Quartile_Deviation);
 
+        featureVector.add((double) (wEtime-wStime));
+
         featureVector.add(Pitch_Mean);
         featureVector.add(Pitch_Median);
         featureVector.add(Pitch_SD);
@@ -293,15 +308,24 @@ public class PuffMarker {
         featureVector.add(Roll_SD);
         featureVector.add(Roll_Quartile_Deviation);
 
-        int cnt = 0;
-        for (Double aFeatureVector : featureVector) {
-            cnt++;
+        featureVector.add((double) rStime - wStime);
+        featureVector.add((double) rEtime - wStime);
+        featureVector.add((double) rStime - wEtime);
+        featureVector.add((double) rEtime - wEtime);
+
+/*
+        System.out.print(featureVector.get(0));
+        for (int cnt = 1; cnt < featureVector.size(); cnt++) {
+            Double aFeatureVector = featureVector.get(cnt);
 //                System.out.print(", ("+cnt+","+aFeatureVector+")");
+            System.out.print("," + aFeatureVector);
             if (Double.isNaN(aFeatureVector)) {
 //                    System.out.println("NaN at "+cnt);
-                    throw new NotANumberException();
+                throw new NotANumberException();
             }
         }
+        System.out.println("," + wEtime + "," + wStime + "," + wrist);
+*/
 
         return new DataPointArray(gyr_mag.get(0).timestamp, featureVector);
     }
