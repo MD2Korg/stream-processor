@@ -16,7 +16,7 @@ Please add additional rows as appropriate
 | Software version | FILLIN | e.g. v0.3.5 for this repository |
 | mCerebrum version | FILLIN | Main application version  |
 | Configuration file | FILLIN | Configuration identifier used to setup the software  |
-| Participant name | FILLIN | Participant identifier so that we can examine the data in our cloud |
+| Participant ID | FILLIN | Participant identifier so that we can examine the data in our cloud |
 | Android phone type | FILLIN | e.g. Samsung S5  |
 | Android OS version | FILLIN | e.g. 4.4.2  |
 
@@ -27,18 +27,18 @@ FILLIN
 
 
 
-## Expected result
+## Expected result - This is what I expect to happen
 
 FILLIN
 
 
 
-## Actual result
+## Actual result - This is what actually happened
 
 FILLIN
 
 
 
-## Steps to reproduce
+## Please describe the steps necessary to reproduce the issue/problem/bug
 
 FILLIN
