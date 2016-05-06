@@ -44,7 +44,7 @@ public class Main {
 
         for (int i = 1; i < 23; i++) {
             String person = "SI" + String.format("%02d", i);
-            Runnable worker = new WorkerThread(path + person, args[1], args[2]);
+            Runnable worker = new WorkerThread(path + person, args[1], args[2], args[3]);
             executor.execute(worker);
         }
         executor.shutdown();

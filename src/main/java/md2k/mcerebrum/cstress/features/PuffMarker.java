@@ -71,7 +71,7 @@ public class PuffMarker {
                         totalFeatures++;
 //                    System.out.println(" |feature|=" + fv.value.size());
 
-                        DataArrayStream fvStream = datastreams.getDataArrayStream("org.md2k.puffMarkers.fv");
+                        DataArrayStream fvStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_PUFFMARKER_FV);
                         fvStream.add(fv);
                     }
                 }
@@ -120,7 +120,7 @@ public class PuffMarker {
         double resp = 0;        //3
         double ieRatio = 0;     //4
         double stretch = 0;     //5
-        double u_stretch = 0;      //  6. U_Stretch = max(sample[j])
+        double u_stretch = 0;      //  6. U_Stretch = max(sample[j])  --
         double l_stretch = 0;      //  7. L_Stretch = min(sample[j])
         double bd_insp = 0;        //10. BD_INSP = INSP(i)-INSP(i-1)
         double bd_expr = 0;        //11. BD_EXPR = EXPR(i)-EXPR(i-1)
@@ -213,9 +213,11 @@ public class PuffMarker {
         if (gyr_mag_8000.size() == 0) return null;
         double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
         double duration = gyr_mag_8000.get(gyr_mag_8000.size() - 1).timestamp - gyr_mag_8000.get(0).timestamp;
-        boolean isValidRollPitch = checkValidRollPitch(rollstats, pitchstats);
+//        boolean isValidRollPitch = checkValidRollPitch(rollstats, pitchstats);
+        boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
-        if (!(duration > PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration < PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
+        if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
+//        if (!(duration > PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration < PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_))
             return null;
 
         /*
@@ -271,6 +273,8 @@ public class PuffMarker {
 
         List<Double> featureVector = new ArrayList<Double>();
 
+//        featureVector.add((double)gyr_mag.get(0).timestamp); // start time
+//        featureVector.add((double) (wEtime - wStime)); // end time
         featureVector.add(insp);
         featureVector.add(expr);
         featureVector.add(resp);
@@ -296,7 +300,7 @@ public class PuffMarker {
         featureVector.add(GYRO_Magnitude_SD);
         featureVector.add(GYRO_Magnitude_Quartile_Deviation);
 
-        featureVector.add((double) (wEtime-wStime));
+        featureVector.add((double) (wEtime - wStime)); //24
 
         featureVector.add(Pitch_Mean);
         featureVector.add(Pitch_Median);
@@ -324,9 +328,15 @@ public class PuffMarker {
                 throw new NotANumberException();
             }
         }
-        System.out.println("," + wEtime + "," + wStime + "," + wrist);
-*/
+        System.out.println("," + wEtime + "," + wStime + "," + wrist);*/
 
         return new DataPointArray(gyr_mag.get(0).timestamp, featureVector);
+    }
+
+    private boolean checkValidRollPitchSimple(DescriptiveStatistics roll, DescriptiveStatistics pitch) {
+        double r = roll.getMean();
+        double p = pitch.getMean();
+        return r > -20 && r <= 60 && p >= -130 && p <= -50;
+
     }
 }

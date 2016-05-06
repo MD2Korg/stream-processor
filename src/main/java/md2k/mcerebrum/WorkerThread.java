@@ -40,15 +40,17 @@ public class WorkerThread implements Runnable {
     private String path;
     private String cStressModelPath;
     private String cStressRIPModelPath;
+    private String puffMarkerModelPath;
 
     public WorkerThread(String path) {
         this.path = path;
     }
 
-    public WorkerThread(String path, String cStressModelPath, String cStressRIPModelPath) {
+    public WorkerThread(String path, String cStressModelPath, String cStressRIPModelPath, String puffMarkerModelPath) {
         this.path = path;
         this.cStressModelPath = cStressModelPath;
         this.cStressRIPModelPath = cStressRIPModelPath;
+        this.puffMarkerModelPath = puffMarkerModelPath;
     }
 
 
@@ -85,6 +87,7 @@ public class WorkerThread implements Runnable {
         streamProcessor.setPath(path);
         streamProcessor.loadModel("cStressModel", cStressModelPath);
         streamProcessor.loadModel("cStressRIPModel", cStressRIPModelPath);
+        streamProcessor.loadModel("puffMarkerModel", puffMarkerModelPath);
 
         streamProcessor.dpInterface = new DataPointInterface() {
             @Override

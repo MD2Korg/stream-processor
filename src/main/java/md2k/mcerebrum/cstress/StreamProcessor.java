@@ -31,6 +31,7 @@ package md2k.mcerebrum.cstress;
  */
 
 import com.google.gson.Gson;
+import md2k.mcerebrum.PuffMarkerMain;
 import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
 import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.features.*;
@@ -43,6 +44,7 @@ import md2k.mcerebrum.cstress.library.structs.Model;
 import md2k.mcerebrum.cstress.library.structs.SVCModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NotANumberException;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -216,10 +218,38 @@ public class StreamProcessor {
         generateResults();
         runcStress();
         runcStressEpisode();
+
+        runpuffMarker();
+
         resetDataStreams();
     }
 
+    /**
+     * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
+     */
+    private void runpuffMarker() {
+        SVCModel model = (SVCModel) models.get("puffMarkerModel");
+        DataArrayStream featurevector = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_PUFFMARKER_FV);
 
+        for (DataPointArray ap : featurevector.data) {
+            double prob = model.computeProbability(ap);
+            int label;
+            if (prob > model.getHighBias())
+                label = PUFFMARKER.PUFF;
+            else if (prob < model.getLowBias())
+                label = AUTOSENSE.NOT_STRESSED;
+            else
+                label = AUTOSENSE.UNSURE;
+
+            if(label == PUFFMARKER.PUFF) {
+                System.out.println("-------------------------------------- PUFF --------------------------------------------"+PuffMarkerMain.puffcount);
+                PuffMarkerMain.puffcount++;
+            }
+
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_STRESSLABEL).add(new DataPoint(ap.timestamp, label));
+        }
+    }
     /**
      * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
      */
