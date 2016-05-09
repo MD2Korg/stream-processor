@@ -38,7 +38,7 @@ import md2k.mcerebrum.cstress.library.structs.DataPoint;
 /**
  * AutoSense Accelerometer and Gyrometer processor.
  */
-public class AccelGyroFeatures {
+public class AutosenseWristFeatures {
 
 
     /**
@@ -46,23 +46,31 @@ public class AccelGyroFeatures {
      * @param datastreams Global datastreams object
      * @param wrist Which wrist to operate on
      */
-    public AccelGyroFeatures(DataStreams datastreams, String wrist) {
+    public AutosenseWristFeatures(DataStreams datastreams, String wrist) {
 
-        DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_X + wrist);
-        DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Y + wrist);
-        DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_GYRO_Z + wrist);
+        DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X + wrist);
+        DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y + wrist);
+        DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z + wrist);
 
-        DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_X + wrist);
-        DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_Y + wrist);
-        DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_ACCEL_Z + wrist);
+        DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + wrist);
+        DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + wrist);
+        DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z + wrist);
 
         DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
 
-        DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag800" + wrist);
+        DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist);
         Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
-        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag8000" + wrist);
+        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist);
         Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+
+        DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
+        segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
+
+        DataPointStream acl_y_800 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag800" + wrist);
+        Smoothing.smooth(acl_y_800, accely, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        DataPointStream acl_y_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag8000" + wrist);
+        Smoothing.smooth(acl_y_8000, accely, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
 
         DataPointStream roll = datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist);
         DataPointStream pitch = datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist);
@@ -109,7 +117,7 @@ public class AccelGyroFeatures {
         int[] intersectionIndex = new int[curIndex + 1];
 
         if (curIndex > 0)
-            for (int i = 0; i <= curIndex; i += 2) {
+            for (int i = 0; i < curIndex; i += 2) {
                 output.data.add(new DataPoint(indexList[i], indexList[i + 1]));
                 intersectionIndex[i] = indexList[i];
             }

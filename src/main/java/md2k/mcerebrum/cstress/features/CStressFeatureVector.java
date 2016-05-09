@@ -49,16 +49,22 @@ public class CStressFeatureVector {
      */
     public CStressFeatureVector(DataStreams datastreams) {
         try {
-            DataPointArray fv = compute(datastreams);
-            DataArrayStream fvStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV);
-            fvStream.add(fv);
+            double activity = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.size() == 0) ? 0 : datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
+            if (activity == 0.0) {
+                DataPointArray fv = compute(datastreams);
+                DataArrayStream fvStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV);
+                fvStream.add(fv);
+            }
         } catch (IndexOutOfBoundsException e) {
             //Ignore this error
         }
         try {
-            DataPointArray fv = computeRIP(datastreams);
-            DataArrayStream fvRIPStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV_RIP);
-            fvRIPStream.add(fv);
+            double activity = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.size() == 0) ? 0 : datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
+            if (activity == 0.0) {
+                DataPointArray fv = computeRIP(datastreams);
+                DataArrayStream fvRIPStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV_RIP);
+                fvRIPStream.add(fv);
+            }
         } catch (IndexOutOfBoundsException e) {
             //Ignore this error
         }

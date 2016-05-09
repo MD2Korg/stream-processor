@@ -4,8 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /*
- * Copyright (c) 2015, The University of Memphis, MD2K Center
- * - Timothy Hnat <twhnat@memphis.edu>
+ * Copyright (c) 2016, The University of Memphis, MD2K Center
+ * - Nazir Saleheen <nsleheen@memphis.edu>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,37 @@ import java.util.concurrent.Executors;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class Main {
+
+public class PuffMarkerMain {
+    static int[][] sIds = {{}, {2, 3, 4, 5}, {3, 4, 5, 6}, {1, 2, 3}, {1}, {1}, {1}};
 
     /**
      * Main driver class for replaying AutoSense data through StreamProcessor
      *
      * @param args Arguments to the program
      */
+
     public static void main(String[] args) {
 
         String path = args[0];
+        String pathToPuffMarkerModelFile = args[1];
+
+        for (int i = 1; i < 7; i++) {
+            String person = "p" + String.format("%02d", i);
+            for (int sid : sIds[i]) {
+                doProcess(person, sid, path, pathToPuffMarkerModelFile);
+            }
+        }
+    }
+
+
+    private static void doProcess(String pid, int sid, String path, String pathToPuffMarkerModelFile) {
 
         ExecutorService executor = Executors.newFixedThreadPool(4);
-
-        for (int i = 1; i < 23; i++) {
-            String person = "SI" + String.format("%02d", i);
-            Runnable worker = new WorkerThread(path + person, args[1], args[2], args[3]);
-            executor.execute(worker);
-        }
+        String session = "s" + String.format("%02d", sid);
+        Runnable worker = new WorkerThread(path + pid + "\\" + session + "\\", "", "", pathToPuffMarkerModelFile);
+        executor.execute(worker);
         executor.shutdown();
         while (!executor.isTerminated()) ;
-
-        System.out.println("Finished all threads");
     }
 }

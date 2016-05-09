@@ -107,4 +107,23 @@ public class StreamConstants {
     public static final String ORG_MD2K_CSTRESS_FV_RIP = "org.md2k.cstress.fv.rip";
     public static final String ORG_MD2K_CSTRESS_RIP_PROBABILITY = "org.md2k.cstress.probability.rip";
     public static final String ORG_MD2K_CSTRESS_RIP_STRESSLABEL = "org.md2k.cstress.stresslabel.rip";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION_BACK_DIFFERENCE = "org.md2k.puffMarker.data.rip.exprduration.backward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION_FORWARD_DIFFERENCE = "org.md2k.puffMarker.data.rip.exprduration.forward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION_BACK_DIFFERENCE = "org.md2k.puffMarker.data.rip.inspduration.backward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION_FORWARD_DIFFERENCE = "org.md2k.puffMarker.data.rip.inspduration.forward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_IERATIO_BACK_DIFFERENCE = "org.md2k.puffMarker.data.rip.IERatio.backward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_IERATIO_FORWARD_DIFFERENCE = "org.md2k.puffMarker.data.rip.IERatio.forward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH_BACK_DIFFERENCE = "org.md2k.puffMarker.data.rip.stretch.backward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH_FORWARD_DIFFERENCE = "org.md2k.puffMarker.data.rip.stretch.forward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION_BACK_DIFFERENCE = "org.md2k.puffMarker.data.rip.respduration.backward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION_FORWARD_DIFFERENCE = "org.md2k.puffMarker.data.rip.respduration.forward.diff";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_D5_EXPRDURATION = "org.md2k.puffMarker.data.rip.respduration.d5.exprduration";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_D5_STRETCH = "org.md2k.puffMarker.data.rip.respduration.d5.stretch";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE = "org.md2k.puffMarker.data.rip.respduration.max.amplitude";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_AMPLITUDE = "org.md2k.puffMarker.data.rip.respduration.min.amplitude";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_RATE_OF_CHANGE = "org.md2k.puffMarker.data.rip.respduration.max.rateofchange";
+    public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_RATE_OF_CHANGE = "org.md2k.puffMarker.data.rip.respduration.min.rateofchange";
+    public static final String ORG_MD2K_PUFFMARKER_FV = "org.md2k.puffMarker.fv";
+    public static final String ORG_MD2K_PUFFMARKER_PROBABILITY = "org.md2k.puffMarker.probability";
+    public static final String ORG_MD2K_PUFFMARKER_PUFFLABEL = "org.md2k.puffMarker.pufflabel";
 }

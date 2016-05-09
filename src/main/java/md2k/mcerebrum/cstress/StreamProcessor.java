@@ -31,6 +31,7 @@ package md2k.mcerebrum.cstress;
  */
 
 import com.google.gson.Gson;
+import md2k.mcerebrum.PuffMarkerMain;
 import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
 import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.features.*;
@@ -43,6 +44,7 @@ import md2k.mcerebrum.cstress.library.structs.Model;
 import md2k.mcerebrum.cstress.library.structs.SVCModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NotANumberException;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -170,12 +172,21 @@ public class StreamProcessor {
             try {
                 RIPFeatures rf = new RIPFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
                 System.err.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
-            //AutoSense wrist features
-//            AccelGyroFeatures leftWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
-//            AccelGyroFeatures rightWrist = new AccelGyroFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
+            try {
+                AutosenseWristFeatures leftWrist = new AutosenseWristFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
+            }
+
+            try {
+                AutosenseWristFeatures rightWrist = new AutosenseWristFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
+            }
 
 
         } catch (IndexOutOfBoundsException e) {
@@ -192,10 +203,14 @@ public class StreamProcessor {
     public void generateResults() {
         try {
             CStressFeatureVector cs = new CStressFeatureVector(datastreams);
-    //        PuffMarker pm = new PuffMarker(datastreams);
-
         } catch (NotANumberException e) {
             System.err.println("Generate result error");
+        }
+
+        try {
+            PuffMarker pm = new PuffMarker(datastreams);
+        } catch (NotANumberException e) {
+            System.err.println("PuffMarker: Generate result error");
         }
     }
 
@@ -207,10 +222,33 @@ public class StreamProcessor {
         generateResults();
         runcStress();
         runcStressEpisode();
+
+        runpuffMarker();
+
         resetDataStreams();
     }
 
+    /**
+     * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
+     */
+    private void runpuffMarker() {
+        SVCModel model = (SVCModel) models.get("puffMarkerModel");
+        DataArrayStream featurevector = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_PUFFMARKER_FV);
 
+        for (DataPointArray ap : featurevector.data) {
+            double prob = model.computeProbability(ap);
+            int label;
+            if (prob > model.getHighBias())
+                label = PUFFMARKER.PUFF;
+            else if (prob < model.getLowBias())
+                label = PUFFMARKER.NOT_PUFF;
+            else
+                label = PUFFMARKER.UNSURE;
+
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL).add(new DataPoint(ap.timestamp, label));
+        }
+    }
     /**
      * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
      */
@@ -298,52 +336,52 @@ public class StreamProcessor {
 
 
             case PUFFMARKER.LEFTWRIST_ACCEL_X:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_X)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_X)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_ACCEL_Y:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_ACCEL_Z:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_GYRO_X:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_X)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_X)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_GYRO_Y:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Y)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Y)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_GYRO_Z:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_LEFTWRIST_GYRO_Z)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Z)).add(dp);
                 break;
 
 
             case PUFFMARKER.RIGHTWRIST_ACCEL_X:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_ACCEL_Y:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_ACCEL_Z:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_GYRO_X:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_X)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_X)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_GYRO_Y:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_GYRO_Z:
-                (datastreams.getDataPointStream(PUFFMARKER.KEY_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
+                (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
                 break;
 
 

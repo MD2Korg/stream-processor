@@ -3,6 +3,7 @@ package md2k.mcerebrum;
 import md2k.mcerebrum.cstress.StreamConstants;
 import md2k.mcerebrum.cstress.StreamProcessor;
 import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.library.Time;
 import md2k.mcerebrum.cstress.library.datastream.DataPointInterface;
 import md2k.mcerebrum.cstress.library.structs.DataPoint;
@@ -39,15 +40,17 @@ public class WorkerThread implements Runnable {
     private String path;
     private String cStressModelPath;
     private String cStressRIPModelPath;
+    private String puffMarkerModelPath;
 
     public WorkerThread(String path) {
         this.path = path;
     }
 
-    public WorkerThread(String path, String cStressModelPath, String cStressRIPModelPath) {
+    public WorkerThread(String path, String cStressModelPath, String cStressRIPModelPath, String puffMarkerModelPath) {
         this.path = path;
         this.cStressModelPath = cStressModelPath;
         this.cStressRIPModelPath = cStressRIPModelPath;
+        this.puffMarkerModelPath = puffMarkerModelPath;
     }
 
 
@@ -55,25 +58,26 @@ public class WorkerThread implements Runnable {
     public void run() {
 
         CSVParser tp = new CSVParser();
+
         tp.importData(path + "/rip.txt", AUTOSENSE.CHEST_RIP);
         tp.importData(path + "/ecg.txt", AUTOSENSE.CHEST_ECG);
         tp.importData(path + "/accelx.txt", AUTOSENSE.CHEST_ACCEL_X);
         tp.importData(path + "/accely.txt", AUTOSENSE.CHEST_ACCEL_Y);
         tp.importData(path + "/accelz.txt", AUTOSENSE.CHEST_ACCEL_Z);
 
-//        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
-//        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
-//        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
-//        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
-//        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
-//        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
-//
-//        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
-//        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
-//        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
-//        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
-//        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
-//        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
+        tp.importData(path + "/left-wrist-accelx.txt", PUFFMARKER.LEFTWRIST_ACCEL_X);
+        tp.importData(path + "/left-wrist-accely.txt", PUFFMARKER.LEFTWRIST_ACCEL_Y);
+        tp.importData(path + "/left-wrist-accelz.txt", PUFFMARKER.LEFTWRIST_ACCEL_Z);
+        tp.importData(path + "/left-wrist-gyrox.txt", PUFFMARKER.LEFTWRIST_GYRO_X);
+        tp.importData(path + "/left-wrist-gyroy.txt", PUFFMARKER.LEFTWRIST_GYRO_Y);
+        tp.importData(path + "/left-wrist-gyroz.txt", PUFFMARKER.LEFTWRIST_GYRO_Z);
+
+        tp.importData(path + "/right-wrist-accely.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
+        tp.importData(path + "/right-wrist-accelx.txt", PUFFMARKER.RIGHTWRIST_ACCEL_X);
+        tp.importData(path + "/right-wrist-accelz.txt", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
+        tp.importData(path + "/right-wrist-gyrox.txt", PUFFMARKER.RIGHTWRIST_GYRO_X);
+        tp.importData(path + "/right-wrist-gyroy.txt", PUFFMARKER.RIGHTWRIST_GYRO_Y);
+        tp.importData(path + "/right-wrist-gyroz.txt", PUFFMARKER.RIGHTWRIST_GYRO_Z);
 
         tp.sort();
 
@@ -83,6 +87,7 @@ public class WorkerThread implements Runnable {
         streamProcessor.setPath(path);
         streamProcessor.loadModel("cStressModel", cStressModelPath);
         streamProcessor.loadModel("cStressRIPModel", cStressRIPModelPath);
+        streamProcessor.loadModel("puffMarkerModel", puffMarkerModelPath);
 
         streamProcessor.dpInterface = new DataPointInterface() {
             @Override
