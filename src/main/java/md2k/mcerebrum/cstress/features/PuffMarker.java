@@ -59,23 +59,18 @@ public class PuffMarker {
             for (String wrist : wristList) {
 
                 DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
-                int totalFeatures = 0;
+
                 for (int i = 0; i < gyr_intersections.data.size(); i++) {
                     int startIndex = (int) gyr_intersections.data.get(i).timestamp;
                     int endIndex = (int) gyr_intersections.data.get(i).value;
 
-//                    System.out.println(" s=" + startIndex+", e="+endIndex + " "+"org.md2k.cstress.data.gyr.mag_800" + wrist);
-
                     DataPointArray fv = computePuffMarkerFeatures(datastreams, wrist, startIndex, endIndex);
                     if (fv != null) {
-                        totalFeatures++;
-//                    System.out.println(" |feature|=" + fv.value.size());
 
                         DataArrayStream fvStream = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_PUFFMARKER_FV);
                         fvStream.add(fv);
                     }
                 }
-//                System.out.println("Total features = " + totalFeatures);
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -110,17 +105,13 @@ public class PuffMarker {
      */
     private DataPointArray computePuffMarkerFeatures(DataStreams datastreams, String wrist, int startIndex, int endIndex) {
 
-//        G.SVM.RIP_MPUFF_ROC.IND=[1:7, 10:12,14,19:21,23,29,32,8,9];G.SVM.RIP_MPUFF_ROC.NAME='rip_mpuff_roc';
-//        G.SVM.WRIST_MRP.IND=109:121;G.SVM.WRIST_MRP.NAME='wrist_mrp';
-//        G.SVM.RIP_MPUFF_ROC_WRIST_MRP_TIME.IND=[G.SVM.RIP_MPUFF_ROC.IND, G.SVM.WRIST_MRP.IND,134:138];
-
         /////////////// RESPIRATION FEATURES ////////////////////////
         double insp = 0;        //1
         double expr = 0;        //2
         double resp = 0;        //3
         double ieRatio = 0;     //4
         double stretch = 0;     //5
-        double u_stretch = 0;      //  6. U_Stretch = max(sample[j])  --
+        double u_stretch = 0;      //  6. U_Stretch = max(sample[j])
         double l_stretch = 0;      //  7. L_Stretch = min(sample[j])
         double bd_insp = 0;        //10. BD_INSP = INSP(i)-INSP(i-1)
         double bd_expr = 0;        //11. BD_EXPR = EXPR(i)-EXPR(i-1)
@@ -138,7 +129,6 @@ public class PuffMarker {
 
         DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
         DataPointStream gyr_mag_stream = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
-//            System.out.print("valleys:"+ valleys.data.size());
 
         boolean isRIPPresent = false;
         int candidateRespirationValley = 0;
@@ -181,8 +171,8 @@ public class PuffMarker {
         }
 
         if (!isRIPPresent) return null;
-        /////////////// WRIST FEATURES ////////////////////////
 
+        /////////////// WRIST FEATURES ////////////////////////
 
         List<DataPoint> gyr_mag_800 = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex);
         DescriptiveStatistics mag800stats = new DescriptiveStatistics();
@@ -213,11 +203,9 @@ public class PuffMarker {
         if (gyr_mag_8000.size() == 0) return null;
         double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
         double duration = gyr_mag_8000.get(gyr_mag_8000.size() - 1).timestamp - gyr_mag_8000.get(0).timestamp;
-//        boolean isValidRollPitch = checkValidRollPitch(rollstats, pitchstats);
         boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
         if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
-//        if (!(duration > PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration < PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_))
             return null;
 
         /*
@@ -231,10 +219,10 @@ public class PuffMarker {
         for (DataPoint dp : gyr_mag) {
             magstats.addValue(dp.value);
         }
-        double GYRO_Magnitude_Mean = magstats.getMean();// gyr_mag.stats.getMean();
-        double GYRO_Magnitude_Median = magstats.getPercentile(50);// gyr_mag.getPercentile(50);
-        double GYRO_Magnitude_SD = magstats.getStandardDeviation();// gyr_mag.stats.getStandardDeviation();
-        double GYRO_Magnitude_Quartile_Deviation = magstats.getPercentile(75) - magstats.getPercentile(25);// gyr_mag.getPercentile(75) - gyr_mag.getPercentile(25);
+        double GYRO_Magnitude_Mean = magstats.getMean();
+        double GYRO_Magnitude_Median = magstats.getPercentile(50);
+        double GYRO_Magnitude_SD = magstats.getStandardDeviation();
+        double GYRO_Magnitude_Quartile_Deviation = magstats.getPercentile(75) - magstats.getPercentile(25);
 
          /*
             WRIST - PITCH - mean
@@ -273,8 +261,6 @@ public class PuffMarker {
 
         List<Double> featureVector = new ArrayList<Double>();
 
-//        featureVector.add((double)gyr_mag.get(0).timestamp); // start time
-//        featureVector.add((double) (wEtime - wStime)); // end time
         featureVector.add(insp);
         featureVector.add(expr);
         featureVector.add(resp);
@@ -316,19 +302,6 @@ public class PuffMarker {
         featureVector.add((double) rEtime - wStime);
         featureVector.add((double) rStime - wEtime);
         featureVector.add((double) rEtime - wEtime);
-
-/*
-        System.out.print(featureVector.get(0));
-        for (int cnt = 1; cnt < featureVector.size(); cnt++) {
-            Double aFeatureVector = featureVector.get(cnt);
-//                System.out.print(", ("+cnt+","+aFeatureVector+")");
-            System.out.print("," + aFeatureVector);
-            if (Double.isNaN(aFeatureVector)) {
-//                    System.out.println("NaN at "+cnt);
-                throw new NotANumberException();
-            }
-        }
-        System.out.println("," + wEtime + "," + wStime + "," + wrist);*/
 
         return new DataPointArray(gyr_mag.get(0).timestamp, featureVector);
     }

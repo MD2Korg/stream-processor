@@ -99,8 +99,7 @@ public class RIPFeatures {
 
         //Key features
 
-        double activity = 0;//(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.size() == 0) ? 0 : datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY).data.get(0).value;
-        if (activity == 0.0) {
+
 //        System.out.println("; |V|="+valleys.data.size());
 
             for (int i = 0; i < valleys.data.size() - 1; i++) {
@@ -224,7 +223,7 @@ public class RIPFeatures {
             }
 
             (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MINUTE_VENTILATION)).add(new DataPoint(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.size() - 1).timestamp, minuteVentilation));
-        }
+
 
     }
 

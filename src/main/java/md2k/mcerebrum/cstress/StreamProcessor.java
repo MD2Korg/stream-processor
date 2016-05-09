@@ -203,10 +203,14 @@ public class StreamProcessor {
     public void generateResults() {
         try {
             CStressFeatureVector cs = new CStressFeatureVector(datastreams);
-            PuffMarker pm = new PuffMarker(datastreams);
-
         } catch (NotANumberException e) {
             System.err.println("Generate result error");
+        }
+
+        try {
+            PuffMarker pm = new PuffMarker(datastreams);
+        } catch (NotANumberException e) {
+            System.err.println("PuffMarker: Generate result error");
         }
     }
 
@@ -240,11 +244,6 @@ public class StreamProcessor {
                 label = PUFFMARKER.NOT_PUFF;
             else
                 label = PUFFMARKER.UNSURE;
-
-/*            if(label == PUFFMARKER.PUFF) {
-                System.out.println("-------------------------------------- PUFF --------------------------------------------"+PuffMarkerMain.puffcount);
-                PuffMarkerMain.puffcount++;
-            }*/
 
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL).add(new DataPoint(ap.timestamp, label));
