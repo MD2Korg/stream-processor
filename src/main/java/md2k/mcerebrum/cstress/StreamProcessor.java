@@ -237,17 +237,17 @@ public class StreamProcessor {
             if (prob > model.getHighBias())
                 label = PUFFMARKER.PUFF;
             else if (prob < model.getLowBias())
-                label = AUTOSENSE.NOT_STRESSED;
+                label = PUFFMARKER.NOT_PUFF;
             else
-                label = AUTOSENSE.UNSURE;
+                label = PUFFMARKER.UNSURE;
 
-            if(label == PUFFMARKER.PUFF) {
+/*            if(label == PUFFMARKER.PUFF) {
                 System.out.println("-------------------------------------- PUFF --------------------------------------------"+PuffMarkerMain.puffcount);
                 PuffMarkerMain.puffcount++;
-            }
+            }*/
 
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
-            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_STRESSLABEL).add(new DataPoint(ap.timestamp, label));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL).add(new DataPoint(ap.timestamp, label));
         }
     }
     /**

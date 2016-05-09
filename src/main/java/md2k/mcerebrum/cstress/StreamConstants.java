@@ -125,5 +125,5 @@ public class StreamConstants {
     public static final String ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_RATE_OF_CHANGE = "org.md2k.puffMarker.data.rip.respduration.min.rateofchange";
     public static final String ORG_MD2K_PUFFMARKER_FV = "org.md2k.puffMarker.fv";
     public static final String ORG_MD2K_PUFFMARKER_PROBABILITY = "org.md2k.puffMarker.probability";
-    public static final String ORG_MD2K_PUFFMARKER_STRESSLABEL = "org.md2k.puffMarker.pufflabel";
+    public static final String ORG_MD2K_PUFFMARKER_PUFFLABEL = "org.md2k.puffMarker.pufflabel";
 }

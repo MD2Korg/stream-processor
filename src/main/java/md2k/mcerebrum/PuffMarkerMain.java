@@ -122,7 +122,7 @@ System.out.println("total puff "+puffcount);
             e.printStackTrace();
         }*/
 //        Runnable worker = new WorkerThread(path + person + "\\" + session + "\\", "", "", Path_To_PuffMarker_Model_File);
-        String Path_To_PuffMarker_Model_File="C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\_puffMarkerModel.json";
+        String Path_To_PuffMarker_Model_File="C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\puffMarkerModel.json";
         Runnable worker = new WorkerThread(path + person + "\\" + session + "\\", "", "", Path_To_PuffMarker_Model_File);
         executor.execute(worker);
         executor.shutdown();

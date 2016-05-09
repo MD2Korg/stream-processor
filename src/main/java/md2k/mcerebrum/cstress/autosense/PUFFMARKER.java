@@ -93,8 +93,8 @@ public class PUFFMARKER {
     public static final double[] TH = new double[]{13.9489, 8.3384, 17.3435, 14.2775};
 */
     public static int PUFF = 1;
-    public static int NO_PUFF = 0;
-    public static int UNSURE = -1;
+    public static int NOT_PUFF = 0;
+    public static int UNSURE = 2;
 
 
 
