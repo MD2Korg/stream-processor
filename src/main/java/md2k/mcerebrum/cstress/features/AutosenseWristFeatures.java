@@ -43,18 +43,27 @@ public class AutosenseWristFeatures {
 
     /**
      * Constructor
+     *
      * @param datastreams Global datastreams object
-     * @param wrist Which wrist to operate on
+     * @param wrist       Which wrist to operate on
      */
     public AutosenseWristFeatures(DataStreams datastreams, String wrist) {
 
         DataPointStream gyrox = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X + wrist);
         DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y + wrist);
         DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z + wrist);
+        DataPointStream gyroInterpolateX = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_INTERPOLATE_X + wrist);
+        DataPointStream gyroInterpolateY = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_INTERPOLATE_Y + wrist);
+        DataPointStream gyroInterpolateZ = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_INTERPOLATE_Z + wrist);
 
         DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + wrist);
         DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + wrist);
         DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z + wrist);
+        DataPointStream accelInterpolateX = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_INTERPOLATE_X + wrist);
+        DataPointStream accelInterpolateY = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_INTERPOLATE_Y + wrist);
+        DataPointStream accelInterpolateZ = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_INTERPOLATE_Z + wrist);
+
+        doInterpolation(gyrox, gyroy, gyroz, gyroInterpolateX, gyroInterpolateY, gyroInterpolateZ);
 
         DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
         Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
@@ -83,15 +92,23 @@ public class AutosenseWristFeatures {
         }
     }
 
+    private void doInterpolation(DataPointStream signalX, DataPointStream signalY, DataPointStream signalZ, DataPointStream interpolateX, DataPointStream interpolateY, DataPointStream interpolateZ) {
+
+        while(signalX.data.size() > signalY.data.size())
+            signalY.add(signalY.data.get(signalY.data.size()-1));
+
+        while(signalX.data.size() > signalZ.data.size())
+            signalZ.add(signalZ.data.get(signalZ.data.size()-1));
+    }
 
     /**
      * Segmentation based on two moving averages
      *
-     * @param output Output datastream
+     * @param output            Output datastream
      * @param slowMovingAverage Input slow moving average
      * @param fastMovingAverage Input fast moving average
-     * @param THRESHOLD Threshold //TODO: more details
-     * @param near //TODO: What is this?
+     * @param THRESHOLD         Threshold //TODO: more details
+     * @param near              //TODO: What is this?
      * @return
      */
     public static int[] segmentationUsingTwoMovingAverage(DataPointStream output, DataPointStream slowMovingAverage
@@ -126,6 +143,7 @@ public class AutosenseWristFeatures {
 
     /**
      * Compute roll from accelerometer inputs
+     *
      * @param ax Accelerometer x-axis
      * @param ay Accelerometer y-axis
      * @param az Accelerometer z-axis
@@ -138,6 +156,7 @@ public class AutosenseWristFeatures {
 
     /**
      * Compute pitch from accelerometer inputs
+     *
      * @param ax Accelerometer x-axis
      * @param ay Accelerometer y-axis
      * @param az Accelerometer z-axis
@@ -149,12 +168,13 @@ public class AutosenseWristFeatures {
 
     /**
      * Segment datastreams based on roll and pitch
-     * @param roll Output roll datastream
-     * @param pitch Output pitch datastream
+     *
+     * @param roll   Output roll datastream
+     * @param pitch  Output pitch datastream
      * @param accelx Input accelerometer x datastream
      * @param accely Input accelerometer y datastream
      * @param accelz Input accelerometer z datastream
-     * @param sign Sign //TODO: What does this mean?
+     * @param sign   Sign //TODO: What does this mean?
      */
     private void calculateRollPitchSegment(DataPointStream roll, DataPointStream pitch, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
         for (int i = 0; i < accelx.data.size(); i++) {

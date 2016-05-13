@@ -255,7 +255,7 @@ public class PuffMarker {
             features : 'RStime-WStime','REtime-WStime','RStime-WEtime','REtime-WEtime','RPStime-WEtime'
          */
         long rStime = valleys.data.get(candidateRespirationValley).timestamp;
-        long rEtime = valleys.data.get(candidateRespirationValley).timestamp;
+        long rEtime = valleys.data.get(candidateRespirationValley+1).timestamp;
         long wStime = gyr_mag_stream.data.get(startIndex).timestamp;
         long wEtime = gyr_mag_stream.data.get(endIndex).timestamp;
 
