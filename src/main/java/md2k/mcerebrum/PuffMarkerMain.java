@@ -41,8 +41,8 @@ public class PuffMarkerMain {
 
     public static void main(String[] args) {
 
-        String path = args[0];
-        String pathToPuffMarkerModelFile = args[1];
+        String path = "C:\\Users\\nsleheen\\DATA\\6smoker_lab_csv_data\\";// args[0];
+        String pathToPuffMarkerModelFile = "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\puffMarkerModel.json";// args[1];
 
         for (int i = 1; i < 7; i++) {
             String person = "p" + String.format("%02d", i);

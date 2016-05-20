@@ -224,8 +224,18 @@ public class StreamProcessor {
         runcStressEpisode();
 
         runpuffMarker();
+        runSmokingEpisode();
 
         resetDataStreams();
+    }
+
+    private void runSmokingEpisode() {
+        try {
+            SmokingEpisodeGeneration seg = new SmokingEpisodeGeneration(datastreams);
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("SmokingEpisodeGeneration Exception Handler: IndexOutOfBoundsException");
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -238,8 +248,10 @@ public class StreamProcessor {
         for (DataPointArray ap : featurevector.data) {
             double prob = model.computeProbability(ap);
             int label;
-            if (prob > model.getHighBias())
+            if (prob > model.getLowBias()) {
+                System.out.println(">>>>>>>>>>>>>>>>>> PUFF <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                 label = PUFFMARKER.PUFF;
+            }
             else if (prob < model.getLowBias())
                 label = PUFFMARKER.NOT_PUFF;
             else

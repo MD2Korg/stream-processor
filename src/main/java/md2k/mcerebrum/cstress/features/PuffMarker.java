@@ -134,7 +134,7 @@ public class PuffMarker {
         int candidateRespirationValley = 0;
         for (int i = 0; i < valleys.data.size() - 2; i++) {
             double respCycleMaxAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
-            if (valleys.data.get(i).timestamp > gyr_mag_stream.data.get(startIndex).timestamp && valleys.data.get(i).timestamp < gyr_mag_stream.data.get(endIndex).timestamp
+            if (valleys.data.get(i).timestamp >= gyr_mag_stream.data.get(startIndex).timestamp && valleys.data.get(i).timestamp <= gyr_mag_stream.data.get(endIndex).timestamp
                     && respCycleMaxAmplitude > u_stretch
                     ) {
                 isRIPPresent = true;
@@ -169,8 +169,10 @@ public class PuffMarker {
             }
 
         }
-
+//System.err.print("DHUKSE>>");
         if (!isRIPPresent) return null;
+//        System.err.print("DHUKSE<<");
+
 
         /////////////// WRIST FEATURES ////////////////////////
 
@@ -204,10 +206,11 @@ public class PuffMarker {
         double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
         double duration = gyr_mag_8000.get(gyr_mag_8000.size() - 1).timestamp - gyr_mag_8000.get(0).timestamp;
         boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
+//        boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
         if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
             return null;
-
+//        System.err.print("FILTER PASR HOISE<<");
         /*
             WRIST - GYRO MAGNITUDE - mean
             WRIST - GYRO MAGNITUDE - median
