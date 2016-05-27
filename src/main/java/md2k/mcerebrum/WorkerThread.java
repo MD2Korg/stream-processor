@@ -106,6 +106,8 @@ public class WorkerThread implements Runnable {
         streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY);
         streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL);
         streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_ACTIVITY);
+        streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY);
+        streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL);
 
         long windowStartTime = -1;
         for (CSVDataPoint ap : tp) {
@@ -123,6 +125,7 @@ public class WorkerThread implements Runnable {
             streamProcessor.add(ap.channel, dp);
 
         }
+        streamProcessor.go();
     }
 
 

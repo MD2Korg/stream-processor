@@ -210,7 +210,7 @@ public class PuffMarker {
 
         if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
             return null;
-//        System.err.print("FILTER PASR HOISE<<");
+//        System.err.print("FILTER PAR HOISE<<");
         /*
             WRIST - GYRO MAGNITUDE - mean
             WRIST - GYRO MAGNITUDE - median
