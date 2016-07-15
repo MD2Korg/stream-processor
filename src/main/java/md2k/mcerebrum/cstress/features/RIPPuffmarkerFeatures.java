@@ -1,20 +1,8 @@
 package md2k.mcerebrum.cstress.features;
 
-import md2k.mcerebrum.cstress.StreamConstants;
-import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
-import md2k.mcerebrum.cstress.library.Vector;
-import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
-import md2k.mcerebrum.cstress.library.datastream.DataStream;
-import md2k.mcerebrum.cstress.library.datastream.DataStreams;
-import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
-import md2k.mcerebrum.cstress.library.structs.DataPoint;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
+ * - Nazir Saleheen <nsleheen@memphis.edu>
  * - Timothy Hnat <twhnat@memphis.edu>
  * All rights reserved.
  *
@@ -40,81 +28,97 @@ import java.util.List;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import md2k.mcerebrum.cstress.StreamConstants;
+import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
+import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
+import md2k.mcerebrum.cstress.library.Vector;
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
+import md2k.mcerebrum.cstress.library.datastream.DataStreams;
+import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
+import md2k.mcerebrum.cstress.library.structs.DataPoint;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Respiration feature computation class
  */
-public class RIPFeatures {
+public class RIPPuffmarkerFeatures {
 
     final int BUFFER_SIZE = 5;
 
     /**
-     * Core Respiration Features
+     * Core Respiration Features for puffMarker
      * <p>
      * Reference: ripFeature_Extraction.m
      * </p>
      *
      * @param datastreams Global data stream object
      */
-    public RIPFeatures(DataStreams datastreams) {
-
+    public RIPPuffmarkerFeatures(DataStreams datastreams) {
 
         DataPointStream rip = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP);
-        DataPointStream rip_smooth = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_SMOOTH);
-        Smoothing.smooth(rip_smooth, rip, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
-//        System.out.print("|rip|="+rip.data.size());
+        DataPointStream rip2min = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP);
+        int wLen = (int) Math.round(PUFFMARKER.BUFFER_SIZE_2MIN_SEC* (Double) datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).metadata.get("frequency"));
+        rip2min.setHistoricalBufferSize(wLen);
+        List<DataPoint> listHistoryRIP = new ArrayList<>(rip2min.getHistoricalNValues(wLen));
+        rip2min.addAll(listHistoryRIP);
+        rip2min.addAll(rip.data);
+
+        DataPointStream rip_smooth = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_SMOOTH);
+        Smoothing.smooth(rip_smooth, rip2min, AUTOSENSE.PEAK_VALLEY_SMOOTHING_SIZE);
 
         int windowLength = (int) Math.round(AUTOSENSE.WINDOW_LENGTH_SECS * (Double) datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).metadata.get("frequency"));
-        DataPointStream rip_mac = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MAC);
+        DataPointStream rip_mac = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAC);
         Smoothing.smooth(rip_mac, rip_smooth, windowLength); //TWH: Replaced MAC with Smooth after discussion on 11/9/2015
 
-        DataPointStream upIntercepts = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS);
-        DataPointStream downIntercepts = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS);
+        DataPointStream upIntercepts = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_UP_INTERCEPTS);
+        DataPointStream downIntercepts = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_DOWN_INTERCEPTS);
         generateIntercepts(upIntercepts, downIntercepts, rip_smooth, rip_mac);
 
-        DataPointStream upInterceptsFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS_FILTERED);
-        DataPointStream downInterceptsFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS_FILTERED);
+        DataPointStream upInterceptsFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_UP_INTERCEPTS_FILTERED);
+        DataPointStream downInterceptsFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_DOWN_INTERCEPTS_FILTERED);
         filterIntercepts(upInterceptsFiltered, downInterceptsFiltered, upIntercepts, downIntercepts);
 
-        DataPointStream upInterceptsFiltered1sec = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS_FILTERED_1SEC);
-        DataPointStream downInterceptsFiltered1sec = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS_FILTERED_1SEC);
+        DataPointStream upInterceptsFiltered1sec = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_UP_INTERCEPTS_FILTERED_1SEC);
+        DataPointStream downInterceptsFiltered1sec = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_DOWN_INTERCEPTS_FILTERED_1SEC);
         filter1Second(upInterceptsFiltered1sec, downInterceptsFiltered1sec, upInterceptsFiltered, downInterceptsFiltered);
 
-        DataPointStream upInterceptsFiltered1sect20 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_UP_INTERCEPTS_FILTERED_1SEC_T20);
-        DataPointStream downInterceptsFiltered1sect20 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_DOWN_INTERCEPTS_FILTERED_1SEC_T20);
+        DataPointStream upInterceptsFiltered1sect20 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_UP_INTERCEPTS_FILTERED_1SEC_T20);
+        DataPointStream downInterceptsFiltered1sect20 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_DOWN_INTERCEPTS_FILTERED_1SEC_T20);
         filtert20second(upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, upInterceptsFiltered1sec, downInterceptsFiltered1sec);
 
-        DataPointStream peaks = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_PEAKS);
+        DataPointStream peaks = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_PEAKS);
         generatePeaks(peaks, upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, rip_smooth);
 
-        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
+        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_VALLEYS);
         generateValleys(valleys, upInterceptsFiltered1sect20, downInterceptsFiltered1sect20, rip_smooth);
 
-        DataPointStream inspirationAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPIRATION_AMPLITUDE);
+        DataPointStream inspirationAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPIRATION_AMPLITUDE);
         double meanInspirationAmplitude = generateInspirationAmplitude(inspirationAmplitude, peaks, valleys);
 
-        DataPointStream respirationDuration = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPIRATION_DURATION);
+        DataPointStream respirationDuration = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPIRATION_DURATION);
         generateRespirationDuration(respirationDuration, valleys);
 
-        DataPointStream valleysFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS_FILTERED);
-        DataPointStream peaksFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_PEAKS_FILTERED);
+        DataPointStream valleysFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_VALLEYS_FILTERED);
+        DataPointStream peaksFiltered = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_PEAKS_FILTERED);
         filterPeaksAndValleys(peaksFiltered, valleysFiltered, respirationDuration, inspirationAmplitude, peaks, valleys, meanInspirationAmplitude);
 
+        datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_RESPIRATION_CYCLE_COUNT).add(new DataPoint(rip.data.get(0).timestamp, valleys.data.size()));
 
         //Key features
-        DataPointStream inspDurationDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION);
+        DataPointStream inspDurationDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION);
         inspDurationDataStream.setHistoricalBufferSize(BUFFER_SIZE);
 
-        DataPointStream exprDurationDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION);
+        DataPointStream exprDurationDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION);
         exprDurationDataStream.setHistoricalBufferSize(BUFFER_SIZE);
 
-        DataPointStream respDurationDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION);
+        DataPointStream respDurationDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION);
         respDurationDataStream.setHistoricalBufferSize(BUFFER_SIZE);
 
-        DataPointStream stretchDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH);
+        DataPointStream stretchDataStream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH);
         stretchDataStream.setHistoricalBufferSize(BUFFER_SIZE);
-
-
-//        System.out.println("; |V|="+valleys.data.size());
 
         for (int i = 0; i < valleys.data.size() - 1; i++) {
 
@@ -130,17 +134,9 @@ public class RIPFeatures {
             DataPoint stretch = new DataPoint(valleys.data.get(i).timestamp, peaks.data.get(i).value - valleys.data.get(i).value);
             stretchDataStream.add(stretch);
 
-//                DataPoint inratio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.size() - 1);
-//                DataPoint exratio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).data.size() - 1);
-
-            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_IERATIO)).add(new DataPoint(valleys.data.get(i).timestamp, inspDuration.value / exprDuration.value));
-
-            DataPoint rsa = rsaCalculateCycle(valleys.data.get(i).timestamp, valleys.data.get(i + 1).timestamp, datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR));
-            if (rsa.value != -1.0) { //Only add if a valid value
-                (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RSA)).add(rsa);
-            }
+            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_IERATIO)).add(new DataPoint(valleys.data.get(i).timestamp, inspDuration.value / exprDuration.value));
         }
-/*        for (int i = 0; i < valleys.data.size() - 2; i++) {
+        for (int i = 0; i < valleys.data.size() - 2; i++) {
             DataPoint inspDuration = inspDurationDataStream.data.get(i);
             double nextInspDurationValue = inspDurationDataStream.data.get(i + 1).value;
             double preInspDurationValue = getPreviousValue(inspDurationDataStream, i, -1, 0);
@@ -187,32 +183,9 @@ public class RIPFeatures {
             d5_exp = exprDurationDataStream.data.get(i).value / d5_exp;
             (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_STRETCH)).add(new DataPoint(stretchDataStream.data.get(i).timestamp, d5_stretch));
             (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_D5_EXPRDURATION)).add(new DataPoint(exprDurationDataStream.data.get(i).timestamp, d5_exp));
-        }*/
-/////////////////////////
-/*
-        for (int currentRespirationIndex=0; currentRespirationIndex<respDurationDataStream.data.size(); currentRespirationIndex++) {
-            double maxAmplitude = 1;
-            double minAmplitude = Double.MAX_VALUE;
-            double maxRateOfChange = 1;
-            double minRateOfChange = Double.MAX_VALUE;
-            DataPoint currentRespiration = respDurationDataStream.data.get(currentRespirationIndex);
-
-            for(int i=0; i<rip.data.size(); i++)
-                if(rip.data.get(i).timestamp >= currentRespiration.timestamp && rip.data.get(i).timestamp <= currentRespiration.timestamp+currentRespiration.value){
-                    maxAmplitude = Math.max(maxAmplitude, rip.data.get(i).value);
-                    minAmplitude = Math.min(minAmplitude, rip.data.get(i).value);
-                    maxRateOfChange = Math.max(maxRateOfChange, rip.data.get(i).value - rip.data.get(i - 1).value);
-                    minRateOfChange = Math.min(minRateOfChange, rip.data.get(i).value - rip.data.get(i - 1).value);
-                }
-            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE)).add(new DataPoint(currentRespiration.timestamp, maxAmplitude));
-            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_AMPLITUDE)).add(new DataPoint(currentRespiration.timestamp, minAmplitude));
-            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_RATE_OF_CHANGE)).add(new DataPoint(currentRespiration.timestamp, maxRateOfChange));
-            (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MIN_RATE_OF_CHANGE)).add(new DataPoint(currentRespiration.timestamp, minRateOfChange));
         }
-*/
 
-        //////////////////////////////
-/*        int currentRespirationIndex = 0;
+        int currentRespirationIndex = 0;
         DataPoint currentRespiration = respDurationDataStream.data.get(currentRespirationIndex++);
         double maxAmplitude = 0;
         double minAmplitude = Double.MAX_VALUE;
@@ -230,34 +203,19 @@ public class RIPFeatures {
                 minAmplitude = Double.MAX_VALUE;
                 maxRateOfChange = 0;
                 minRateOfChange = Double.MAX_VALUE;
-                currentRespiration = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(currentRespirationIndex++);
+                currentRespiration = respDurationDataStream.data.get(currentRespirationIndex++);
             }
             maxAmplitude = Math.max(maxAmplitude, rip.data.get(i).value);
             minAmplitude = Math.min(minAmplitude, rip.data.get(i).value);
             maxRateOfChange = Math.max(maxRateOfChange, rip.data.get(i).value - rip.data.get(i - 1).value);
             minRateOfChange = Math.min(minRateOfChange, rip.data.get(i).value - rip.data.get(i - 1).value);
         }
-        */
-        (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_BREATH_RATE)).add(new DataPoint(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.size() - 1).timestamp, valleys.data.size() - 1));
-
-        double minuteVentilation = 0.0;
-        for (int i = 0; i < valleys.data.size() - 1; i++) {
-            minuteVentilation += (peaks.data.get(i).timestamp - valleys.data.get(i).timestamp) / 1000.0 * (peaks.data.get(i).value - valleys.data.get(i).value) / 2.0;
-        }
-
-        (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_MINUTE_VENTILATION)).add(new DataPoint(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.size() - 1).timestamp, minuteVentilation));
-
 
     }
 
     private double getPreviousValue(DataPointStream dataPointStream, int currentIndex, int previousOffset, double defaultValue) {
         if (currentIndex + previousOffset >= 0) return dataPointStream.data.get(currentIndex + previousOffset).value;
-
-        List<DataPoint> listHistory = dataPointStream.getHistoricalNValues(Math.abs(currentIndex + previousOffset));
-        if (listHistory.size() == 0) {
-            return defaultValue;
-        }
-        return listHistory.get(0).value;
+        return defaultValue;
     }
 
     /**
@@ -349,7 +307,6 @@ public class RIPFeatures {
                 valleys.add(valley);
             }
         }
-
     }
 
     /**

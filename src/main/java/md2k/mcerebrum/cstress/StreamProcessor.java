@@ -115,6 +115,7 @@ public class StreamProcessor {
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).metadata.put("frequency", 1000.0 / windowSize);
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).metadata.put("frequency", 1000.0 / windowSize);
 
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.put("frequency", 64.0 / 3.0); // TODO: complete!!
     }
 
 
@@ -146,7 +147,7 @@ public class StreamProcessor {
 
         try {
             //Data quality computations
-            try {
+/*            try {
                 ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("ECGDataQuality Exception Handler: IndexOutOfBoundsException");
@@ -162,18 +163,25 @@ public class StreamProcessor {
                 AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("AccelerometerFeatures Exception Handler: IndexOutOfBoundsException");
-            }
-            try {
-                ECGFeatures ef = new ECGFeatures(datastreams);
-            } catch (IndexOutOfBoundsException e) {
-                System.err.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
-                e.printStackTrace();
-            }
+            }*/
+//            try {
+//                ECGFeatures ef = new ECGFeatures(datastreams);
+//            } catch (IndexOutOfBoundsException e) {
+//                System.err.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
+//                e.printStackTrace();
+//            }
             try {
                 RIPFeatures rf = new RIPFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
                 System.err.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
+            }
+
+            try {
+                RIPPuffmarkerFeatures rpf = new RIPPuffmarkerFeatures(datastreams);
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                System.err.println("RIPPuffmarkerFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
             try {
@@ -239,7 +247,7 @@ public class StreamProcessor {
     }
 
     /**
-     * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
+     * Method for running the puffMarker model on any available feature vectors to get corresponding stress probabilities
      */
     private void runpuffMarker() {
         SVCModel model = (SVCModel) models.get("puffMarkerModel");
@@ -249,7 +257,6 @@ public class StreamProcessor {
             double prob = model.computeProbability(ap);
             int label;
             if (prob > model.getLowBias()) {
-                System.out.println(">>>>>>>>>>>>>>>>>> PUFF <<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
                 label = PUFFMARKER.PUFF;
             }
             else if (prob < model.getLowBias())
@@ -257,8 +264,8 @@ public class StreamProcessor {
             else
                 label = PUFFMARKER.UNSURE;
 
-            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY).add(new DataPoint(ap.timestamp, prob));
-            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL).add(new DataPoint(ap.timestamp, label));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PROBABILITY_MINUTE).add(new DataPoint(ap.timestamp, prob));
+            datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL_MINUTE).add(new DataPoint(ap.timestamp, label));
         }
     }
     /**

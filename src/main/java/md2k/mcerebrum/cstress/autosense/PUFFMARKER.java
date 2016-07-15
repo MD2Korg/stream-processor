@@ -43,6 +43,12 @@ public class PUFFMARKER {
     public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_X = "org.md2k.puffMarker.data.gyro.x";
     public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y = "org.md2k.puffMarker.data.gyro.y";
     public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z = "org.md2k.puffMarker.data.gyro.z";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X_2_MIN = "org.md2k.puffMarker.data.accel.x.2min";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y_2_MIN = "org.md2k.puffMarker.data.accel.y.2min";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z_2_MIN = "org.md2k.puffMarker.data.accel.z.2min";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_X_2_MIN = "org.md2k.puffMarker.data.gyro.x.2min";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y_2_MIN = "org.md2k.puffMarker.data.gyro.y.2min";
+    public static final String ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z_2_MIN = "org.md2k.puffMarker.data.gyro.z.2min";
     public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_INTERPOLATE_X = "org.md2k.puffMarker.data.accel.interpolate.x";
     public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_INTERPOLATE_Y = "org.md2k.puffMarker.data.accel.interpolate.y";
     public static final String ORG_MD2K_PUFF_MARKER_DATA_ACCEL_INTERPOLATE_Z = "org.md2k.puffMarker.data.accel.interpolate.z";
@@ -98,4 +104,7 @@ public class PUFFMARKER {
     public static int PUFF = 1;
     public static int NOT_PUFF = 0;
     public static int UNSURE = 2;
+
+    public static final int BUFFER_SIZE_2MIN_SEC = 2*60;
+    public static final int BUFFER_SIZE_3MIN_SEC = 3*60;
 }

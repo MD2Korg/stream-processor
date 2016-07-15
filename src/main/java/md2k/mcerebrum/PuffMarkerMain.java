@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
  */
 
 public class PuffMarkerMain {
-    static int[][] sIds = {{}, {2, 3, 4, 5}, {3, 4, 5, 6}, {1, 2, 3}, {1}, {1}, {1}};
+    static int[][] sIds = {{}, {2, 3, 4, 5}, {3, 4, 5, 6, 7}, {1, 2, 3}, {1}, {1}, {1}};
 
     /**
      * Main driver class for replaying AutoSense data through StreamProcessor

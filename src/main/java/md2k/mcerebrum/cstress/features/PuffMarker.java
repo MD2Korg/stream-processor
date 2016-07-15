@@ -56,13 +56,25 @@ public class PuffMarker {
         try {
 
             String[] wristList = new String[]{PUFFMARKER.LEFT_WRIST, PUFFMARKER.RIGHT_WRIST};
+
+            long startTime = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(0).timestamp-60*1000;
+            long endTime = startTime + 60*1000;
+
+            DataPointStream minute_segment_timestamp = datastreams.getDataPointStream("org.md2k.puffmarker.data.minute.segment"); // TODO: remove
+            minute_segment_timestamp.add(new DataPoint(startTime, endTime)); //TODO: remove
+
             for (String wrist : wristList) {
 
-                DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
+                DataPointStream gyr_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
+                DataPointStream gyr_mag_stream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG + wrist);
 
                 for (int i = 0; i < gyr_intersections.data.size(); i++) {
                     int startIndex = (int) gyr_intersections.data.get(i).timestamp;
                     int endIndex = (int) gyr_intersections.data.get(i).value;
+
+                    long st = gyr_mag_stream.data.get(startIndex).timestamp;
+                    long et = gyr_mag_stream.data.get(endIndex).timestamp;
+//                    if (st<startTime || st > endTime) continue;
 
                     DataPointArray fv = computePuffMarkerFeatures(datastreams, wrist, startIndex, endIndex);
                     if (fv != null) {
@@ -127,24 +139,24 @@ public class PuffMarker {
         double roc_min = 0;      //  9. ROC_MIN = min(sample[j]-sample[j-1])
 
 
-        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_VALLEYS);
-        DataPointStream gyr_mag_stream = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
+        DataPointStream valleys = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_VALLEYS);
+        DataPointStream gyr_mag_stream = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG + wrist);
 
         boolean isRIPPresent = false;
         int candidateRespirationValley = 0;
         for (int i = 0; i < valleys.data.size() - 2; i++) {
             double respCycleMaxAmplitude = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_MAX_AMPLITUDE).data.get(i).value;
-            if (valleys.data.get(i).timestamp >= gyr_mag_stream.data.get(startIndex).timestamp && valleys.data.get(i).timestamp <= gyr_mag_stream.data.get(endIndex).timestamp
+            if (valleys.data.get(i).timestamp >= gyr_mag_stream.data.get(startIndex).timestamp && valleys.data.get(i).timestamp <= (gyr_mag_stream.data.get(endIndex).timestamp + 6000)
                     && respCycleMaxAmplitude > u_stretch
                     ) {
                 isRIPPresent = true;
                 candidateRespirationValley = i;
-                insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_INSPDURATION).data.get(i).value;
-                resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_RESPDURATION).data.get(i).value;
+                insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION).data.get(i).value;
+                resp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_RESPDURATION).data.get(i).value;
 
-                ieRatio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_IERATIO).data.get(i).value;
-                expr = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_EXPRDURATION).data.get(i).value;
-                stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_STRETCH).data.get(i).value;
+                ieRatio = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_IERATIO).data.get(i).value;
+                expr = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_EXPRDURATION).data.get(i).value;
+                stretch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_STRETCH).data.get(i).value;
 
                 bd_insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION_BACK_DIFFERENCE).data.get(i).value;
                 fd_insp = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_RIP_INSPDURATION_FORWARD_DIFFERENCE).data.get(i).value;
@@ -169,31 +181,29 @@ public class PuffMarker {
             }
 
         }
-//System.err.print("DHUKSE>>");
-        if (!isRIPPresent) return null;
-//        System.err.print("DHUKSE<<");
 
+        if (!isRIPPresent) return null;
 
         /////////////// WRIST FEATURES ////////////////////////
 
-        List<DataPoint> gyr_mag_800 = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist)).data.subList(startIndex, endIndex);
+        List<DataPoint> gyr_mag_800 = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist)).data.subList(startIndex, endIndex);
         DescriptiveStatistics mag800stats = new DescriptiveStatistics();
         for (DataPoint dp : gyr_mag_800) {
             mag800stats.addValue(dp.value);
         }
 
-        List<DataPoint> gyr_mag_8000 = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist)).data.subList(startIndex, endIndex);
+        List<DataPoint> gyr_mag_8000 = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist)).data.subList(startIndex, endIndex);
         DescriptiveStatistics mag8000stats = new DescriptiveStatistics();
         for (DataPoint dp : gyr_mag_8000) {
             mag8000stats.addValue(dp.value);
         }
-        List<DataPoint> rolls = (datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist)).data.subList(startIndex, endIndex);
+        List<DataPoint> rolls = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist)).data.subList(startIndex, endIndex);
         DescriptiveStatistics rollstats = new DescriptiveStatistics();
         for (DataPoint dp : rolls) {
             rollstats.addValue(dp.value);
         }
 
-        List<DataPoint> pitches = (datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist)).data.subList(startIndex, endIndex);
+        List<DataPoint> pitches = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist)).data.subList(startIndex, endIndex);
         DescriptiveStatistics pitchstats = new DescriptiveStatistics();
         for (DataPoint dp : pitches) {
             pitchstats.addValue(dp.value);
@@ -206,18 +216,19 @@ public class PuffMarker {
         double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
         double duration = gyr_mag_8000.get(gyr_mag_8000.size() - 1).timestamp - gyr_mag_8000.get(0).timestamp;
         boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
-//        boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
         if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
             return null;
-//        System.err.print("FILTER PAR HOISE<<");
+        DataPointStream gyr_intersections_timestamp = datastreams.getDataPointStream("org.md2k.puffmarker.data.gyr.interval.timestamp" + wrist); // TODO: remove
+        gyr_intersections_timestamp.add(new DataPoint(gyr_mag_stream.data.get(startIndex).timestamp, gyr_mag_stream.data.get(endIndex).timestamp)); //TODO: remove
+
         /*
             WRIST - GYRO MAGNITUDE - mean
             WRIST - GYRO MAGNITUDE - median
             WRIST - GYRO MAGNITUDE - std deviation
             WRIST - GYRO MAGNITUDE - quartile deviation
          */
-        List<DataPoint> gyr_mag = (datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist)).data.subList(startIndex, endIndex);
+        List<DataPoint> gyr_mag = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG + wrist)).data.subList(startIndex, endIndex);
         DescriptiveStatistics magstats = new DescriptiveStatistics();
         for (DataPoint dp : gyr_mag) {
             magstats.addValue(dp.value);
@@ -312,7 +323,7 @@ public class PuffMarker {
     private boolean checkValidRollPitchSimple(DescriptiveStatistics roll, DescriptiveStatistics pitch) {
         double r = roll.getMean();
         double p = pitch.getMean();
-        return r > -20 && r <= 60 && p >= -130 && p <= -50;
+        return r > -20 && r <= 65 && p >= -125 && p <= -40;
 
     }
 }

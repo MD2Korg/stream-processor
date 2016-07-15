@@ -221,6 +221,17 @@ public class DataPointStream extends DataStream {
         }
     }
 
+    /**
+     * Main method to add DataPoint list to the data stream.  Updates stats and descriptiveStats and checks for invalid data
+     * values.
+     *
+     * @param dpList New DataPoint list to add to the data stream
+     */
+    public void addAll(List<DataPoint> dpList) {
+        for (DataPoint dp : dpList)
+            add(dp);
+    }
+
 
     /**
      * Percentile computation based on a buffer of datapoints
