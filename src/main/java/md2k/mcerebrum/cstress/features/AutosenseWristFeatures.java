@@ -1,11 +1,15 @@
 package md2k.mcerebrum.cstress.features;
 
+import md2k.mcerebrum.cstress.StreamConstants;
 import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.library.Vector;
 import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
 import md2k.mcerebrum.cstress.library.datastream.DataStreams;
 import md2k.mcerebrum.cstress.library.signalprocessing.Smoothing;
 import md2k.mcerebrum.cstress.library.structs.DataPoint;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Copyright (c) 2015, The University of Memphis, MD2K Center
@@ -43,8 +47,9 @@ public class AutosenseWristFeatures {
 
     /**
      * Constructor
+     *
      * @param datastreams Global datastreams object
-     * @param wrist Which wrist to operate on
+     * @param wrist       Which wrist to operate on
      */
     public AutosenseWristFeatures(DataStreams datastreams, String wrist) {
 
@@ -52,46 +57,84 @@ public class AutosenseWristFeatures {
         DataPointStream gyroy = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y + wrist);
         DataPointStream gyroz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z + wrist);
 
+        DataPointStream gyrox2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X_2_MIN + wrist);
+        DataPointStream gyroy2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y_2_MIN + wrist);
+        DataPointStream gyroz2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z_2_MIN + wrist);
+
+        int wLen = (int) Math.round(PUFFMARKER.BUFFER_SIZE_2MIN_SEC* (Double) datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.get("frequency"));
+        gyrox2min.setHistoricalBufferSize(wLen);
+        gyroy2min.setHistoricalBufferSize(wLen);
+        gyroz2min.setHistoricalBufferSize(wLen);
+
+        mergeWithPreviousData(gyrox, gyrox2min, wLen);
+        mergeWithPreviousData(gyroy, gyroy2min, wLen);
+        mergeWithPreviousData(gyroz, gyroz2min, wLen);
+
         DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + wrist);
         DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + wrist);
         DataPointStream accelz = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z + wrist);
+        DataPointStream accelx2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X_2_MIN + wrist);
+        DataPointStream accely2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y_2_MIN + wrist);
+        DataPointStream accelz2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z_2_MIN + wrist);
+        accelx2min.setHistoricalBufferSize(wLen);
+        accely2min.setHistoricalBufferSize(wLen);
+        accelz2min.setHistoricalBufferSize(wLen);
 
-        DataPointStream gyr_mag = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag" + wrist);
-        Vector.magnitude(gyr_mag, gyrox.data, gyroy.data, gyroz.data);
+        mergeWithPreviousData(accelx, accelx2min, wLen);
+        mergeWithPreviousData(accely, accely2min, wLen);
+        mergeWithPreviousData(accelz, accelz2min, wLen);
 
-        DataPointStream gyr_mag_800 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_800" + wrist);
+        DataPointStream gyr_mag = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG + wrist);
+        Vector.magnitude(gyr_mag, gyrox2min.data, gyroy2min.data, gyroz2min.data);
+
+        DataPointStream gyr_mag_800 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist);
         Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
-        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.mag_8000" + wrist);
+        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist);
         Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
 
-        DataPointStream gyr_intersections = datastreams.getDataPointStream("org.md2k.cstress.data.gyr.intersections" + wrist);
+        DataPointStream gyr_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
         segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
 
         DataPointStream acl_y_800 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag800" + wrist);
-        Smoothing.smooth(acl_y_800, accely, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(acl_y_800, accely2min, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
         DataPointStream acl_y_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag8000" + wrist);
-        Smoothing.smooth(acl_y_8000, accely, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(acl_y_8000, accely2min, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
 
-        DataPointStream roll = datastreams.getDataPointStream("org.md2k.cstress.data.roll" + wrist);
-        DataPointStream pitch = datastreams.getDataPointStream("org.md2k.cstress.data.pitch" + wrist);
+        DataPointStream roll = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist);
+        DataPointStream pitch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist);
         //TODO: add yaw
 
         if (PUFFMARKER.LEFT_WRIST.equals(wrist)) {
-            calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, -1);
+            calculateRollPitchSegment(roll, pitch, accelx2min, accely2min, accelz2min, -1);
         } else {
-            calculateRollPitchSegment(roll, pitch, accelx, accely, accelz, 1);
+            calculateRollPitchSegment(roll, pitch, accelx2min, accely2min, accelz2min, 1);
         }
     }
 
+    private void mergeWithPreviousData(DataPointStream currentDataStream, DataPointStream mergedDataStream, int size) {
+
+        List<DataPoint> listHistory= new ArrayList<>(mergedDataStream.getHistoricalNValues(size));
+        mergedDataStream.addAll(listHistory);
+        mergedDataStream.addAll(currentDataStream.data);
+    }
+
+    private void doInterpolation(DataPointStream signalX, DataPointStream signalY, DataPointStream signalZ, DataPointStream interpolateX, DataPointStream interpolateY, DataPointStream interpolateZ) {
+
+        while(signalX.data.size() > signalY.data.size())
+            signalY.add(signalY.data.get(signalY.data.size()-1));
+
+        while(signalX.data.size() > signalZ.data.size())
+            signalZ.add(signalZ.data.get(signalZ.data.size()-1));
+    }
 
     /**
      * Segmentation based on two moving averages
      *
-     * @param output Output datastream
+     * @param output            Output datastream
      * @param slowMovingAverage Input slow moving average
      * @param fastMovingAverage Input fast moving average
-     * @param THRESHOLD Threshold //TODO: more details
-     * @param near //TODO: What is this?
+     * @param THRESHOLD         Threshold //TODO: more details
+     * @param near              //TODO: What is this?
      * @return
      */
     public static int[] segmentationUsingTwoMovingAverage(DataPointStream output, DataPointStream slowMovingAverage
@@ -126,6 +169,7 @@ public class AutosenseWristFeatures {
 
     /**
      * Compute roll from accelerometer inputs
+     *
      * @param ax Accelerometer x-axis
      * @param ay Accelerometer y-axis
      * @param az Accelerometer z-axis
@@ -138,6 +182,7 @@ public class AutosenseWristFeatures {
 
     /**
      * Compute pitch from accelerometer inputs
+     *
      * @param ax Accelerometer x-axis
      * @param ay Accelerometer y-axis
      * @param az Accelerometer z-axis
@@ -149,12 +194,13 @@ public class AutosenseWristFeatures {
 
     /**
      * Segment datastreams based on roll and pitch
-     * @param roll Output roll datastream
-     * @param pitch Output pitch datastream
+     *
+     * @param roll   Output roll datastream
+     * @param pitch  Output pitch datastream
      * @param accelx Input accelerometer x datastream
      * @param accely Input accelerometer y datastream
      * @param accelz Input accelerometer z datastream
-     * @param sign Sign //TODO: What does this mean?
+     * @param sign   Sign //TODO: What does this mean?
      */
     private void calculateRollPitchSegment(DataPointStream roll, DataPointStream pitch, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
         for (int i = 0; i < accelx.data.size(); i++) {
