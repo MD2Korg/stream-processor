@@ -103,6 +103,7 @@ public class StreamConstants {
     public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_FAST = "org.md2k.cstress.stress.episode.ema.fast";
     public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SLOW = "org.md2k.cstress.stress.episode.ema.slow";
     public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SIGNAL = "org.md2k.cstress.stress.episode.ema.signal";
+    public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_HISTOGRAM = "org.md2k.cstress.stress.episode.histogram";
     public static final String ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION = "org.md2k.cstress.stress.episode.classification";
     public static final String ORG_MD2K_CSTRESS_FV_RIP = "org.md2k.cstress.fv.rip";
     public static final String ORG_MD2K_CSTRESS_RIP_PROBABILITY = "org.md2k.cstress.probability.rip";

@@ -173,7 +173,7 @@ public class DataPointStream extends DataStream {
         List<DataPoint> result = new ArrayList<DataPoint>();
 
         for (DataPoint dpa : history) {
-            if (dpa.timestamp > starttime) {
+            if (dpa.timestamp >= starttime) {
                 result.add(dpa);
             }
         }
