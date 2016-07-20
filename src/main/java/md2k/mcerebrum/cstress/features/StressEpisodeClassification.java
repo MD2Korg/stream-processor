@@ -170,17 +170,21 @@ public class StressEpisodeClassification {
                     dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unknown.value));
                 } else {
                     List<DataPoint> listStressProbability = dsStressProbabilitySmoothed.getHistoricalValues(episodeStartTimestamp);
-                    double sumStressProbability = 0;
-                    for (DataPoint stressProbabilityDP : listStressProbability) {
-                        sumStressProbability += stressProbabilityDP.value;
-                    }
-                    double stressDensity = sumStressProbability / listStressProbability.size();
-                    if (stressDensity >= thresholdYes) {
-                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.YesStress.value));
-                    } else if (stressDensity <= thresholdNo) {
-                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.NotStress.value));
+                    if(listStressProbability.size()==0) {
+                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unknown.value));
                     } else {
-                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unsure.value));
+                        double sumStressProbability = 0;
+                        for (DataPoint stressProbabilityDP : listStressProbability) {
+                            sumStressProbability += stressProbabilityDP.value;
+                        }
+                        double stressDensity = sumStressProbability / listStressProbability.size();
+                        if (stressDensity >= thresholdYes) {
+                            dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.YesStress.value));
+                        } else if (stressDensity <= thresholdNo) {
+                            dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.NotStress.value));
+                        } else {
+                            dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unsure.value));
+                        }
                     }
                 }
             }
