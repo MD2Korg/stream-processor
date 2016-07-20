@@ -41,8 +41,8 @@ public class StressEpisodeClassification {
     public static final double macdParamSlow = 19;
     public static final double macdParamSignal = 2;
 
-    public static final double thresholdYes = 0.44;
-    public static final double thresholdNo = 0.29;
+    public static final double thresholdYes = 0.36;
+    public static final double thresholdNo = 0.36;
 
     public static final int stressProbabilitySmoothingWindow = 3; // 3 minutes
     public static final int BUFFER_SIZE = 1000;
@@ -70,6 +70,9 @@ public class StressEpisodeClassification {
 
         DataPointStream dsEmaSignal = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_EMA_SIGNAL);
         dsEmaSignal.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
+
+        DataPointStream dsEmaHistogram = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_HISTOGRAM);
+        dsEmaHistogram.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
 
         DataPointStream dsStressEpisodeClassification = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION);
         dsStressEpisodeClassification.setHistoricalBufferSize(BUFFER_SIZE_SMALL);
@@ -139,7 +142,7 @@ public class StressEpisodeClassification {
         double emaSignalPrev;
         List<DataPoint> emaSignalHistory = dsEmaSignal.getHistoricalNValues(1);
         if (emaSignalHistory.size() == 0) {
-            emaSignalPrev = stressProbability.value;
+            emaSignalPrev = 0;//stressProbability.value;
         } else {
             emaSignalPrev = emaSignalHistory.get(0).value;
         }
@@ -148,31 +151,37 @@ public class StressEpisodeClassification {
 
         double histogramPrev = macdPrev - emaSignalPrev;
         double histogram = macd - emaSignal;
-        if (histogramPrev < 0 && histogram > 0) {
+        dsEmaHistogram.add(new DataPoint(stressProbability.timestamp, histogram));
+
+        if (histogramPrev >= 0 && histogram < 0) {
             //Episode is ended; Started Increasing again
             long episodeStartTimestamp = getEpisodeStartTimestamp(datastreams);
-            List<DataPoint> listAvailable = dsStressProbabilityAvailable.getHistoricalValues(episodeStartTimestamp);
-            double sumAvailable = 0;
-            for (DataPoint available : listAvailable) {
-                sumAvailable += available.value;
-            }
-            double proportionAvailable = sumAvailable / listAvailable.size();
-            if (proportionAvailable < .5) {
-                //More than 50% data is lost.
-                dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unknown.value));
+            if(episodeStartTimestamp==-1) {
+                dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.NotClassified.value));
             } else {
-                List<DataPoint> listStressProbability = dsStressProbabilitySmoothed.getHistoricalValues(episodeStartTimestamp);
-                double sumStressProbability = 0;
-                for (DataPoint stressProbabilityDP : listStressProbability) {
-                    sumStressProbability += stressProbabilityDP.value;
+                List<DataPoint> listAvailable = dsStressProbabilityAvailable.getHistoricalValues(episodeStartTimestamp);
+                double sumAvailable = 0;
+                for (DataPoint available : listAvailable) {
+                    sumAvailable += available.value;
                 }
-                double stressDensity = sumStressProbability / listStressProbability.size();
-                if (stressDensity >= thresholdYes) {
-                    dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.YesStress.value));
-                } else if (stressDensity <= thresholdNo) {
-                    dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.NotStress.value));
+                double proportionAvailable = sumAvailable / listAvailable.size();
+                if (proportionAvailable < .5) {
+                    //More than 50% data is lost.
+                    dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unknown.value));
                 } else {
-                    dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unsure.value));
+                    List<DataPoint> listStressProbability = dsStressProbabilitySmoothed.getHistoricalValues(episodeStartTimestamp);
+                    double sumStressProbability = 0;
+                    for (DataPoint stressProbabilityDP : listStressProbability) {
+                        sumStressProbability += stressProbabilityDP.value;
+                    }
+                    double stressDensity = sumStressProbability / listStressProbability.size();
+                    if (stressDensity >= thresholdYes) {
+                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.YesStress.value));
+                    } else if (stressDensity <= thresholdNo) {
+                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.NotStress.value));
+                    } else {
+                        dsStressEpisodeClassification.add(new DataPoint(stressProbability.timestamp, StressEpisodeClass.Unsure.value));
+                    }
                 }
             }
         } //else Episode in the middle; Started Decreasing
@@ -181,16 +190,27 @@ public class StressEpisodeClassification {
     public long getEpisodeStartTimestamp(DataStreams datastreams) {
         DataPointStream dsStressEpisodeClassification = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_CLASSIFICATION);
         List<DataPoint> historicalNValues = dsStressEpisodeClassification.getHistoricalNValues(3);
-        for (int i = 0; i < historicalNValues.size(); i++) {
-            DataPoint dataPoint = historicalNValues.get(i);
-            if (dataPoint.value == StressEpisodeClass.NotStress.value ||
-                    dataPoint.value == StressEpisodeClass.Unsure.value ||
-                    dataPoint.value == StressEpisodeClass.YesStress.value ||
-                    dataPoint.value == StressEpisodeClass.Unknown.value) {
-                return dataPoint.timestamp;
+        long timestampPrev = -1;
+        // historicalNValues.size()-1 is  most recent; 0 is the oldest
+
+        if(historicalNValues.size()>0) {
+            timestampPrev = historicalNValues.get(0).timestamp;
+        }
+
+
+        DataPointStream dsEmaHistogram = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESS_EPISODE_HISTOGRAM);
+        List<DataPoint> listHistogram = dsEmaHistogram.getHistoricalValues(timestampPrev); // For -1 it will return all
+        if(listHistogram.size()<=1) {
+            return -1;
+        }
+        for (int i = listHistogram.size()-2; i >=0; i--) {
+            // discard newly added one.
+            DataPoint dataPoint = listHistogram.get(i);
+            if(dataPoint.value<=0) {
+                return listHistogram.get(i+1).timestamp;
             }
         }
-        return -1;
+        return listHistogram.get(0).timestamp;
     }
 
     public double getLastHistoricalValue(DataPointStream dataPointStream, double defaultValue) {
