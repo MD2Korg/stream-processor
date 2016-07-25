@@ -147,7 +147,7 @@ public class StreamProcessor {
 
         try {
             //Data quality computations
-/*            try {
+            try {
                 ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("ECGDataQuality Exception Handler: IndexOutOfBoundsException");
@@ -163,13 +163,13 @@ public class StreamProcessor {
                 AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
             } catch (IndexOutOfBoundsException e) {
                 System.err.println("AccelerometerFeatures Exception Handler: IndexOutOfBoundsException");
-            }*/
-//            try {
-//                ECGFeatures ef = new ECGFeatures(datastreams);
-//            } catch (IndexOutOfBoundsException e) {
-//                System.err.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
-//                e.printStackTrace();
-//            }
+            }
+            try {
+                ECGFeatures ef = new ECGFeatures(datastreams);
+            } catch (IndexOutOfBoundsException e) {
+                System.err.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
+                e.printStackTrace();
+            }
             try {
                 RIPFeatures rf = new RIPFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
