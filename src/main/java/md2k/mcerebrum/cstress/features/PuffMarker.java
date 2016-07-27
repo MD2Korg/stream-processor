@@ -35,7 +35,6 @@ import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
 import md2k.mcerebrum.cstress.library.datastream.DataStreams;
 import md2k.mcerebrum.cstress.library.structs.DataPoint;
 import md2k.mcerebrum.cstress.library.structs.DataPointArray;
-import org.apache.commons.math3.exception.NotANumberException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
@@ -185,36 +184,20 @@ public class PuffMarker {
         if (!isRIPPresent) return null;
 
         /////////////// WRIST FEATURES ////////////////////////
+        long startTimestamp = gyr_mag_stream.data.get(startIndex).timestamp;
+        long endTimestamp = gyr_mag_stream.data.get(endIndex).timestamp;
 
-        List<DataPoint> gyr_mag_800 = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist)).data.subList(startIndex, endIndex);
-        DescriptiveStatistics mag800stats = new DescriptiveStatistics();
-        for (DataPoint dp : gyr_mag_800) {
-            mag800stats.addValue(dp.value);
-        }
-
-        List<DataPoint> gyr_mag_8000 = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist)).data.subList(startIndex, endIndex);
-        DescriptiveStatistics mag8000stats = new DescriptiveStatistics();
-        for (DataPoint dp : gyr_mag_8000) {
-            mag8000stats.addValue(dp.value);
-        }
-        List<DataPoint> rolls = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist)).data.subList(startIndex, endIndex);
-        DescriptiveStatistics rollstats = new DescriptiveStatistics();
-        for (DataPoint dp : rolls) {
-            rollstats.addValue(dp.value);
-        }
-
-        List<DataPoint> pitches = (datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist)).data.subList(startIndex, endIndex);
-        DescriptiveStatistics pitchstats = new DescriptiveStatistics();
-        for (DataPoint dp : pitches) {
-            pitchstats.addValue(dp.value);
-        }
+        DescriptiveStatistics mag800stats = getDescriptiveStatisticsSubList(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist), startTimestamp, endTimestamp);
+        DescriptiveStatistics mag8000stats = getDescriptiveStatisticsSubList(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist), startTimestamp, endTimestamp);
+        DescriptiveStatistics rollstats = getDescriptiveStatisticsSubList(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist), startTimestamp, endTimestamp);
+        DescriptiveStatistics pitchstats = getDescriptiveStatisticsSubList(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist), startTimestamp, endTimestamp);
 
         /*
         Three filtering criteria
          */
-        if (gyr_mag_8000.size() == 0) return null;
+        if (mag8000stats.getN() == 0) return null;
         double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
-        double duration = gyr_mag_8000.get(gyr_mag_8000.size() - 1).timestamp - gyr_mag_8000.get(0).timestamp;
+        double duration = endTimestamp - startTimestamp;
         boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
         if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
@@ -318,6 +301,14 @@ public class PuffMarker {
         featureVector.add((double) rEtime - wEtime);
 
         return new DataPointArray(gyr_mag.get(0).timestamp, featureVector);
+    }
+
+    private DescriptiveStatistics getDescriptiveStatisticsSubList(DataPointStream dataPointStream, long startTimestamp, long endTimestamp) {
+        DescriptiveStatistics subList =new DescriptiveStatistics();
+        for(int i=0; i<dataPointStream.data.size(); i++)
+            if(dataPointStream.data.get(i).timestamp >= startTimestamp && dataPointStream.data.get(i).timestamp <= endTimestamp)
+                subList.addValue(dataPointStream.data.get(i).value);
+        return subList;
     }
 
     private boolean checkValidRollPitchSimple(DescriptiveStatistics roll, DescriptiveStatistics pitch) {
