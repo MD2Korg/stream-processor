@@ -62,13 +62,25 @@ public class AutosenseWristFeatures {
         DataPointStream gyroz2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z_2_MIN + wrist);
 
         int wLen = (int) Math.round(PUFFMARKER.BUFFER_SIZE_2MIN_SEC* (Double) datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.get("frequency"));
+        long timestamp2minbefore = gyrox.data.get(0).timestamp -PUFFMARKER.BUFFER_SIZE_2MIN_SEC*1000;
         gyrox2min.setHistoricalBufferSize(wLen);
         gyroy2min.setHistoricalBufferSize(wLen);
         gyroz2min.setHistoricalBufferSize(wLen);
 
-        mergeWithPreviousData(gyrox, gyrox2min, wLen);
-        mergeWithPreviousData(gyroy, gyroy2min, wLen);
-        mergeWithPreviousData(gyroz, gyroz2min, wLen);
+        mergeWithPreviousData(gyrox, gyrox2min, timestamp2minbefore);
+        mergeWithPreviousData(gyroy, gyroy2min, timestamp2minbefore);
+        mergeWithPreviousData(gyroz, gyroz2min, timestamp2minbefore);
+        DataPointStream gyr_mag = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG + wrist);
+        doInterpolation(gyrox2min, gyroy2min, gyroz2min, null, null, null);
+        Vector.magnitude(gyr_mag, gyrox2min.data, gyroy2min.data, gyroz2min.data);
+
+        DataPointStream gyr_mag_800 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist);
+        Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist);
+        Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+
+        DataPointStream gyr_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
+        segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
 
         DataPointStream accelx = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X + wrist);
         DataPointStream accely = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y + wrist);
@@ -80,20 +92,10 @@ public class AutosenseWristFeatures {
         accely2min.setHistoricalBufferSize(wLen);
         accelz2min.setHistoricalBufferSize(wLen);
 
-        mergeWithPreviousData(accelx, accelx2min, wLen);
-        mergeWithPreviousData(accely, accely2min, wLen);
-        mergeWithPreviousData(accelz, accelz2min, wLen);
-
-        DataPointStream gyr_mag = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG + wrist);
-        Vector.magnitude(gyr_mag, gyrox2min.data, gyroy2min.data, gyroz2min.data);
-
-        DataPointStream gyr_mag_800 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist);
-        Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
-        DataPointStream gyr_mag_8000 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist);
-        Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
-
-        DataPointStream gyr_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
-        segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
+        mergeWithPreviousData(accelx, accelx2min, timestamp2minbefore);
+        mergeWithPreviousData(accely, accely2min, timestamp2minbefore);
+        mergeWithPreviousData(accelz, accelz2min, timestamp2minbefore);
+        doInterpolation(accelx2min, accely2min, accelz2min, null, null, null);
 
         DataPointStream acl_y_800 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag800" + wrist);
         Smoothing.smooth(acl_y_800, accely2min, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
@@ -111,9 +113,9 @@ public class AutosenseWristFeatures {
         }
     }
 
-    private void mergeWithPreviousData(DataPointStream currentDataStream, DataPointStream mergedDataStream, int size) {
+    private void mergeWithPreviousData(DataPointStream currentDataStream, DataPointStream mergedDataStream, long timestamp) {
 
-        List<DataPoint> listHistory= new ArrayList<>(mergedDataStream.getHistoricalNValues(size));
+        List<DataPoint> listHistory= new ArrayList<>(mergedDataStream.getHistoricalValues(timestamp));
         mergedDataStream.addAll(listHistory);
         mergedDataStream.addAll(currentDataStream.data);
     }
