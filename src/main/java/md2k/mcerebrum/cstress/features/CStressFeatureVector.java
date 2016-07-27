@@ -79,7 +79,7 @@ public class CStressFeatureVector {
                 throw new NotANumberException();
             }
         }
-        return new DataPointArray(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_RR_VALUE).data.get(0).timestamp, RIPFeatures);
+        return new DataPointArray(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP).data.get(0).timestamp, RIPFeatures);
     }
 
     /**
