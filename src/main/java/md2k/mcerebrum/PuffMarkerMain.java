@@ -57,7 +57,8 @@ public class PuffMarkerMain {
 
         ExecutorService executor = Executors.newFixedThreadPool(4);
         String session = "s" + String.format("%02d", sid);
-        Runnable worker = new WorkerThread(path + pid + "\\" + session + "\\", "", "", pathToPuffMarkerModelFile);
+        Runnable worker = new WorkerThread(path + pid + "\\" + session + "\\", "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\cStressModelV4.json"
+                , "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\cStressModelRIPv4.json", pathToPuffMarkerModelFile);
         executor.execute(worker);
         executor.shutdown();
         while (!executor.isTerminated()) ;

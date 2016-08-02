@@ -95,11 +95,13 @@ public class PUFFMARKER {
     public static final int RIGHTWRIST_GYRO_Y = 37;
     public static final int RIGHTWRIST_GYRO_Z = 38;
 
-    public static int GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE = 13;
-    public static int GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE = 131;
+    public static int GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE_TH_TIME = 609; //0.609 sec, 13 samples
+    public static int GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE_TH_TIME= 6140; // 6.14, 131 samples
 
     public static int MINIMUM_CANDIDATE_WINDOW_DURATION_ = 500;
     public static int MAXIMUM_CANDIDATE_WINDOW_DURATION_ = 5000;
+
+    public static double MINIMUM_GYRO_MEAN_HEIGHT_DIFFERENCE = 250*50.00/2048; // adc value=50
 
     public static int PUFF = 1;
     public static int NOT_PUFF = 0;

@@ -61,8 +61,8 @@ public class AutosenseWristFeatures {
         DataPointStream gyroy2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y_2_MIN + wrist);
         DataPointStream gyroz2min = datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z_2_MIN + wrist);
 
-        int wLen = (int) Math.round(PUFFMARKER.BUFFER_SIZE_2MIN_SEC* (Double) datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.get("frequency"));
-        long timestamp2minbefore = gyrox.data.get(0).timestamp -PUFFMARKER.BUFFER_SIZE_2MIN_SEC*1000;
+        int wLen = (int) Math.round(PUFFMARKER.BUFFER_SIZE_2MIN_SEC * (Double) datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.get("frequency"));
+        long timestamp2minbefore = gyrox.data.get(0).timestamp - PUFFMARKER.BUFFER_SIZE_2MIN_SEC * 1000;
         gyrox2min.setHistoricalBufferSize(wLen);
         gyroy2min.setHistoricalBufferSize(wLen);
         gyroz2min.setHistoricalBufferSize(wLen);
@@ -74,10 +74,13 @@ public class AutosenseWristFeatures {
         doInterpolation(gyrox2min, gyroy2min, gyroz2min, null, null, null);
         Vector.magnitude(gyr_mag, gyrox2min.data, gyroy2min.data, gyroz2min.data);
 
+        int firstSize = (int) Math.round(PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE_TH_TIME * (Double) datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.get("frequency"));
+        int slowSize = (int) Math.round(PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE_TH_TIME * (Double) datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.get("frequency"));
+
         DataPointStream gyr_mag_800 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG800 + wrist);
-        Smoothing.smooth(gyr_mag_800, gyr_mag, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(gyr_mag_800, gyr_mag, firstSize);
         DataPointStream gyr_mag_8000 = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_MAG8000 + wrist);
-        Smoothing.smooth(gyr_mag_8000, gyr_mag, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(gyr_mag_8000, gyr_mag, slowSize);
 
         DataPointStream gyr_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
         segmentationUsingTwoMovingAverage(gyr_intersections, gyr_mag_8000, gyr_mag_800, 0, 2);
@@ -98,9 +101,9 @@ public class AutosenseWristFeatures {
         doInterpolation(accelx2min, accely2min, accelz2min, null, null, null);
 
         DataPointStream acl_y_800 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag800" + wrist);
-        Smoothing.smooth(acl_y_800, accely2min, PUFFMARKER.GYR_MAG_FIRST_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(acl_y_800, accely2min, firstSize);
         DataPointStream acl_y_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag8000" + wrist);
-        Smoothing.smooth(acl_y_8000, accely2min, PUFFMARKER.GYR_MAG_SLOW_MOVING_AVG_SMOOTHING_SIZE);
+        Smoothing.smooth(acl_y_8000, accely2min, slowSize);
 
         DataPointStream roll = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist);
         DataPointStream pitch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist);
@@ -115,18 +118,18 @@ public class AutosenseWristFeatures {
 
     private void mergeWithPreviousData(DataPointStream currentDataStream, DataPointStream mergedDataStream, long timestamp) {
 
-        List<DataPoint> listHistory= new ArrayList<>(mergedDataStream.getHistoricalValues(timestamp));
+        List<DataPoint> listHistory = new ArrayList<>(mergedDataStream.getHistoricalValues(timestamp));
         mergedDataStream.addAll(listHistory);
         mergedDataStream.addAll(currentDataStream.data);
     }
 
     private void doInterpolation(DataPointStream signalX, DataPointStream signalY, DataPointStream signalZ, DataPointStream interpolateX, DataPointStream interpolateY, DataPointStream interpolateZ) {
 
-        while(signalX.data.size() > signalY.data.size())
-            signalY.add(signalY.data.get(signalY.data.size()-1));
+        while (signalX.data.size() > signalY.data.size())
+            signalY.add(signalY.data.get(signalY.data.size() - 1));
 
-        while(signalX.data.size() > signalZ.data.size())
-            signalZ.add(signalZ.data.get(signalZ.data.size()-1));
+        while (signalX.data.size() > signalZ.data.size())
+            signalZ.add(signalZ.data.get(signalZ.data.size() - 1));
     }
 
     /**

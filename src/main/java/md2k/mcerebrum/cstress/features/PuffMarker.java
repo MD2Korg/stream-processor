@@ -196,11 +196,11 @@ public class PuffMarker {
         Three filtering criteria
          */
         if (mag8000stats.getN() == 0) return null;
-        double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
+        double meanHeight = mag8000stats.getMean() - mag800stats.getMean(); // 50 -> 50/1024
         double duration = endTimestamp - startTimestamp;
         boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
-        if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
+        if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch || meanHeight<PUFFMARKER.MINIMUM_GYRO_MEAN_HEIGHT_DIFFERENCE)
             return null;
         DataPointStream gyr_intersections_timestamp = datastreams.getDataPointStream("org.md2k.puffmarker.data.gyr.interval.timestamp" + wrist); // TODO: remove
         gyr_intersections_timestamp.add(new DataPoint(gyr_mag_stream.data.get(startIndex).timestamp, gyr_mag_stream.data.get(endIndex).timestamp)); //TODO: remove
