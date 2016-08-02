@@ -112,7 +112,6 @@ public class StreamProcessor {
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).metadata.put("frequency", 1000.0 / windowSize);
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).metadata.put("frequency", 1000.0 / windowSize);
 
-        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.put("frequency", 64.0 / 3.0); // TODO: complete!!
     }
 
     public void configurePuffMarkerWristDataStreams(double freqAccel, double freqGyro) {
@@ -359,82 +358,57 @@ public class StreamProcessor {
 
 
             case PUFFMARKER.LEFTWRIST_ACCEL_X:
-                dp.value = convertADCtoSIAccl(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_X)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_ACCEL_Y:
-                dp.value = convertADCtoSIAccl(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_Y)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_ACCEL_Z:
-                dp.value = convertADCtoSIAccl(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_ACCEL_Z)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_GYRO_X:
-                dp.value = convertADCtoSIGyro(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_X)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_GYRO_Y:
-                dp.value = convertADCtoSIGyro(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Y)).add(dp);
                 break;
 
             case PUFFMARKER.LEFTWRIST_GYRO_Z:
-                dp.value = convertADCtoSIGyro(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Z)).add(dp);
                 break;
 
-
             case PUFFMARKER.RIGHTWRIST_ACCEL_X:
-                dp.value = convertADCtoSIAccl(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_ACCEL_Y:
-                dp.value = convertADCtoSIAccl(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_Y)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_ACCEL_Z:
-                dp.value = convertADCtoSIAccl(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_Z)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_GYRO_X:
-                dp.value = convertADCtoSIGyro(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_X)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_GYRO_Y:
-                dp.value = convertADCtoSIGyro(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Y)).add(dp);
                 break;
 
             case PUFFMARKER.RIGHTWRIST_GYRO_Z:
-                dp.value = convertADCtoSIGyro(dp.value);
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
                 break;
-
 
             default:
                 System.out.println("NOT INTERESTED: " + dp);
                 break;
         }
-    }
-
-    // TODO:remove
-    private double convertADCtoSIAccl(double value) {
-//        return value;
-        return value / 1024;
-    }
-
-    private double convertADCtoSIGyro(double value) {
-//        return value;
-        return 250 * value / 2048;
     }
 
     /**
