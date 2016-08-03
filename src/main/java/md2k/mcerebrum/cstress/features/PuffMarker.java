@@ -192,15 +192,32 @@ public class PuffMarker {
         DescriptiveStatistics rollstats = getDescriptiveStatisticsSubList(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist), startTimestamp, endTimestamp);
         DescriptiveStatistics pitchstats = getDescriptiveStatisticsSubList(datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist), startTimestamp, endTimestamp);
 
+        if (mag8000stats.getN() == 0) return null;
+
         /*
         Three filtering criteria
          */
-        if (mag8000stats.getN() == 0) return null;
-        double meanHeight = mag800stats.getMean() - mag8000stats.getMean();
+
+        DataPointStream acl_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
+        boolean isHandUpDirection = false;
+        for (DataPoint dp : acl_intersections.data){
+            long acl_seg_start_timestamp = gyr_mag_stream.data.get((int)dp.timestamp).timestamp;
+            long acl_seg_end_timestamp = gyr_mag_stream.data.get((int)dp.value).timestamp;
+            if (Math.max(startTimestamp, acl_seg_start_timestamp) < Math.min(endTimestamp, acl_seg_end_timestamp)) {
+                double overlap_seg_length = Math.min(endTimestamp, acl_seg_end_timestamp) - Math.max(startTimestamp, acl_seg_start_timestamp);
+                if((endTimestamp-startTimestamp)*0.70 <= overlap_seg_length) {
+                    isHandUpDirection = true;
+                }
+            }
+
+        }
+        if (!isHandUpDirection) return null;
+
+        double meanHeight = mag8000stats.getMean() - mag800stats.getMean(); // 50 -> 50/1024
         double duration = endTimestamp - startTimestamp;
         boolean isValidRollPitch = checkValidRollPitchSimple(rollstats, pitchstats);
 
-        if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch)
+        if (!(duration >= PUFFMARKER.MINIMUM_CANDIDATE_WINDOW_DURATION_ && duration <= PUFFMARKER.MAXIMUM_CANDIDATE_WINDOW_DURATION_) || !isValidRollPitch || meanHeight<PUFFMARKER.MINIMUM_GYRO_MEAN_HEIGHT_DIFFERENCE)
             return null;
         DataPointStream gyr_intersections_timestamp = datastreams.getDataPointStream("org.md2k.puffmarker.data.gyr.interval.timestamp" + wrist); // TODO: remove
         gyr_intersections_timestamp.add(new DataPoint(gyr_mag_stream.data.get(startIndex).timestamp, gyr_mag_stream.data.get(endIndex).timestamp)); //TODO: remove

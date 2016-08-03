@@ -60,12 +60,13 @@ public class StreamProcessor {
     private long windowSize;
     private String path = null;
     private DataStreams datastreams = new DataStreams();
-    private TreeMap<String,Object> models = new TreeMap<String,Object>();
+    private TreeMap<String, Object> models = new TreeMap<String, Object>();
+
 
     /**
      * Main constructor for StreamProcessor
      *
-     * @param windowSize  Time in milliseconds to segment and buffer data before processing
+     * @param windowSize Time in milliseconds to segment and buffer data before processing
      */
     public StreamProcessor(long windowSize) {
         this.windowSize = windowSize;
@@ -73,23 +74,19 @@ public class StreamProcessor {
         configureDataStreams();
     }
 
-
-
     /**
      * load and create a model object from a model file
+     *
      * @param path Path to the model file (in JSON format)
      */
     public void loadModel(String name, String path) {
         Gson gson = new Gson();
-        try
-        {
+        try {
             String jsonstring = FileUtils.readFileToString(new File(path));
-            Model genericModel = gson.fromJson(jsonstring,Model.class);
-            if(genericModel.getModelType().equals("svc"))
+            Model genericModel = gson.fromJson(jsonstring, Model.class);
+            if (genericModel.getModelType().equals("svc"))
                 models.put(name, gson.fromJson(jsonstring, SVCModel.class));
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         //gson parse a JSON model file and create a SVMModel object, and add it to models
@@ -115,9 +112,18 @@ public class StreamProcessor {
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).metadata.put("frequency", 1000.0 / windowSize);
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).metadata.put("frequency", 1000.0 / windowSize);
 
-        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.put("frequency", 64.0 / 3.0); // TODO: complete!!
     }
 
+    public void configurePuffMarkerWristDataStreams(double freqAccel, double freqGyro) {
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_X).metadata.put("frequency", freqAccel);
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Y).metadata.put("frequency", freqAccel);
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_ACCEL_Z).metadata.put("frequency", freqAccel);
+
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_X).metadata.put("frequency", freqGyro);
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Y).metadata.put("frequency", freqGyro);
+        datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_GYRO_Z).metadata.put("frequency", freqGyro);
+
+    }
 
 
     /**
@@ -136,8 +142,6 @@ public class StreamProcessor {
             f.delete();
         }
     }
-
-
 
 
     /**
@@ -258,8 +262,7 @@ public class StreamProcessor {
             int label;
             if (prob > model.getLowBias()) {
                 label = PUFFMARKER.PUFF;
-            }
-            else if (prob < model.getLowBias())
+            } else if (prob < model.getLowBias())
                 label = PUFFMARKER.NOT_PUFF;
             else
                 label = PUFFMARKER.UNSURE;
@@ -268,15 +271,15 @@ public class StreamProcessor {
             datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL_MINUTE).add(new DataPoint(ap.timestamp, label));
         }
     }
+
     /**
      * Method for running the cStress model on any available feature vectors to get corresponding stress probabilities
      */
     private void runcStress() {
-        SVCModel model = (SVCModel)models.get("cStressModel");
+        SVCModel model = (SVCModel) models.get("cStressModel");
         DataArrayStream featurevector = datastreams.getDataArrayStream(StreamConstants.ORG_MD2K_CSTRESS_FV);
 
-        for(DataPointArray ap: featurevector.data)
-        {
+        for (DataPointArray ap : featurevector.data) {
             double prob = model.computeProbability(ap);
             int label;
             if (prob > model.getHighBias())
@@ -378,7 +381,6 @@ public class StreamProcessor {
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_LEFTWRIST_GYRO_Z)).add(dp);
                 break;
 
-
             case PUFFMARKER.RIGHTWRIST_ACCEL_X:
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_ACCEL_X)).add(dp);
                 break;
@@ -403,7 +405,6 @@ public class StreamProcessor {
                 (datastreams.getDataPointStream(PUFFMARKER.ORG_MD2K_PUFF_MARKER_DATA_RIGHTWRIST_GYRO_Z)).add(dp);
                 break;
 
-
             default:
                 System.out.println("NOT INTERESTED: " + dp);
                 break;
@@ -422,6 +423,7 @@ public class StreamProcessor {
 
     /**
      * Handle registration of a callback interface
+     *
      * @param s Stream identifier
      */
     public void registerCallbackDataStream(String s) {
@@ -431,6 +433,7 @@ public class StreamProcessor {
 
     /**
      * Handle registration of a callback interface
+     *
      * @param s Stream identifier
      */
     public void registerCallbackDataArrayStream(String s) {

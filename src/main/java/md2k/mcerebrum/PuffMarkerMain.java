@@ -42,7 +42,7 @@ public class PuffMarkerMain {
     public static void main(String[] args) {
 
         String path = "C:\\Users\\nsleheen\\DATA\\6smoker_lab_csv_data\\";// args[0];
-        String pathToPuffMarkerModelFile = "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\puffMarkerModel.json";// args[1];
+        String pathToPuffMarkerModelFile = "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\model_puffmarker.json";// args[1];
 
         for (int i = 1; i < 7; i++) {
             String person = "p" + String.format("%02d", i);
@@ -57,7 +57,8 @@ public class PuffMarkerMain {
 
         ExecutorService executor = Executors.newFixedThreadPool(4);
         String session = "s" + String.format("%02d", sid);
-        Runnable worker = new WorkerThread(path + pid + "\\" + session + "\\", "", "", pathToPuffMarkerModelFile);
+        Runnable worker = new WorkerThread(path + pid + "\\" + session + "\\", "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\cStressModelV4.json"
+                , "C:\\Users\\nsleheen\\projects\\MD2Korg\\stream-processor\\cStressModelRIPv4.json", pathToPuffMarkerModelFile);
         executor.execute(worker);
         executor.shutdown();
         while (!executor.isTerminated()) ;
