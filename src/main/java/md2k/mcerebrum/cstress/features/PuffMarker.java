@@ -198,7 +198,6 @@ public class PuffMarker {
         Three filtering criteria
          */
 
-        // filter 1: if hand is in upward direction
         DataPointStream acl_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
         boolean isHandUpDirection = false;
         for (DataPoint dp : acl_intersections.data){

@@ -104,7 +104,7 @@ public class AutosenseWristFeatures {
         Smoothing.smooth(acl_y_800, accely2min, firstSize);
         DataPointStream acl_y_8000 = datastreams.getDataPointStream("org.md2k.cstress.data.accel.y.mag8000" + wrist);
         Smoothing.smooth(acl_y_8000, accely2min, slowSize);
-        DataPointStream acl_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_GYRO_INTERSECTIONS + wrist);
+        DataPointStream acl_intersections = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_ACCEL_Y_INTERSECTIONS+ wrist);
         segmentationUsingTwoMovingAverage(acl_intersections, acl_y_8000, acl_y_800, 0, 2);
 
         DataPointStream roll = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_ROLL + wrist);
