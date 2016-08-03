@@ -112,8 +112,6 @@ public class StreamProcessor {
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_PROBABILITY).metadata.put("frequency", 1000.0 / windowSize);
         datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_STRESSLABEL).metadata.put("frequency", 1000.0 / windowSize);
 
-        configurePuffMarkerWristDataStreams(64.0 / 3, 64.0 / 3);
-
     }
 
     public void configurePuffMarkerWristDataStreams(double freqAccel, double freqGyro) {
