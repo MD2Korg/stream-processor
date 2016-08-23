@@ -31,7 +31,6 @@ package md2k.mcerebrum.cstress;
  */
 
 import com.google.gson.Gson;
-import md2k.mcerebrum.PuffMarkerMain;
 import md2k.mcerebrum.cstress.autosense.AUTOSENSE;
 import md2k.mcerebrum.cstress.autosense.PUFFMARKER;
 import md2k.mcerebrum.cstress.features.*;
@@ -44,7 +43,6 @@ import md2k.mcerebrum.cstress.library.structs.Model;
 import md2k.mcerebrum.cstress.library.structs.SVCModel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NotANumberException;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -154,55 +152,55 @@ public class StreamProcessor {
             try {
                 ECGDataQuality ecgDQ = new ECGDataQuality(datastreams, AUTOSENSE.AUTOSENSE_ECG_QUALITY);
             } catch (IndexOutOfBoundsException e) {
-                System.err.println("ECGDataQuality Exception Handler: IndexOutOfBoundsException");
+                System.out.println("ECGDataQuality Exception Handler: IndexOutOfBoundsException");
             }
             try {
                 RIPDataQuality ripDQ = new RIPDataQuality(datastreams, AUTOSENSE.AUTOSENSE_RIP_QUALITY);
             } catch (IndexOutOfBoundsException e) {
-                System.err.println("RIPDataQuality Exception Handler: IndexOutOfBoundsException");
+                System.out.println("RIPDataQuality Exception Handler: IndexOutOfBoundsException");
             }
 
             //AutoSense features
             try {
                 AccelerometerFeatures af = new AccelerometerFeatures(datastreams, AUTOSENSE.ACTIVITY_THRESHOLD, AUTOSENSE.ACCEL_WINDOW_SIZE);
             } catch (IndexOutOfBoundsException e) {
-                System.err.println("AccelerometerFeatures Exception Handler: IndexOutOfBoundsException");
+                System.out.println("AccelerometerFeatures Exception Handler: IndexOutOfBoundsException");
             }
             try {
                 ECGFeatures ef = new ECGFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
-                System.err.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
+                System.out.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
                 e.printStackTrace();
             }
             try {
                 RIPFeatures rf = new RIPFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
-                System.err.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
+                System.out.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
             try {
                 RIPPuffmarkerFeatures rpf = new RIPPuffmarkerFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
-                System.err.println("RIPPuffmarkerFeatures Exception Handler: IndexOutOfBoundsException");
+                System.out.println("RIPPuffmarkerFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
             try {
                 AutosenseWristFeatures leftWrist = new AutosenseWristFeatures(datastreams, PUFFMARKER.LEFT_WRIST);
             } catch (IndexOutOfBoundsException e) {
-                System.err.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
+                System.out.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
             try {
                 AutosenseWristFeatures rightWrist = new AutosenseWristFeatures(datastreams, PUFFMARKER.RIGHT_WRIST);
             } catch (IndexOutOfBoundsException e) {
-                System.err.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
+                System.out.println("AutosenseWristFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
 
         } catch (IndexOutOfBoundsException e) {
-            System.err.println("Stress Exception Handler: IndexOutOfBoundsException");
+            System.out.println("Stress Exception Handler: IndexOutOfBoundsException");
             e.printStackTrace();
         }
 
@@ -216,13 +214,13 @@ public class StreamProcessor {
         try {
             CStressFeatureVector cs = new CStressFeatureVector(datastreams);
         } catch (NotANumberException e) {
-            System.err.println("Generate result error");
+            System.out.println("Generate result error");
         }
 
         try {
             PuffMarker pm = new PuffMarker(datastreams);
         } catch (NotANumberException e) {
-            System.err.println("PuffMarker: Generate result error");
+            System.out.println("PuffMarker: Generate result error");
         }
     }
 
@@ -245,7 +243,7 @@ public class StreamProcessor {
         try {
             SmokingEpisodeGeneration seg = new SmokingEpisodeGeneration(datastreams);
         } catch (IndexOutOfBoundsException e) {
-            System.err.println("SmokingEpisodeGeneration Exception Handler: IndexOutOfBoundsException");
+            System.out.println("SmokingEpisodeGeneration Exception Handler: IndexOutOfBoundsException");
             e.printStackTrace();
         }
     }
@@ -323,7 +321,7 @@ public class StreamProcessor {
         try {
             StressEpisodeClassification sef = new StressEpisodeClassification(datastreams, windowSize);
         } catch (IndexOutOfBoundsException e) {
-            System.err.println("StressEpisodeClassification Exception Handler: IndexOutOfBoundsException");
+            System.out.println("StressEpisodeClassification Exception Handler: IndexOutOfBoundsException");
         }
     }
 
