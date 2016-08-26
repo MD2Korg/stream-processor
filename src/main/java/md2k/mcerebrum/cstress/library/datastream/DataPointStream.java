@@ -139,8 +139,7 @@ public class DataPointStream extends DataStream {
                 writer.write(dp.timestamp + ", " + dp.value + "\n");
             }
             writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 

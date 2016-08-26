@@ -68,8 +68,7 @@ public class TOSParser implements Iterable<AUTOSENSE_PACKET> {
                 tempPacket = new AUTOSENSE_PACKET(timestamp, channelID, data);
                 this.data.put(tempPacket.timestamp, tempPacket);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException ignored) {
         }
     }
 

@@ -84,8 +84,7 @@ public class StreamProcessor {
             Model genericModel = gson.fromJson(jsonstring, Model.class);
             if (genericModel.getModelType().equals("svc"))
                 models.put(name, gson.fromJson(jsonstring, SVCModel.class));
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
         //gson parse a JSON model file and create a SVMModel object, and add it to models
     }
@@ -170,19 +169,16 @@ public class StreamProcessor {
                 ECGFeatures ef = new ECGFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
-                e.printStackTrace();
             }
             try {
                 RIPFeatures rf = new RIPFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
                 System.out.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
             try {
                 RIPPuffmarkerFeatures rpf = new RIPPuffmarkerFeatures(datastreams);
             } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
                 System.out.println("RIPPuffmarkerFeatures Exception Handler: IndexOutOfBoundsException");
             }
 
@@ -201,7 +197,6 @@ public class StreamProcessor {
 
         } catch (IndexOutOfBoundsException e) {
             System.out.println("Stress Exception Handler: IndexOutOfBoundsException");
-            e.printStackTrace();
         }
 
 
@@ -244,7 +239,6 @@ public class StreamProcessor {
             SmokingEpisodeGeneration seg = new SmokingEpisodeGeneration(datastreams);
         } catch (IndexOutOfBoundsException e) {
             System.out.println("SmokingEpisodeGeneration Exception Handler: IndexOutOfBoundsException");
-            e.printStackTrace();
         }
     }
 

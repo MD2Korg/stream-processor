@@ -162,8 +162,7 @@ public class DataArrayStream extends DataStream {
                 writer.write("\n");
             }
             writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 

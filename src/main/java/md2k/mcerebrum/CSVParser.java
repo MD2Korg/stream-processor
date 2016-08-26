@@ -60,8 +60,7 @@ public class CSVParser implements Iterable<CSVDataPoint> {
                 tempPacket = new CSVDataPoint(channel, timestamp, data);
                 this.data.add(tempPacket);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException ignored) {
         }
     }
 
