@@ -70,6 +70,8 @@ public class StreamProcessor {
         this.windowSize = windowSize;
 
         configureDataStreams();
+        //TODO: Require nazir's comment for the following line. Updated by Monowar as it causes crash
+        configurePuffMarkerWristDataStreams(16.0, 16.0);
     }
 
     /**
