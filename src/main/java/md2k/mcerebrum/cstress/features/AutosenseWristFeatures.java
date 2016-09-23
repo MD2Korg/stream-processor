@@ -111,11 +111,7 @@ public class AutosenseWristFeatures {
         DataPointStream pitch = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_PUFFMARKER_DATA_WRIST_PITCH + wrist);
         //TODO: add yaw
 
-        if (PUFFMARKER.LEFT_WRIST.equals(wrist)) {
-            calculateRollPitchSegment(roll, pitch, accelx2min, accely2min, accelz2min, -1);
-        } else {
-            calculateRollPitchSegment(roll, pitch, accelx2min, accely2min, accelz2min, 1);
-        }
+        calculateRollPitchSegment(roll, pitch, accelx2min, accely2min, accelz2min);
     }
 
     private void mergeWithPreviousData(DataPointStream currentDataStream, DataPointStream mergedDataStream, long timestamp) {
@@ -207,12 +203,11 @@ public class AutosenseWristFeatures {
      * @param accelx Input accelerometer x datastream
      * @param accely Input accelerometer y datastream
      * @param accelz Input accelerometer z datastream
-     * @param sign   Sign //TODO: What does this mean?
      */
-    private void calculateRollPitchSegment(DataPointStream roll, DataPointStream pitch, DataPointStream accelx, DataPointStream accely, DataPointStream accelz, int sign) {
+    private void calculateRollPitchSegment(DataPointStream roll, DataPointStream pitch, DataPointStream accelx, DataPointStream accely, DataPointStream accelz) {
         for (int i = 0; i < accelx.data.size(); i++) {
-            double rll = roll(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
-            double ptch = pitch(accelx.data.get(i).value, sign * accely.data.get(i).value, accelz.data.get(i).value);
+            double rll = roll(accelx.data.get(i).value, accely.data.get(i).value, accelz.data.get(i).value);
+            double ptch = pitch(accelx.data.get(i).value, accely.data.get(i).value, accelz.data.get(i).value);
             roll.data.add(new DataPoint(accelx.data.get(i).timestamp, rll));
             pitch.data.add(new DataPoint(accelx.data.get(i).timestamp, ptch));
         }
