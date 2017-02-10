@@ -49,7 +49,7 @@ public class AccelerometerFeatures {
      * Accelerometer feature processor for StreamProcessor-Autosense.
      *
      * @param datastreams        object
-     * @param ACTIVITY_THRESHOLD threshold based on accelerometer magnitude
+     * @param ACTIVITY_THRESHOLD threshold based on acc elerometer magnitude
      * @param windowSize         seconds
      */
     public AccelerometerFeatures(DataStreams datastreams, double ACTIVITY_THRESHOLD, int windowSize) {
@@ -91,8 +91,8 @@ public class AccelerometerFeatures {
 
 
         //Compute Activity from datastreams
-        double lowlimit = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_MAGNITUDE).getPercentile(1);
-        double highlimit = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_MAGNITUDE).getPercentile(99);
+        double lowlimit = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_WINDOWED_MAGNITUDE_STDEV).getPercentile(1);
+        double highlimit = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_WINDOWED_MAGNITUDE_STDEV).getPercentile(99);
         double range = highlimit - lowlimit;
 
         DataPointStream stdmag = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ACCEL_WINDOWED_MAGNITUDE_STDEV);
