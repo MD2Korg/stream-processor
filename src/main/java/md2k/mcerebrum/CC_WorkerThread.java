@@ -83,21 +83,21 @@ public class CC_WorkerThread implements Runnable {
         tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+ACCELEROMETER_Y.*bz2"), AUTOSENSE.CHEST_ACCEL_Y);
         tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+ACCELEROMETER_Z.*bz2"), AUTOSENSE.CHEST_ACCEL_Z);
 
-//        tp.importData(path + "/left-wrist-accelx.csv", PUFFMARKER.LEFTWRIST_ACCEL_X);
-//        tp.importData(path + "/left-wrist-accely.csv", PUFFMARKER.LEFTWRIST_ACCEL_Y);
-//        tp.importData(path + "/left-wrist-accelz.csv", PUFFMARKER.LEFTWRIST_ACCEL_Z);
-//        tp.importData(path + "/left-wrist-gyrox.csv", PUFFMARKER.LEFTWRIST_GYRO_X);
-//        tp.importData(path + "/left-wrist-gyroy.csv", PUFFMARKER.LEFTWRIST_GYRO_Y);
-//        tp.importData(path + "/left-wrist-gyroz.csv", PUFFMARKER.LEFTWRIST_GYRO_Z);
+//        tp.importData(fileMatcher(path, "/left-wrist-accelx.csv"), PUFFMARKER.LEFTWRIST_ACCEL_X);
+//        tp.importData(fileMatcher(path, "/left-wrist-accely.csv"), PUFFMARKER.LEFTWRIST_ACCEL_Y);
+//        tp.importData(fileMatcher(path, "/left-wrist-accelz.csv"), PUFFMARKER.LEFTWRIST_ACCEL_Z);
+//        tp.importData(fileMatcher(path, "/left-wrist-gyrox.csv"), PUFFMARKER.LEFTWRIST_GYRO_X);
+//        tp.importData(fileMatcher(path, "/left-wrist-gyroy.csv"), PUFFMARKER.LEFTWRIST_GYRO_Y);
+//        tp.importData(fileMatcher(path, "/left-wrist-gyroz.csv"), PUFFMARKER.LEFTWRIST_GYRO_Z);
 //
-//        tp.importData(path + "/right-wrist-accely.csv", PUFFMARKER.RIGHTWRIST_ACCEL_Y);
-//        tp.importData(path + "/right-wrist-accelx.csv", PUFFMARKER.RIGHTWRIST_ACCEL_X);
-//        tp.importData(path + "/right-wrist-accelz.csv", PUFFMARKER.RIGHTWRIST_ACCEL_Z);
-//        tp.importData(path + "/right-wrist-gyrox.csv", PUFFMARKER.RIGHTWRIST_GYRO_X);
-//        tp.importData(path + "/right-wrist-gyroy.csv", PUFFMARKER.RIGHTWRIST_GYRO_Y);
-//        tp.importData(path + "/right-wrist-gyroz.csv", PUFFMARKER.RIGHTWRIST_GYRO_Z);
+//        tp.importData(fileMatcher(path, "/right-wrist-accely.csv"), PUFFMARKER.RIGHTWRIST_ACCEL_Y);
+//        tp.importData(fileMatcher(path, "/right-wrist-accelx.csv"), PUFFMARKER.RIGHTWRIST_ACCEL_X);
+//        tp.importData(fileMatcher(path, "/right-wrist-accelz.csv"), PUFFMARKER.RIGHTWRIST_ACCEL_Z);
+//        tp.importData(fileMatcher(path, "/right-wrist-gyrox.csv"), PUFFMARKER.RIGHTWRIST_GYRO_X);
+//        tp.importData(fileMatcher(path, "/right-wrist-gyroy.csv"), PUFFMARKER.RIGHTWRIST_GYRO_Y);
+//        tp.importData(fileMatcher(path, "/right-wrist-gyroz.csv"), PUFFMARKER.RIGHTWRIST_GYRO_Z);
 
-        tp.sort();
+//        tp.sort();
 
         int windowSize = 60000;
 
@@ -129,13 +129,16 @@ public class CC_WorkerThread implements Runnable {
         streamProcessor.registerCallbackDataStream(StreamConstants.ORG_MD2K_PUFFMARKER_PUFFLABEL);
 
         long windowStartTime = -1;
-        for (CSVDataPoint ap : tp) {
-            DataPoint dp = new DataPoint(ap.timestamp, ap.value);
 
+        while(true) {
+            CSVDataPoint ap = tp.getNextValue();
+            if (ap.channel == -1) {
+                break;
+            }
+            DataPoint dp = new DataPoint(ap.timestamp, ap.value);
             if (windowStartTime < 0) {
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
             }
-
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
                 streamProcessor.go();
                 windowStartTime += windowSize;
