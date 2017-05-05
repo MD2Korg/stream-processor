@@ -59,7 +59,6 @@ public class WorkerThread implements Runnable {
 
         CSVParser tp = new CSVParser();
 
-
         tp.importData(path + "/rip.csv", AUTOSENSE.CHEST_RIP);
         tp.importData(path + "/ecg.csv", AUTOSENSE.CHEST_ECG);
         tp.importData(path + "/accelx.csv", AUTOSENSE.CHEST_ACCEL_X);
