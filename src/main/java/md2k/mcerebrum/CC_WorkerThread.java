@@ -64,9 +64,10 @@ public class CC_WorkerThread implements Runnable {
                 return (f.isFile() && f.getName().matches(regex));
             }
         });
-        if (directories.length > 0)
-            return basepath + directories[0];
-        else
+        if (directories.length > 0) {
+            System.out.println("Matched: " + directories[0]);
+            return basepath + "/" + directories[0];
+        }else
             return "None";
     }
 
@@ -76,11 +77,11 @@ public class CC_WorkerThread implements Runnable {
         CC_CSVParser tp = new CC_CSVParser();
 
 
-        tp.importData(fileMatcher(path, ".*org.md2k.autosense+RESPIRATION.*.bz2"), AUTOSENSE.CHEST_RIP);
-        tp.importData(fileMatcher(path, ".*org.md2k.autosense+ECG.*.bz2"), AUTOSENSE.CHEST_ECG);
-        tp.importData(fileMatcher(path, ".*org.md2k.autosense+ACCELEROMETER_X.*.bz2"), AUTOSENSE.CHEST_ACCEL_X);
-        tp.importData(fileMatcher(path, ".*org.md2k.autosense+ACCELEROMETER_Y.*.bz2"), AUTOSENSE.CHEST_ACCEL_Y);
-        tp.importData(fileMatcher(path, ".*org.md2k.autosense+ACCELEROMETER_Z.*.bz2"), AUTOSENSE.CHEST_ACCEL_Z);
+        tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+RESPIRATION.*bz2"), AUTOSENSE.CHEST_RIP);
+        tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+ECG.*bz2"), AUTOSENSE.CHEST_ECG);
+        tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+ACCELEROMETER_X.*bz2"), AUTOSENSE.CHEST_ACCEL_X);
+        tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+ACCELEROMETER_Y.*bz2"), AUTOSENSE.CHEST_ACCEL_Y);
+        tp.importData(fileMatcher(path, ".*org.md2k.autosense\\+ACCELEROMETER_Z.*bz2"), AUTOSENSE.CHEST_ACCEL_Z);
 
 //        tp.importData(path + "/left-wrist-accelx.csv", PUFFMARKER.LEFTWRIST_ACCEL_X);
 //        tp.importData(path + "/left-wrist-accely.csv", PUFFMARKER.LEFTWRIST_ACCEL_Y);

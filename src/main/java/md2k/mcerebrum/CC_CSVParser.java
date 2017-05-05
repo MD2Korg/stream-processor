@@ -1,5 +1,7 @@
 package md2k.mcerebrum;
 
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
+
 import java.io.*;
 import java.util.*;
 
@@ -47,36 +49,25 @@ public class CC_CSVParser implements Iterable<CSVDataPoint> {
 
 
         try {
-            FileInputStream fin = new FileInputStream("archive.tar.bz2");
-            BufferedInputStream in = new BufferedInputStream(fin);
-            FileOutputStream out = new FileOutputStream("archive.tar");
-            BZip2CompressorInputStream bzIn = new BZip2CompressorInputStream(in);
-            final byte[] buffer = new byte[buffersize];
-            int n = 0;
-            while (-1 != (n = bzIn.read(buffer))) {
-                out.write(buffer, 0, n);
-            }
-            out.close();
-            bzIn.close();
-        } catch (FileNotFoundException ignored) {
-        }
+            BufferedReader reader = new BufferedReader( new InputStreamReader( new BZip2CompressorInputStream( new FileInputStream(filename))));
 
+            String line;
+            while((line = reader.readLine()) != null) {
 
-        File file = new File(filename);
-        Scanner scanner;
-        try {
-            scanner = new Scanner(file);
-            while (scanner.hasNext()) {
-                tokens = scanner.nextLine().split(",");
+                tokens = line.split(",");
                 double ts = Double.parseDouble(tokens[0]);
                 timestamp = (long) ts;
-                data = Double.parseDouble(tokens[1]);
+                data = Double.parseDouble(tokens[2]);
 
                 tempPacket = new CSVDataPoint(channel, timestamp, data);
                 this.data.add(tempPacket);
+
             }
-        } catch (FileNotFoundException ignored) {
+
+            reader.close();
+        } catch (IOException e) {
         }
+
     }
 
 
