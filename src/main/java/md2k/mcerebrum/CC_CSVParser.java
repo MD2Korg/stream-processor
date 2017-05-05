@@ -1,0 +1,91 @@
+package md2k.mcerebrum;
+
+import java.io.*;
+import java.util.*;
+
+/*
+ * Copyright (c) 2017, The University of Memphis, MD2K Center
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+public class CC_CSVParser implements Iterable<CSVDataPoint> {
+
+    private final List<CSVDataPoint> data;
+
+
+    public CC_CSVParser() {
+        this.data = new ArrayList<CSVDataPoint>();
+    }
+
+    public void importData(String filename, int channel) {
+
+        CSVDataPoint tempPacket;
+
+        String[] tokens;
+        double data;
+        long timestamp;
+
+
+        try {
+            FileInputStream fin = new FileInputStream("archive.tar.bz2");
+            BufferedInputStream in = new BufferedInputStream(fin);
+            FileOutputStream out = new FileOutputStream("archive.tar");
+            BZip2CompressorInputStream bzIn = new BZip2CompressorInputStream(in);
+            final byte[] buffer = new byte[buffersize];
+            int n = 0;
+            while (-1 != (n = bzIn.read(buffer))) {
+                out.write(buffer, 0, n);
+            }
+            out.close();
+            bzIn.close();
+        } catch (FileNotFoundException ignored) {
+        }
+
+
+        File file = new File(filename);
+        Scanner scanner;
+        try {
+            scanner = new Scanner(file);
+            while (scanner.hasNext()) {
+                tokens = scanner.nextLine().split(",");
+                double ts = Double.parseDouble(tokens[0]);
+                timestamp = (long) ts;
+                data = Double.parseDouble(tokens[1]);
+
+                tempPacket = new CSVDataPoint(channel, timestamp, data);
+                this.data.add(tempPacket);
+            }
+        } catch (FileNotFoundException ignored) {
+        }
+    }
+
+
+    public void sort() {
+        Collections.sort(this.data);
+    }
+
+    @Override
+    public Iterator<CSVDataPoint> iterator() {
+        return this.data.iterator();
+    }
+}

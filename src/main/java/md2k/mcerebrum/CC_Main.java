@@ -1,11 +1,12 @@
 package md2k.mcerebrum;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /*
- * Copyright (c) 2015, The University of Memphis, MD2K Center
- * - Timothy Hnat <twhnat@memphis.edu>
+ * Copyright (c) 2017, The University of Memphis, MD2K Center
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +30,7 @@ import java.util.concurrent.Executors;
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-public class CCMain {
+public class CC_Main {
 
     /**
      * Main driver class for replaying AutoSense data through StreamProcessor
@@ -40,11 +41,21 @@ public class CCMain {
 
         String path = args[0];
 
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        ExecutorService executor = Executors.newFixedThreadPool(1);
 
-        for (int i = 1; i < 2; i++) {
-            String person = "SI" + String.format("%02d", i);
-            Runnable worker = new WorkerThread(path + person, args[1], args[2], args[3]);
+
+        File file = new File(path);
+        String[] directories = file.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                File f = new File(dir, name);
+                return (f.isDirectory() && f.getName().matches(".*-.*-.*-.*-.*"));
+            }
+        });
+
+        for (String person : directories) {
+            System.out.println(person);
+            Runnable worker = new CC_WorkerThread(path + person, args[1], args[2], args[3]);
             executor.execute(worker);
         }
         executor.shutdown();
