@@ -98,7 +98,6 @@ public class CC_WorkerThread implements Runnable {
 //        tp.importData(fileMatcher(path, "/right-wrist-gyroy.csv"), PUFFMARKER.RIGHTWRIST_GYRO_Y);
 //        tp.importData(fileMatcher(path, "/right-wrist-gyroz.csv"), PUFFMARKER.RIGHTWRIST_GYRO_Z);
 
-//        tp.sort();
 
         int windowSize = 60000;
 
