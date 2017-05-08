@@ -32,6 +32,7 @@ package md2k.mcerebrum.cstress;
 
 import com.google.gson.Gson;
 
+import md2k.mcerebrum.cstress.library.datastream.DataPointStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.math3.exception.NotANumberException;
 
@@ -205,12 +206,18 @@ public class StreamProcessor {
                 System.out.println("AccelerometerFeatures Exception Handler: IndexOutOfBoundsException");
             }
             try {
-                ECGFeatures ef = new ECGFeatures(datastreams);
+                DataPointStream ecgDQ = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_ECG_WINDOW_QUALITY);
+                if (ecgDQ.data.get(0).value == AUTOSENSE.QUALITY_GOOD) {
+                    ECGFeatures ef = new ECGFeatures(datastreams);
+                }
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("ECGFeatures Exception Handler: IndexOutOfBoundsException");
             }
             try {
-                RIPFeatures rf = new RIPFeatures(datastreams);
+                DataPointStream ripDQ = datastreams.getDataPointStream(StreamConstants.ORG_MD2K_CSTRESS_DATA_RIP_WINDOW_QUALITY);
+                if (ripDQ.data.get(0).value == AUTOSENSE.QUALITY_GOOD) {
+                    RIPFeatures rf = new RIPFeatures(datastreams);
+                }
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("RIPFeatures Exception Handler: IndexOutOfBoundsException");
             }

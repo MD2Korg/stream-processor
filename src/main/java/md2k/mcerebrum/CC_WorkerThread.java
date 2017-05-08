@@ -10,6 +10,7 @@ import md2k.mcerebrum.cstress.library.structs.DataPointArray;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Date;
 
 /*
  * Copyright (c) 2017, The University of Memphis, MD2K Center
@@ -140,6 +141,8 @@ public class CC_WorkerThread implements Runnable {
                 windowStartTime = Time.nextEpochTimestamp(dp.timestamp, windowSize);
             }
             if ((dp.timestamp - windowStartTime) >= windowSize) { //Process the buffer every windowSize milliseconds
+                System.out.println("--------------------------------------------------------------------------------");
+                System.out.println("Starting Window: " + Long.toString(windowStartTime) + " " + new Date(windowStartTime));
                 streamProcessor.go();
                 windowStartTime += windowSize;
 //                streamProcessor.exportDatastreams(path + "/streamProcessor.serialized");
