@@ -20,6 +20,24 @@ Karen Hovsepian, Mustafa al'absi, Emre Ertin, Thomas Kamarck, Motoshiro Nakajima
 Clone repository `git clone https://github.com/MD2Korg/stream-processor`
 
 or import into Intellij IDEA through `New->Project from Version Control->Github`
+- Use this url `https://github.com/MD2Korg/stream-processor`
+- Check `Use auto-import`
+- Check `Create directories ofr empyt content roots automatically`
+- Choose `Use gralde wrapper task configuration`
+- Specify a Gradle JVM `(jdk>=1.7)`
+- Wait for Gradle to resolve dependencies and build project
+- Define the `Project SDK` and add the same JDK you are utilizing from the previous step
+- Open `Edit Configurations`
+- Add `Application`
+  - Main class: `CC_Main or Main`
+  - Program Arguments: 
+    - Directory to Cerebral Cortex data files
+    - Path to `cStressModelV5.json`
+    - Path to `cStressModelRIPv4.json`
+    - Path to `model_puffmarker.json`
+   - Specify classpath of module: `streamm-processor_main`
+
+
 
 # Usage
 Import data for replay through Stream Processor
