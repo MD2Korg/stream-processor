@@ -49,6 +49,20 @@ public class AUTOSENSE {
     public static final int QUALITY_MISSING = 4;
     public static final int QUALITY_BAND_LOOSE = 2;
 
+    public static final double QUALITY_acceptableOutlierPercent = .34;
+    public static final double QUALITY_outlierThresholdHigh = .9769;
+    public static final double QUALITY_outlierThresholdLow = .004884;
+    public static final int QUALITY_bufferLength = 3;
+    public static final int ADC_range = 4095;
+
+    public static final double QUALITY_ecgSlope = .02443;
+    public static final int QUALITY_windowSizeEcg = 2000;
+    public static final double QUALITY_ecgThresholdBandLoose = .01148;
+
+    public static final double QUALITY_ripSlope = .0733;
+    public static final int QUALITY_windowSizeRip = 4000;
+    public static final double QUALITY_ripThresholdBandLoose = .0428;
+
     public static final int NOT_STRESSED = 0;
     public static final int STRESSED = 1;
     public static final int UNSURE = 2;
